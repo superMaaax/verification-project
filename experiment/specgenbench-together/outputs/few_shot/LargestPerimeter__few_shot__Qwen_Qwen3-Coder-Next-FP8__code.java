@@ -1,0 +1,33 @@
+import java.util.Arrays;
+
+class LargestPerimeter {
+    //@ requires A != null;
+    //@ ensures (\forall int i; 0 <= i && i < A.length; 
+    //@   (\exists int a, b, c; 
+    //@     0 <= a && a < A.length && 0 <= b && b < A.length && 0 <= c && c < A.length &&
+    //@     a != b && a != c && b != c && A[a] == \old(A[a]) && A[b] == \old(A[b]) && A[c] == \old(A[c]) &&
+    //@     A[a] + A[b] > A[c] && A[a] + A[c] > A[b] && A[b] + A[c] > A[a] &&
+    //!    (A[a] + A[b] + A[c] > \result)));
+    //@ ensures \result == 0 <==> 
+    //@   (\forall int i, j, k; 0 <= i && i < A.length && 0 <= j && j < A.length && 0 <= k && k < A.length &&
+    //@     i != j && i != k && j != k; !(A[i] + A[j] > A[k] && A[i] + A[k] > A[j] && A[j] + A[k] > A[i]));
+    //@ ensures \result > 0 ==> 
+    //@   (\exists int i, j, k; 0 <= i && i < A.length && 0 <= j && j < A.length && 0 <= k && k < A.length &&
+    //@     i != j && i != k && j != k && A[i] + A[j] > A[k] && A[i] + A[k] > A[j] && A[j] + A[k] > A[i] &&
+    //!    (A[i] + A[j] + A[k] == \result));
+    public int largestPerimeter(int[] A) {
+        Arrays.sort(A);
+        //@ loop_invariant 0 <= i+1 && i+1 <= A.length;
+        //@ loop_invariant (\forall int j; i+1 < j && j < A.length; 
+        //@   !(A[j-2] + A[j-1] > A[j]));
+        for (int i = A.length - 1; i >= 2; --i) {
+            //@ maintaining 0 <= i && i < A.length;
+            if (A[i - 2] + A[i - 1] > A[i]) {
+                //@ ensures \result == A[i-2] + A[i-1] + A[i];
+                return A[i - 2] + A[i - 1] + A[i];
+            }
+        }
+        //@ ensures \result == 0;
+        return 0;
+    }
+}

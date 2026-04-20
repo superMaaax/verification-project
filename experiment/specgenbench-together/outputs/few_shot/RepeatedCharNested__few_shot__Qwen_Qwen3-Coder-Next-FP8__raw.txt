@@ -1,0 +1,22 @@
+```java
+public class RepeatedCharNested {
+    //@ ensures \result == -1 <==> (\forall int i; 0 <= i && i < s.length(); (\forall int j; i < j && j < s.length(); s.charAt(i) != s.charAt(j)));
+    //@ ensures -1 < \result < s.length() && (\exists int j; \result < j && j < s.length(); s.charAt(\result) == s.charAt(j));
+    public static int repeatedChar(String s) {
+        for (int i = 0; i < s.length(); ++i) {
+            char c1 = s.charAt(i);
+            //@ maintaining 0 <= i && i <= s.length();
+            //@ decreases s.length() - i;
+            for (int j = i + 1; j < s.length(); ++j) {
+                char c2 = s.charAt(j);
+                //@ maintaining i + 1 <= j && j <= s.length();
+                //@ decreases s.length() - j;
+                if(c1 == c2)
+                    return i;
+            }
+        }
+        return -1;
+    }
+    
+}
+```

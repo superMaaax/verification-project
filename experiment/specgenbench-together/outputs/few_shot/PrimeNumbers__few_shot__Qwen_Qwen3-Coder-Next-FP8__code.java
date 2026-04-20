@@ -1,0 +1,58 @@
+public class PrimeNumbers
+{
+    /*@ spec_public @*/
+    private  static boolean div(int n, int d) 
+    /*@ requires d != 0; @*/
+    /*@ ensures \result <==> (n % d == 0); @*/
+    { 
+        return n%d == 0; 
+    }
+
+    private  int primeArray[];
+    
+    /*@ requires n > 0; @*/
+    /*@ ensures \result.length == n; @*/
+    /*@ ensures (\forall int i; 0 <= i && i < n; 
+        (\forall int j; 2 <= j && j < \result[i]; \result[i] % j != 0)); @*/
+    /*@ ensures (\forall int i; 0 <= i && i < n; \result[i] >= 2); @*/
+    /*@ ensures (\forall int i, j; 0 <= i < j < n; \result[i] < \result[j]); @*/
+    public int[] primeList(int n)
+    {
+      int status = 1, num = 3, count, j;
+      primeArray = new int[n];
+      primeArray[0] = 2;
+  
+      /*@ maintaining 2 <= count && count <= n + 1; @*/
+      /*@ maintaining num >= 3; @*/
+      /*@ maintaining (\forall int i; 0 <= i < count - 1; primeArray[i] >= 2 && 
+          (\forall int j; 2 <= j < primeArray[i]; primeArray[i] % j != 0)); @*/
+      /*@ maintaining (\forall int i, j; 0 <= i < j < count - 1; primeArray[i] < primeArray[j]); @*/
+      /*@ decreases n - (count - 1); @*/
+      for (count = 2; count <= n;)
+      { 
+
+         /*@ maintaining 2 <= j && j <= num/2 + 1; @*/
+         /*@ maintaining (\forall int k; 2 <= k < j; num % k != 0); @*/
+         /*@ decreases num/2 + 2 - j; @*/
+         for (j = 2; j <= num/2; j++)
+         { 
+            if (div(num,j))
+            {
+               status = 0;
+               break;
+            }
+         }
+
+         if (status != 0)
+         {  
+            primeArray[count - 1] = num;
+            count++;
+		
+         }
+         status = 1;
+	     
+         num++;
+      } 
+      return primeArray; 
+   }
+}

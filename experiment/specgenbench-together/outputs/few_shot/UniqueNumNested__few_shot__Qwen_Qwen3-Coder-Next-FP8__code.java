@@ -1,0 +1,22 @@
+public class UniqueNumNested {
+
+    //@ ensures \result == -1 <==> (\forall int i; 0 <= i && i < arr.length; (\exists int j; 0 <= j && j < arr.length && j != i; arr[i] == arr[j]));
+    //@ ensures -1 < \result ==> (\forall int j; 0 <= j && j < arr.length && j != \result; arr[\result] != arr[j]);
+    public static int uniqueNum(int[] arr) {
+        for (int i = 0; i < arr.length; ++i) {
+            int j = 0;
+            //@ maintaining 0 <= j && j <= arr.length;
+            //@ maintaining (\forall int k; 0 <= k && k < j; (i != k ==> arr[i] != arr[k]) || (i == k));
+            //@ decreases arr.length - j;
+            while(j < arr.length) {
+                if(i != j && arr[i] == arr[j])
+                    break;
+                j++;
+            }
+            if(j == arr.length)
+                return i;
+        }
+        return -1;
+    }
+    
+}

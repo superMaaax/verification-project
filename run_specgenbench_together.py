@@ -2,7 +2,7 @@
 Batch JML generation for SpecGenBench using Together AI.
 
 The default configuration runs the zero-shot prompt over every primary Java
-benchmark in SpecGen-Artifact/benchmark/SpecGenBench/common with
+benchmark in benchmark/SpecGenBench/common with
 Qwen/Qwen3-Coder-Next-FP8.
 """
 
@@ -23,7 +23,7 @@ from together import AsyncTogether
 
 
 DEFAULT_MODEL = "Qwen/Qwen3-Coder-Next-FP8"
-DEFAULT_BENCHMARK_DIR = "SpecGen-Artifact/benchmark/SpecGenBench/common"
+DEFAULT_BENCHMARK_DIR = "benchmark/SpecGenBench/common"
 DEFAULT_PROMPT_DIR = "experiment/pilot-5/prompts"
 DEFAULT_OUTPUT_DIR = "experiment/specgenbench-together"
 

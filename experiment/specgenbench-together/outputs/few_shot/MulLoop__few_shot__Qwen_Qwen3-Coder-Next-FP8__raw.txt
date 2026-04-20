@@ -1,0 +1,26 @@
+```java
+public class MulLoop {
+
+    //@ requires Integer.MIN_VALUE <= a * b && a * b <= Integer.MAX_VALUE && b != Integer.MIN_VALUE;
+    //@ ensures \result == a * b;
+    public static int mulLoop(int a, int b) {
+        int res = 0;
+        if (b >= 0) {
+            //@ maintaining 0 <= i && i <= b && res == a * i;
+            //@ decreases b - i;
+            for(int i = 0; i < b; i++) {
+                res = res + a;
+            }
+        } else {
+            int n = -b;
+            //@ maintaining 0 <= i && i <= n && res == -a * i;
+            //@ decreases n - i;
+            for(int i = 0; i < n; i++) {
+                res = res - a;
+            }
+        }
+        return res;
+    }
+
+}
+```

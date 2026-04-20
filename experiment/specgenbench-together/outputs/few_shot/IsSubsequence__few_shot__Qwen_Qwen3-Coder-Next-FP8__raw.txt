@@ -1,0 +1,27 @@
+```java
+class IsSubsequence {
+    //@ requires s != null && t != null;
+    //@ ensures \result <==> (\exists int[] indices; indices.length == s.length() && 
+    //@   (\forall int k; 0 <= k && k < indices.length; 0 <= indices[k] && indices[k] < t.length()) &&
+    //@   (\forall int k1, k2; 0 <= k1 && k1 < k2 && k2 < indices.length; indices[k1] < indices[k2]) &&
+    //@   (\forall int k; 0 <= k && k < s.length(); s.charAt(k) == t.charAt(indices[k])));
+    public boolean isSubsequence(String s, String t) {
+        int n = s.length(), m = t.length();
+        int i = 0, j = 0;
+
+        //@ maintaining 0 <= i && i <= n;
+        //@ maintaining 0 <= j && j <= m;
+        //@ maintaining (\forall int k; 0 <= k && k < i; s.charAt(k) == t.charAt(\old(j_at_entry) + k - i + j)) 
+        //@   where \old(j_at_entry) is j at loop entry;
+        //@ maintaining i <= j + (m - n);
+        //@ decreases n - i + m - j;
+        while (i < n && j < m) {
+            if (s.charAt(i) == t.charAt(j)) {
+                i++;
+            }
+            j++;
+        }
+        return i == n;
+    }
+}
+```

@@ -1,0 +1,12 @@
+{
+  "benchmark_dir": "benchmark/SpecGenBench/common",
+  "concurrency": 2,
+  "dry_run": false,
+  "max_tokens": 4096,
+  "model": "Qwen/Qwen3-Coder-Next-FP8",
+  "num_selected": 120,
+  "output_dir": "experiment/specgenbench-together",
+  "prompt_path": "experiment/pilot-5/prompts/few_shot.txt",
+  "strategy": "few_shot",
+  "temperature": 0.0
+}

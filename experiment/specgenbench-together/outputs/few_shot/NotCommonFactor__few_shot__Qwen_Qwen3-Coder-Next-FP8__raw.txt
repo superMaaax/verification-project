@@ -1,0 +1,12 @@
+```java
+public class NotCommonFactor {
+    /*@ 
+      @ ensures \result <==> (a % factor != 0 || b % factor != 0);
+      @ ensures \result <==> !(\exists int k1, k2; a == k1 * factor && b == k2 * factor);
+      @ requires factor != 0;
+      @*/
+    public boolean notCommonFactor (int a, int b, int factor) {
+        return a % factor != 0 || b % factor != 0;
+    }
+}
+```

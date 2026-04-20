@@ -1,0 +1,130 @@
+You are a JML specification generator for Java programs.
+
+Task:
+Generate JML specifications for the Java program below.
+
+Requirements:
+- Add JML directly into the given Java source code.
+- Generate `requires` and `ensures` clauses for each method where appropriate.
+- Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate.
+- Add `/*@ spec_public @*/` only when needed for specification visibility.
+- Do not change executable Java code.
+- Do not rename classes, methods, fields, or variables.
+- Output the full Java file and nothing else.
+- Do not omit any original code.
+
+Example 1 Input:
+```java
+public class AddLoop {
+    public static int AddLoop(int x, int y) {
+        int sum = x;
+        if (y > 0) {
+            int n = y;
+            while (n > 0) {
+                sum = sum + 1;
+                n = n - 1;
+            }
+        } else {
+            int n = -y;
+            while (n > 0) {
+                sum = sum - 1;
+                n = n - 1;
+            }
+        }
+        return sum;
+    }
+}
+```
+
+Example 1 Output:
+```java
+public class AddLoop {
+    //@ requires Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && y != Integer.MIN_VALUE;
+    //@ ensures \result == x + y;
+    public static int AddLoop(int x, int y) {
+        int sum = x;
+        if (y > 0) {
+            int n = y;
+            //@ decreases n;
+            //@ maintaining sum == x + y - n && 0 <= n;
+            while (n > 0) {
+                sum = sum + 1;
+                n = n - 1;
+            }
+        } else {
+            int n = -y;
+            //@ maintaining sum == x + y + n && 0 <= n;
+            //@ decreases n;
+            while (n > 0) {
+                sum = sum - 1;
+                n = n - 1;
+            }
+        }
+        return sum;
+    }
+}
+```
+
+Example 2 Input:
+```java
+public class Smallest {
+
+    static public int Smallest(int[] a) {
+        if (a.length == 0) return -1;
+
+        int index = 0;
+        int smallest = 0;
+
+        while (a.length - index > 0) {
+            if (a[index] < a[smallest]) {
+                smallest = index;
+            }
+            index = index + 1;
+        }
+        return smallest;
+    }
+}
+```
+
+Example 2 Output:
+```java
+public class Smallest {
+    //@ ensures \result == -1 <==> a.length == 0;
+    //@ ensures -1 < \result ==> (\forall int i; 0 <= i && i < a.length; a[\result] <= a[i]);
+    static public int Smallest(int[] a) {
+        if (a.length == 0) return -1;
+
+        int index = 0;
+        int smallest = 0;
+        //@ maintaining 0 <= index && index <= a.length;
+        //@ maintaining 0 <= smallest && smallest < a.length;
+        //@ maintaining (\forall int i; 0 <= i && i < index; a[smallest] <= a[i]);
+        //@ decreases a.length - index;
+        while (a.length - index > 0) {
+            if (a[index] < a[smallest]) {
+                smallest = index;
+            }
+            index = index + 1;
+        }
+        return smallest;
+    }
+}
+```
+
+Now annotate the following Java program:
+```java
+class PrimeCheck {
+   
+	public boolean isPrime(int a) {
+		int i = 2;
+		int mid = a/2;
+
+		while (i <= mid) {
+			if (a%i == 0)
+				return false;
+			i++;
+		}
+		return true;
+	}
+}
+```

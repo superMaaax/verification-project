@@ -1,0 +1,28 @@
+```java
+class IsAllUnique {
+    //@ requires \forall int i; 0 <= i && i < str.length() ==> ('a' <= str.charAt(i) && str.charAt(i) <= 'z');
+    //@ ensures \result <==> (\forall int i, j; 0 <= i && i < str.length() && 0 <= j && j < str.length() && i != j ==> str.charAt(i) != str.charAt(j));
+    boolean isAllUnique(String str) {
+        int len = str.length();
+        if (len > 26) {
+            return false;
+        }
+        int num = 0;
+        //@ maintaining 0 <= i && i <= len;
+        //@ maintaining (\forall int j; 0 <= j && j < i ==> (\forall int k; 0 <= k && k < j ==> str.charAt(j) != str.charAt(k)));
+        //@ maintaining (\forall int j; 0 <= j && j < i ==> (num & (1 << (str.charAt(j) - 'a'))) != 0);
+        //@ maintaining (\forall int j; 0 <= j && j < i && 0 <= k && k < i && j != k ==> (str.charAt(j) - 'a') != (str.charAt(k) - 'a'));
+        //@ decreases len - i;
+        for (int i = 0; i < len; i++) {
+            char c = str.charAt(i);
+            int index = c - 'a';
+            if ((num & (1 << index)) != 0) {
+                return false;
+            } else {
+                num |= (1 << index);
+            }
+        }
+        return true;
+    }
+}
+```

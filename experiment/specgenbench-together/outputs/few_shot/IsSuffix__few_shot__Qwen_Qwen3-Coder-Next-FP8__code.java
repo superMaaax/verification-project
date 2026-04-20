@@ -1,0 +1,23 @@
+public class IsSuffix {
+
+    //@ ensures \result <==> (\exists int k; 0 <= k && k <= txt.length() - pat.length(); 
+    //@                          (\forall int m; 0 <= m && m < pat.length(); 
+    //@                              pat.charAt(m) == txt.charAt(k + m)) && k == txt.length() - pat.length());
+    public boolean isSuffix (String pat, String txt) {
+	
+        int i = pat.length() - 1;
+
+        //@ maintaining 0 <= i && i < pat.length();
+        //@ maintaining (\forall int m; i < m && m < pat.length(); pat.charAt(m) == txt.charAt(txt.length() - pat.length() + m));
+        //@ decreases i + 1;
+        while(i >= 0) {
+	    int j = i - pat.length() + txt.length();
+            if(j < 0 || pat.charAt(i) != txt.charAt(j))
+                return false;
+            i = i - 1;
+        }
+
+        return true;
+    }
+
+}

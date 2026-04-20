@@ -1,0 +1,21 @@
+public class UniqueCharNested {
+    //@ ensures \result == -1 <==> (\forall int i; 0 <= i && i < s.length(); (\exists int j; 0 <= j && j < s.length() && j != i; s.charAt(i) == s.charAt(j)));
+    //@ ensures -1 < \result ==> (\forall int j; 0 <= j && j < s.length() && j != \result; s.charAt(\result) != s.charAt(j));
+    public static int uniqueChar(String s) {
+        for (int i = 0; i < s.length(); ++i) {
+            int j = 0;
+            //@ maintaining 0 <= j && j <= s.length();
+            //@ maintaining (\forall int k; 0 <= k && k < j; (i != k && s.charAt(i) == s.charAt(k)) ==> \false);
+            //@ decreases s.length() - j;
+            while(j < s.length()) {
+                if(i != j && s.charAt(i) == s.charAt(j))
+                    break;
+                j++;
+            }
+            if(j == s.length())
+                return i;
+        }
+        return -1;
+    }
+    
+}

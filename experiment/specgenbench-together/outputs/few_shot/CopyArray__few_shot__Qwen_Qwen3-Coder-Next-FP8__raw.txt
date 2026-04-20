@@ -1,0 +1,17 @@
+```java
+public class CopyArray {
+    //@ requires 0 <= iBegin && iBegin <= iEnd;
+    //@ requires iEnd <= b.length && iEnd <= a.length;
+    //@ ensures (\forall int j; iBegin <= j && j < iEnd; a[j] == \old(b[j]));
+    public static void CopyArray(int[] b, int iBegin, int iEnd, int[] a) {
+        int k = iBegin;
+        //@ maintaining iBegin <= k && k <= iEnd;
+        //@ maintaining (\forall int j; iBegin <= j && j < k; a[j] == \old(b[j]));
+        //@ decreases iEnd - k;
+        while (iEnd - k > 0) {
+            a[k] = b[k];
+            k = k + 1 ;
+        }
+    }
+}
+```
