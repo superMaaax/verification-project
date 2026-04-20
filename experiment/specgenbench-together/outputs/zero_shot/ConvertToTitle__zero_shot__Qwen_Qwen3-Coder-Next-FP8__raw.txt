@@ -1,0 +1,48 @@
+```java
+class ConvertToTitle {
+    /*@ spec_public @*/
+    public String convertToTitle(int columnNumber) {
+        /*@ 
+            requires columnNumber > 0;
+            ensures \result != null;
+            ensures \result.length() > 0;
+            ensures \result.chars().allMatch(c -> c >= 'A' && c <= 'Z');
+        @*/
+        StringBuffer sb = new StringBuffer();
+        /*@ 
+            loop_invariant sb.length() >= 0;
+            loop_invariant columnNumber >= 0;
+            loop_invariant (columnNumber > 0) ==>
+                (original(columnNumber) == 
+                    toColumnNumber(sb.reverse().toString()) + columnNumber * 26^sb.length());
+            decreases columnNumber;
+        @*/
+        while (columnNumber > 0) {
+            int a0 = (columnNumber - 1) % 26 + 1;
+            sb.append((char)(a0 - 1 + 'A'));
+            columnNumber = (columnNumber - a0) / 26;
+        }
+        return sb.reverse().toString();
+    }
+    
+    /*@ 
+        pure helper function for specification;
+        requires s != null;
+        requires s.length() > 0;
+        requires s.chars().allMatch(c -> c >= 'A' && c <= 'Z');
+        ensures \result > 0;
+    @*/
+    /*@ 
+        private helper method for specification only;
+    @*/
+    /*@ 
+        private static int toColumnNumber(String s) {
+            int result = 0;
+            for (int i = 0; i < s.length(); i++) {
+                result = result * 26 + (s.charAt(i) - 'A' + 1);
+            }
+            return result;
+        }
+    @*/
+}
+```

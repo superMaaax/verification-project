@@ -1,0 +1,14 @@
+public class ReLUSeq {
+    /*@ spec_public @*/
+    public static double computeReLU(double x) 
+        /*@ 
+            requires \true;
+            ensures 
+                (\result == x) <==> (x >= 0);
+                (\result == 0) <==> (x < 0);
+                \result >= 0;
+        @*/
+    {
+        return ((x >= 0) ? x : 0);
+    }
+}

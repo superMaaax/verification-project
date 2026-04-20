@@ -1,0 +1,22 @@
+```java
+class PowerOfFourBranch {
+    /*@ spec_public @*/
+    public boolean isPowerOfFour(int n) {
+        // Precondition: none explicitly required beyond what's implied by the logic
+        // Postcondition: returns true iff n is a power of four (i.e., n = 4^k for some integer k >= 0)
+        /*@ ensures \result <==> (n > 0 && ((n & (n - 1)) == 0) && ((n & 0xaaaaaaaa) == 0));
+          @ assignable \nothing;
+          @*/
+        if(n <= 0) {
+            return false;
+        }
+        if((n & (n - 1)) != 0) {
+            return false;
+        }
+        if((n & 0xaaaaaaaa) != 0) {
+            return false;
+        }
+        return true;
+    }
+}
+```

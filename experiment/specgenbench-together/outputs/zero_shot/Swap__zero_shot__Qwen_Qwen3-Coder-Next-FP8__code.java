@@ -1,0 +1,22 @@
+public class Swap {
+    /*@ spec_public @*/
+    public static void swap (int[] arr, int a, int b) {
+        // Precondition: indices a and b must be within valid bounds of the array
+        // Postcondition: if indices are valid, elements at positions a and b are swapped
+        // If indices are invalid, the array remains unchanged
+        
+        /*@ 
+            requires arr != null;
+            requires 0 <= a && a < arr.length;
+            requires 0 <= b && b < arr.length;
+            ensures arr[a] == \old(arr[b]) && arr[b] == \old(arr[a]);
+        @*/
+        
+        if(a >= arr.length || a < 0 || b >= arr.length || b < 0) {
+            return;
+        }
+        int temp = arr[a];
+        arr[a] = arr[b];
+        arr[b] = temp;
+    }
+}

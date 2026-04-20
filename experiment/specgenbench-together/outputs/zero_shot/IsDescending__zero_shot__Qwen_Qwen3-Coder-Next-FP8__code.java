@@ -1,0 +1,18 @@
+public class IsDescending {
+    /*@ spec_public @*/
+    public boolean isDescending (int[] arr) {
+        int n = arr.length;
+        if (n < 2) {
+            return true;
+        }
+        /*@ loop_invariant 0 <= i <= n-1;
+            loop_invariant (\forall int k; 0 <= k && k < i; arr[k] > arr[k+1]);
+            decreases n - i;
+        @*/
+        for (int i = 0; i < n; i++) {
+            if(arr[i] <= arr[i+1])
+                return false;
+        }
+        return true;
+    }
+}

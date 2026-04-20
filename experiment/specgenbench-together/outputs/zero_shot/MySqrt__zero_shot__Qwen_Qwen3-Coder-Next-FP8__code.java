@@ -1,0 +1,33 @@
+class MySqrt {
+    /*@ spec_public @*/
+    public int mySqrt(int x) {
+        // Precondition: x must be non-negative
+        requires x >= 0;
+        
+        // Postcondition: result is the integer square root of x (largest integer whose square <= x)
+        ensures \result >= 0 && \result * \result <= x && (\result + 1) * (\result + 1) > x;
+        
+        int l = 0, r = x, ans = -1;
+        
+        /*@ loop_invariant 0 <= l && l <= r + 1 && r <= x;
+            loop_invariant ans >= 0 ==> ans * ans <= x;
+            loop_invariant ans < 0 || (ans + 1) * (ans + 1) > x;
+            loop_decreases r - l;
+        @*/
+        while (l <= r) {
+            int mid = l + (r - l) / 2;
+            
+            /*@ loop_invariant mid >= 0 && mid <= x;
+            @*/
+            if ((long) mid * mid <= x) {
+                ans = mid;
+                l = mid + 1;
+            } else {
+                r = mid - 1;
+            }
+        }
+        
+        ensures \result >= 0 && \result * \result <= x && (\result + 1) * (\result + 1) > x;
+        return ans;
+    }
+}

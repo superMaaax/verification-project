@@ -1,0 +1,43 @@
+```java
+public class UniqueCharNested {
+
+    /*@ spec_public @*/
+    public static int uniqueChar(String s) {
+        // Precondition: s is not null
+        requires s != null;
+        
+        // Postcondition: returns the index of the first character that appears only once in the string,
+        // or -1 if no such character exists
+        ensures (\result == -1) <==> (\forall int i; 0 <= i && i < s.length(); 
+            (\exists int j; 0 <= j && j < s.length() && i != j; s.charAt(i) == s.charAt(j))) ||
+            (\exists int i; 0 <= i && i < s.length(); 
+                (\forall int j; 0 <= j && j < s.length() && i != j; s.charAt(i) != s.charAt(j)) && \result == i);
+        
+        for (int i = 0; i < s.length(); ++i) {
+            // Loop invariant: for all k such that 0 <= k < i, 
+            // s.charAt(k) appears at least twice in the string
+            invariant (\forall int k; 0 <= k && k < i; 
+                (\exists int l; 0 <= l && l < s.length() && k != l; s.charAt(k) == s.charAt(l)));
+            
+            // Loop variant: s.length() - i (decreases with each iteration)
+            decreases s.length() - i;
+            
+            int j = 0;
+            /*@ loop_invariant 
+                (0 <= j && j <= s.length()) &&
+                (\forall int k; 0 <= k && k < j && k != i; s.charAt(i) != s.charAt(k));
+                loop_variant s.length() - j;
+            @*/
+            while(j < s.length()) {
+                if(i != j && s.charAt(i) == s.charAt(j))
+                    break;
+                j++;
+            }
+            if(j == s.length())
+                return i;
+        }
+        return -1;
+    }
+    
+}
+```

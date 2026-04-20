@@ -1,0 +1,2 @@
+method,strategy,model,syntax_ok,compiled_or_parsed,verification_pass,error_type,notes
+FindFirstZero,zero_shot,gemini-3-pro,yes,yes,yes,,"Stage 5: bounded JPF run finished with no reported property/assertion violations (e.g. 7 new states / 13 end states for driver bounds). Bytecode: Java 11 javac --release 11 of FindFirstZero + FindFirstZeroChecked + FindFirstZeroDriver into build/ (JML in comments; external harness encodes contract checks). OpenJML --esc spot-check optional; OpenJML --rac omitted here (bundled OpenJML emits classfile v60; JPF 8 / javac 11 expect v55)."

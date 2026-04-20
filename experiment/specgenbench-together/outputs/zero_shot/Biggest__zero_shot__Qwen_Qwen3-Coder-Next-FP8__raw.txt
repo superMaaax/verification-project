@@ -1,0 +1,30 @@
+```java
+public class Biggest {
+
+    static public int biggest(int[] a) {
+        //@ requires a != null;
+        //@ ensures (\forall int i; 0 <= i && i < a.length; a[\result] >= a[i]);
+        //@ ensures (\exists int i; 0 <= i && i < a.length; a[\result] == a[i]);
+        //@ ensures (\result == -1) <==> (a.length == 0);
+        //@ ensures (\result != -1) ==> (0 <= \result && \result < a.length);
+        
+        if (a.length == 0) return -1;
+
+        int index = 0;
+        int biggest = 0;
+
+        /*@ loop_invariant 0 <= index && index <= a.length;
+            loop_invariant 0 <= biggest && biggest < a.length;
+            loop_invariant (\forall int i; 0 <= i && i < index; a[biggest] >= a[i]);
+            loop_decreases a.length - index;
+        */
+        while (a.length - index > 0) {
+            if (a[index] > a[biggest]) {
+                biggest = index;
+            }
+            index = index + 1;
+        }
+        return biggest;
+    }
+}
+```

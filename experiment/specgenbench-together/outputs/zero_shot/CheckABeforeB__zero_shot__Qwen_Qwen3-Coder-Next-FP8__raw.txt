@@ -1,0 +1,32 @@
+```java
+class CheckABeforeB {
+    /*@ spec_public @*/ public boolean checkString(String s) {
+        /*@ requires s != null;
+            ensures (\forall int k; 0 <= k < s.length(); 
+                     (s.charAt(k) == 'a' || s.charAt(k) == 'b'));
+            ensures \result <==> 
+                (\exists int i; 0 <= i <= s.length(); 
+                    (\forall int k; 0 <= k < i; s.charAt(k) == 'a') &&
+                    (\forall int k; i <= k < s.length(); s.charAt(k) == 'b'));
+         */
+        char[] chars = s.toCharArray();
+        int i = 0;
+        /*@ loop_invariant 0 <= i <= chars.length &&
+            (\forall int k; 0 <= k < i; chars[k] == 'a');
+            decreases chars.length - i;
+        @*/
+        while (i < chars.length && chars[i] == 'a') {
+            i++;
+        }
+	int j = i;
+        /*@ loop_invariant i <= j <= chars.length &&
+            (\forall int k; i <= k < j; chars[k] == 'b');
+            decreases chars.length - j;
+        @*/
+        while (j < chars.length && chars[j] == 'b') {
+            j++;
+        }
+        return j == chars.length;
+    }
+}
+```

@@ -1,0 +1,78 @@
+class IsSubsequence {
+    /*@ spec_public @*/ public boolean isSubsequence(String s, String t) {
+        // Precondition: both s and t are non-null (implied by Java semantics for String operations)
+        // Postcondition: returns true if and only if s is a subsequence of t
+        /*@ ensures (\result <==> 
+            @\exists int[] indices; 
+            @  indices.length == s.length() && 
+            @  0 <= indices[0] && 
+            @  (\forall int k; 0 <= k < indices.length-1; indices[k] < indices[k+1]) &&
+            @  (\forall int k; 0 <= k < indices.length; 
+            @    indices[k] < t.length() && t.charAt(indices[k]) == s.charAt(k)));
+            @*/
+        int n = s.length(), m = t.length();
+        int i = 0, j = 0;
+
+        /*@ loop_invariant 
+            @  0 <= i <= n && 
+            @  0 <= j <= m && 
+            @  (\forall int k; 0 <= k < i; 
+            @    (\exists int l; 0 <= l < j && l < m; t.charAt(l) == s.charAt(k))) &&
+            @  (\forall int k; 0 <= k < i; 
+            @    (\exists! int l; 0 <= l < j && l < m; t.charAt(l) == s.charAt(k))) &&
+            @  (\forall int k; 0 <= k < i; 
+            @    (\exists int l; 0 <= l < j && l < m && 
+            @      (\forall int l2; 0 <= l2 < l; t.charAt(l2) != s.charAt(k)); 
+            @      t.charAt(l) == s.charAt(k)));
+            @*/
+        /*@ decreases m - j + n - i;
+            @*/
+        while (i < n && j < m) {
+            /*@ loop_invariant 
+                @  0 <= i <= n && 
+                @  0 <= j <= m && 
+                @  (\forall int k; 0 <= k < i; 
+                @    (\exists int l; 0 <= l < j && l < m; t.charAt(l) == s.charAt(k))) &&
+                @  (\forall int k; 0 <= k < i; 
+                @    (\exists! int l; 0 <= l < j && l < m; t.charAt(l) == s.charAt(k))) &&
+                @  (\forall int k; 0 <= k < i; 
+                @    (\exists int l; 0 <= l < j && l < m && 
+                @      (\forall int l2; 0 <= l2 < l; t.charAt(l2) != s.charAt(k)); 
+                @      t.charAt(l) == s.charAt(k)));
+                @*/
+            /*@ loop_invariant 
+                @  (\forall int k; 0 <= k < i; 
+                @    (\exists int l; 0 <= l < j && l < m && 
+                @      (\forall int l2; 0 <= l2 < l; t.charAt(l2) != s.charAt(k)); 
+                @      t.charAt(l) == s.charAt(k)));
+                @*/
+            /*@ decreases m - j + n - i;
+                @*/
+            if (s.charAt(i) == t.charAt(j)) {
+                /*@ loop_invariant 
+                    @  0 <= i <= n && 
+                    @  0 <= j <= m && 
+                    @  (\forall int k; 0 <= k < i; 
+                    @    (\exists int l; 0 <= l < j && l < m; t.charAt(l) == s.charAt(k))) &&
+                    @  (\forall int k; 0 <= k < i; 
+                    @    (\exists! int l; 0 <= l < j && l < m; t.charAt(l) == s.charAt(k))) &&
+                    @  (\forall int k; 0 <= k < i; 
+                    @    (\exists int l; 0 <= l < j && l < m && 
+                    @      (\forall int l2; 0 <= l2 < l; t.charAt(l2) != s.charAt(k)); 
+                    @      t.charAt(l) == s.charAt(k)));
+                    @*/
+                /*@ loop_invariant 
+                    @  (\forall int k; 0 <= k < i; 
+                    @    (\exists int l; 0 <= l < j && l < m && 
+                    @      (\forall int l2; 0 <= l2 < l; t.charAt(l2) != s.charAt(k)); 
+                    @      t.charAt(l) == s.charAt(k)));
+                    @*/
+                /*@ decreases m - j + n - i;
+                    @*/
+                i++;
+            }
+            j++;
+        }
+        return i == n;
+    }
+}

@@ -1,0 +1,24 @@
+```java
+class PrimeCheck {
+   
+	/*@ spec_public @*/
+	public boolean isPrime(int a) {
+		requires: a > 1;
+		ensures: \result <==> (\forall int i; 2 <= i && i < a; a % i != 0);
+		
+		int i = 2;
+		int mid = a/2;
+
+		/*@ loop_invariant 2 <= i && i <= mid + 1;
+			/*@ loop_invariant (\forall int j; 2 <= j && j < i; a % j != 0);
+			/*@ loop_decreases mid - i + 2;
+		@*/
+		while (i <= mid) {
+			if (a%i == 0)
+				return false;
+			i++;
+		}
+		return true;
+	}
+}
+```

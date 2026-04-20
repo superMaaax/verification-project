@@ -1,0 +1,41 @@
+public class RepeatedCharNested {
+
+    /*@ 
+      @ requires s != null;
+      @ ensures (\forall int i; 0 <= i && i < \result; 
+      @           (\forall int j; 0 <= j && j < s.length(); 
+      @               s.charAt(i) != s.charAt(j) || j <= i));
+      @ ensures (\result == -1) || 
+      @         ((\exists int j; 0 < j && j < s.length(); s.charAt(\result) == s.charAt(j)) && 
+      @          (\forall int k; 0 <= k && k < \result; 
+      @              (\forall int j; 0 <= j && j < s.length(); 
+      @                  s.charAt(k) != s.charAt(j) || j <= k)));
+      @ assignable \nothing;
+      @*/
+    public static int repeatedChar(String s) {
+        /*@ loop_invariant 0 <= i && i <= s.length();
+          @ loop_invariant (\forall int k; 0 <= k && k < i; 
+          @                  (\forall int j; 0 <= j && j < s.length(); 
+          @                      s.charAt(k) != s.charAt(j) || j <= k));
+          @ decreases s.length() - i;
+          @*/
+        for (int i = 0; i < s.length(); ++i) {
+            char c1 = s.charAt(i);
+            /*@ loop_invariant i + 1 <= j && j <= s.length();
+              @ loop_invariant (\forall int k; 0 <= k && k < i; 
+              @                  (\forall int j; 0 <= j && j < s.length(); 
+              @                      s.charAt(k) != s.charAt(j) || j <= k));
+              @ loop_invariant (\forall int k; i < k && k < j; 
+              @                  s.charAt(i) != s.charAt(k));
+              @ decreases s.length() - j + 1;
+              @*/
+            for (int j = i + 1; j < s.length(); ++j) {
+                char c2 = s.charAt(j);
+                if(c1 == c2)
+                    return i;
+            }
+        }
+        return -1;
+    }
+    
+}

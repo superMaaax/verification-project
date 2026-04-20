@@ -1,0 +1,5 @@
+target=Main
+classpath=build
+vm.enable_assertions=*
+report.console.finished=statistics
+report.console.property_violation=error,trace

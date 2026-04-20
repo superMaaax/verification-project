@@ -1,0 +1,26 @@
+```java
+class ReverseString {
+    /*@ spec_public @*/
+    public void reverseString(char[] s) {
+        requires s != null;
+        ensures (\forall int i; 0 <= i && i < s.length; 
+                 s[i] == \old(s[s.length - 1 - i]));
+        ensures (\forall int i, j; 0 <= i && i < s.length && 0 <= j && j < s.length && i + j == s.length - 1; 
+                 s[i] == \old(s[j]) && s[j] == \old(s[i]));
+        
+        int n = s.length;
+        /*@ loop_invariant 0 <= left && right < n;
+          @ loop_invariant (\forall int i; 0 <= i && i < left; 
+          @                  s[i] == \old(s[n - 1 - i]));
+          @ loop_invariant (\forall int i; right < i && i < n; 
+          @                  s[i] == \old(s[n - 1 - i]));
+          @ loop_decreases right - left;
+          @*/
+        for (int left = 0, right = n - 1; left < right; ++left, --right) {
+            char tmp = s[left];
+            s[left] = s[right];
+            s[right] = tmp;
+        }
+    }
+}
+```

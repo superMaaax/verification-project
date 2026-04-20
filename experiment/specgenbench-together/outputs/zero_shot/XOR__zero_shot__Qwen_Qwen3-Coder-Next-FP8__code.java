@@ -1,0 +1,31 @@
+public class XOR {
+    /*@ 
+     * @ requires true;
+     * @ ensures (\result <==> (b1 && !b2) || (!b1 && b2));
+     * @ ensures \result <==> (b1 != b2);
+     */
+    public static boolean xor(boolean b1, boolean b2) {
+        if(b1 == true) {
+            /*@ loop_invariant true;
+                @ decreases 0;
+             */
+            if(b2 == true) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+        else {
+            /*@ loop_invariant true;
+                @ decreases 0;
+             */
+            if(b2 == true) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+}

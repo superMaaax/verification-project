@@ -1,0 +1,25 @@
+```java
+class MaxInArray {
+    /*@ spec_public @*/
+    public int maxElementInArray(int[] a) {
+        requires a != null;
+        ensures (\result == -1) <==> (a.length == 0);
+        ensures (a.length > 0) ==> 
+            (\exists int i; 0 <= i && i < a.length; a[i] == \result) &&
+            (\forall int i; 0 <= i && i < a.length; a[i] <= \result);
+        
+        if (a.length == 0) return -1;
+        
+        int res = Integer.MIN_VALUE;
+        /*@ loop_invariant 0 <= i && i <= a.length;
+            loop_invariant res == (\max int k; 0 <= k && k < i; a[k]);
+            loop_invariant (\forall int k; 0 <= k && k < i; a[k] <= res);
+            decreases a.length - i;
+        @*/
+        for(int i = 0; i < a.length; i++) {
+            res = ((a[i] > res) ? a[i] : res);
+        }
+        return res;
+    }
+}
+```

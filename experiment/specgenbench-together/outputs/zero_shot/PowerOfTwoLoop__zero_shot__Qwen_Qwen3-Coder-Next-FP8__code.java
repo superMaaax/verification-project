@@ -1,0 +1,25 @@
+class PowerOfTwoLoop {
+    /*@ spec_public @*/
+    public boolean isPowerOfTwo(int n) {
+        // Precondition: none explicitly needed, but behavior is defined for all int values
+        // Postcondition: returns true if and only if n is a power of two (positive integer of form 2^k for k >= 0)
+        
+        if(n <= 0) {
+            return false;
+        }
+        
+        /*@ loop_invariant n > 0;
+            loop_invariant \result <==> (original_n == 1 || (original_n % 2 == 0 && n == 1));
+            loop_decreases n;
+        @*/
+        while (n % 2 == 0) {
+            /*@ loop_invariant n > 0 && n % 2 == 0;
+                loop_invariant \result <==> (original_n == 1 || (original_n % 2 == 0 && n == 1));
+                loop_decreases n;
+            @*/
+            n /= 2;
+        }
+        
+        return n == 1;
+    }
+}

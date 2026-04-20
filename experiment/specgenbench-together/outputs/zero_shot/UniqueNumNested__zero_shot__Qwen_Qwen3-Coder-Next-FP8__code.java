@@ -1,0 +1,47 @@
+public class UniqueNumNested {
+
+    /*@ spec_public @*/
+    public static int uniqueNum(int[] arr) {
+        // Precondition: arr is not null
+        requires arr != null;
+        
+        // Postcondition: returns the index of the first element that appears only once in the array,
+        // or -1 if no such element exists
+        ensures (\forall int k; 0 <= k && k < arr.length; 
+                 (\exists int l; 0 <= l && l < arr.length && l != k; arr[k] == arr[l]) <==> 
+                 (\result != k));
+        ensures (\result == -1) <==> (\forall int k; 0 <= k && k < arr.length; 
+                                      (\exists int l; 0 <= l && l < arr.length && l != k; arr[k] == arr[l]));
+        ensures (\result != -1) ==> 
+                (\forall int l; 0 <= l && l < arr.length && l != \result; arr[\result] != arr[l]);
+        
+        for (int i = 0; i < arr.length; ++i) {
+            // Loop invariant: for all k such that 0 <= k < i, 
+            // arr[k] appears at least twice in the array (i.e., there exists j != k with arr[j] == arr[k])
+            invariant (\forall int k; 0 <= k && k < i; 
+                       (\exists int l; 0 <= l && l < arr.length && l != k; arr[k] == arr[l]));
+            
+            // Loop variant: arr.length - i (decreases with each iteration)
+            decreases arr.length - i;
+            
+            int j = 0;
+            /*@ loop_invariant 
+                (0 <= j && j <= arr.length) &&
+                (\forall int k; 0 <= k && k < i; 
+                 (\exists int l; 0 <= l && l < arr.length && l != k; arr[k] == arr[l])) &&
+                (\forall int k; 0 <= k && k < j; (i == k) || (arr[i] != arr[k]));
+                loop_variant arr.length - j;
+            @*/
+            while(j < arr.length) {
+                if(i != j && arr[i] == arr[j])
+                    break;
+                j++;
+            }
+            
+            if(j == arr.length)
+                return i;
+        }
+        return -1;
+    }
+    
+}

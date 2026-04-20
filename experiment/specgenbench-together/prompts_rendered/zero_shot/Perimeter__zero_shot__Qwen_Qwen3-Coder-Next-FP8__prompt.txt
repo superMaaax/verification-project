@@ -1,0 +1,57 @@
+You are a JML specification generator for Java programs.
+
+Task:
+Generate JML specifications for the Java program below.
+
+Requirements:
+- Add JML directly into the given Java source code.
+- Generate `requires` and `ensures` clauses for each method where appropriate.
+- Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate.
+- Add `/*@ spec_public @*/` only when needed for specification visibility.
+- Do not change executable Java code.
+- Do not rename classes, methods, fields, or variables.
+- Output the full Java file and nothing else.
+- Do not omit any original code.
+
+Java program:
+```java
+public class Perimeter
+{   
+
+     long Perimeter(short x)
+    {
+	long squarePerimeter = 4 * (long)x;
+	return squarePerimeter;
+    }
+
+     long Perimeter(int x)
+    {
+	long pentagonPerimeter = 5 * (long)x;
+	return pentagonPerimeter;
+    }
+
+     long Perimeter(long x)
+    {
+	long hexagonalPerimeter = 6 * x;
+	return hexagonalPerimeter;
+    }
+
+     long Perimeter(int x, int y)
+    {
+	long perimeterRectangle = 2*((long)x + (long)y);
+	return perimeterRectangle;
+    }
+
+     long Perimeter(int x, int y, int z)
+    {
+	long trianglePerimeter = (long)x + (long)y + (long)z;
+	return trianglePerimeter;
+    }
+
+     long Perimeter(int w, int x, int y, int z)
+    {
+	long trapeziumPerimeter = (long)w + (long)x + (long)y + (long)z;
+	return trapeziumPerimeter;
+    }
+}
+```

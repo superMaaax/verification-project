@@ -1,0 +1,39 @@
+public class MulLoop {
+
+	/*@ spec_public @*/
+    public static /*@ pure @*/ int mulLoop(int a, int b) {
+        /*@ 
+          @ requires true;
+          @ ensures (\result == a * b);
+          @ ensures (\result == 0 <==> a == 0 || b == 0);
+          @ ensures (\result >= 0 <==> (a >= 0 && b >= 0) || (a <= 0 && b <= 0));
+          @ ensures (\result <= 0 <==> (a >= 0 && b <= 0) || (a <= 0 && b >= 0));
+          @ ensures (\result == a * b);
+          @ assignable \nothing;
+          @*/
+        int res = 0;
+        if (b >= 0) {
+            /*@
+              @ loop_invariant 0 <= i && i <= b;
+              @ loop_invariant res == i * a;
+              @ loop_decreases b - i;
+              @ assignable i, res;
+              @*/
+            for(int i = 0; i < b; i++) {
+                res = res + a;
+            }
+        } else {
+            /*@
+              @ loop_invariant 0 <= i && i <= -b;
+              @ loop_invariant res == -i * a;
+              @ loop_decreases -b - i;
+              @ assignable i, res;
+              @*/
+            for(int i = 0; i < -b; i++) {
+                res = res - a;
+            }
+        }
+        return res;
+    }
+
+}

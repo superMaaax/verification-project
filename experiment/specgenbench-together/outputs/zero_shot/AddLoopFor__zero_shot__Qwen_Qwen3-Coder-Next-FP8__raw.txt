@@ -1,0 +1,32 @@
+```java
+public class AddLoopFor {
+    /*@ spec_public @*/
+    public static int addLoop(int x, int y) {
+        /*@ 
+            requires true;
+            ensures \result == y + (x > 0 ? x : -x) * (x > 0 ? 1 : -1);
+        @*/
+        int sum = y;
+        if (x > 0) {
+            /*@ 
+                loop_invariant sum == y + (x - n);
+                loop_invariant n >= 0;
+                decreases n;
+            @*/
+            for(int n = x; n > 0; n = n - 1) {
+                sum = sum + 1;
+            }
+        } else {
+            /*@ 
+                loop_invariant sum == y - (-x - n);
+                loop_invariant n >= 0;
+                decreases n;
+            @*/
+            for(int n = -x; n > 0; n = n - 1) {
+                sum = sum - 1;
+            }
+        }
+        return sum;
+    }
+}
+```

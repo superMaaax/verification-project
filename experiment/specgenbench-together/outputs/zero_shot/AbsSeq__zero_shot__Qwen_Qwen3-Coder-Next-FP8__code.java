@@ -1,0 +1,12 @@
+public class AbsSeq {
+	
+	/*@ spec_public @*/
+	public int Abs(int num) {
+		/*@ requires true;
+		    ensures (\result == num && num >= 0) || (\result == -num && num < 0);
+		    ensures \result >= 0;
+		@*/
+		return ((num < 0) ? (-num) : (num));
+	}
+
+}

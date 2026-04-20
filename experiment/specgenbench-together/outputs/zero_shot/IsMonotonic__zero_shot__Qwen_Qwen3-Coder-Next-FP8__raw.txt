@@ -1,0 +1,39 @@
+```java
+class IsMonotonic {
+    /*@ spec_public @*/
+    public boolean isMonotonic(int[] nums) {
+        // Precondition: nums is non-null
+        requires nums != null;
+        
+        // Postcondition: returns true if and only if the array is monotonic (non-decreasing or non-increasing)
+        ensures (\forall int i, j; 0 <= i && i <= j && j < nums.length; nums[i] <= nums[j]) <==>
+                (\result == true);
+        ensures (\exists int i, j; 0 <= i && i <= j && j < nums.length; nums[i] > nums[j]) &&
+                (\exists int k, l; 0 <= k && k <= l && l < nums.length; nums[k] < nums[l]) <==>
+                (\result == false);
+        
+        boolean inc = true, dec = true;
+        int n = nums.length;
+        
+        // Loop invariant: 
+        // 1. inc is true iff the subarray nums[0..i] is non-decreasing
+        // 2. dec is true iff the subarray nums[0..i] is non-increasing
+        // 3. 0 <= i < n
+        /*@ loop_invariant 0 <= i && i < n;
+            loop_invariant (\forall int k; 0 <= k && k < i; nums[k] <= nums[k+1]) <==> inc;
+            loop_invariant (\forall int k; 0 <= k && k < i; nums[k] >= nums[k+1]) <==> dec;
+            decreases n - 1 - i;
+        @*/
+        for (int i = 0; i < n - 1; ++i) {
+            if (nums[i] > nums[i + 1]) {
+                inc = false;
+            }
+            if (nums[i] < nums[i + 1]) {
+                dec = false;
+            }
+        }
+        
+        return inc || dec;
+    }
+}
+```

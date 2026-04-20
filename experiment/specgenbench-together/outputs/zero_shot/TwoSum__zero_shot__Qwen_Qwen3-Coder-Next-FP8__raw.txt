@@ -1,0 +1,41 @@
+```java
+class TwoSum {
+    /*@ spec_public @*/
+    public int[] twoSum(int[] nums, int target) {
+        // Precondition: nums is not null
+        requires nums != null;
+        
+        // Postcondition: If a solution exists, returns an array of two indices [i, j] such that i < j and nums[i] + nums[j] == target
+        // If no solution exists, returns an empty array
+        ensures (\exists int i, j; 0 <= i && i < j && j < nums.length && nums[i] + nums[j] == target; 
+                 \result.length == 2 && \result[0] == i && \result[1] == j) ||
+                (\forall int i, j; 0 <= i && i < j && j < nums.length; nums[i] + nums[j] != target) ==>
+                \result.length == 0;
+        
+        int n = nums.length;
+        // Loop invariant for outer loop: for all i' < i, and for all j' in (i', n), nums[i'] + nums[j'] != target
+        /*@ loop_invariant 
+            (\forall int i_prime, j_prime; 0 <= i_prime && i_prime < i && i_prime < j_prime && j_prime < n; 
+             nums[i_prime] + nums[j_prime] != target);
+            loop_decreases n - i;
+        @*/
+        for (int i = 0; i < n; ++i) {
+            // Loop invariant for inner loop: for all j' in (i+1, j), nums[i] + nums[j'] != target
+            /*@ loop_invariant 
+                (\forall int j_prime; i+1 <= j_prime && j_prime < j; nums[i] + nums[j_prime] != target);
+                loop_decreases n - j;
+            @*/
+            for (int j = i + 1; j < n; ++j) {
+                if (nums[i] + nums[j] == target) {
+                    // Ensures the returned array contains the correct indices
+                    ensures \result.length == 2 && \result[0] == i && \result[1] == j;
+                    return new int[]{i, j};
+                }
+            }
+        }
+        // Ensures empty array is returned when no solution is found
+        ensures \result.length == 0;
+        return new int[0];
+    }
+}
+```

@@ -1,0 +1,57 @@
+class NextGreaterElem {
+    /*@ spec_public @*/ public int[] nextGreaterElement(int[] nums1, int[] nums2) {
+        // Precondition: nums1 and nums2 are non-null arrays
+        requires nums1 != null && nums2 != null;
+        
+        // Postcondition: result array has same length as nums1
+        ensures \result.length == nums1.length;
+        
+        int m = nums1.length, n = nums2.length;
+        int[] res = new int[m];
+        
+        // Loop invariant for outer loop
+        /*@ loop_invariant 
+        @   0 <= i <= m &&
+        @   (\forall int idx; 0 <= idx < i;
+        @       (\exists int j; 0 <= j < n && nums2[j] == nums1[idx];
+        @           (\exists int k; j < k < n && nums2[k] > nums2[j] && \result[idx] == nums2[k]) ||
+        @           (\forall int k; j < k < n => nums2[k] <= nums2[j]) && \result[idx] == -1)
+        @   )
+        @*/
+        for (int i = 0; i < m; ++i) {
+            // Inner loop 1: find position of nums1[i] in nums2
+            /*@ loop_invariant 
+            @   0 <= j <= n &&
+            @   (\forall int idx; 0 <= idx < j => nums2[idx] != nums1[i])
+            @*/
+            /*@ loop_decreases n - j;
+            @*/
+            int j = 0;
+            while (j < n && nums2[j] != nums1[i]) {
+                ++j;
+            }
+            
+            // After first loop: j is either n (not found) or nums2[j] == nums1[i]
+            // Since problem context implies nums1[i] is in nums2, we assume j < n
+            
+            int k = j + 1;
+            
+            // Inner loop 2: find first element greater than nums2[j] to the right
+            /*@ loop_invariant 
+            @   j + 1 <= k <= n &&
+            @   (\forall int idx; j < idx < k => nums2[idx] <= nums2[j])
+            @*/
+            /*@ loop_decreases n - k;
+            @*/
+            while (k < n && nums2[k] < nums2[j]) {
+                ++k;
+            }
+            
+            // Set result: if found greater element, use it; otherwise -1
+            res[i] = k < n ? nums2[k] : -1;
+        }
+        
+        ensures \result != null && \result.length == nums1.length;
+        return res;
+    }
+}

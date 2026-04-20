@@ -1,0 +1,30 @@
+public class CopyArray {
+ 
+    /*@ spec_public @*/
+    public static void CopyArray(int[] b, int iBegin, int iEnd, int[] a) {
+        // Precondition: arrays must be non-null and indices must be valid
+        // Postcondition: elements from b[iBegin..iEnd-1] are copied to a[iBegin..iEnd-1]
+        
+        /*@ requires b != null;
+          @ requires a != null;
+          @ requires 0 <= iBegin && iBegin <= iEnd;
+          @ requires iEnd <= b.length;
+          @ requires iEnd <= a.length;
+          @ ensures (\forall int j; iBegin <= j && j < iEnd; a[j] == b[j]);
+          @ assignable a[iBegin..iEnd-1];
+          @*/
+        
+        int k = iBegin;
+
+        /*@ loop_invariant iBegin <= k && k <= iEnd;
+          @ loop_invariant (\forall int j; iBegin <= j && j < k; a[j] == b[j]);
+          @ loop_invariant 0 <= k;
+          @ decreases iEnd - k;
+          @ assignable a[k..iEnd-1];
+          @*/
+        while (iEnd - k > 0) {
+            a[k] = b[k];
+            k = k + 1 ;
+        }
+    }
+}

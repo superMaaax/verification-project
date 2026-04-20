@@ -1,0 +1,48 @@
+```java
+public class LCM {
+    
+    /*@ spec_public @*/
+    public static int lcm(int num1, int num2) 
+    {
+        // Precondition: num1 and num2 are integers
+        // Postcondition: Returns the least common multiple of num1 and num2 if both are non-zero,
+        //                returns -1 if either input is zero, or if the LCM exceeds Integer.MAX_VALUE
+        
+        if (num1 == 0 || num2 == 0) {
+            // Ensures: returns -1 when either input is zero
+            return -1;
+        }	
+        if (num1 < 0)
+            num1 = -num1;
+        if (num2 < 0)
+            num2 = -num2;
+
+        // Ensure both numbers are non-negative after normalization
+        // @ ensures num1 >= 0 && num2 >= 0;
+        
+        int result = (num1 > num2) ? num1 : num2;
+
+        // Loop invariant: result >= original_max(num1, num2) && result <= Integer.MAX_VALUE
+        // Loop variant: Integer.MAX_VALUE - result (decreases with each iteration)
+        /*@ loop_invariant result >= (num1 > num2 ? num1 : num2) && result <= Integer.MAX_VALUE;
+            loop_decreases Integer.MAX_VALUE - result;
+        @*/
+        while (result < Integer.MAX_VALUE)
+        {
+            if (result % num1 == 0 && result % num2 == 0)
+            {
+                break;
+            }
+            result++;
+        }
+
+        // Postcondition: If the loop found a common multiple, return it; otherwise return -1
+        // @ ensures (\result == -1) || (\result % num1 == 0 && \result % num2 == 0 && \result >= (num1 > num2 ? num1 : num2));
+        if (result % num1 == 0 && result % num2 == 0) {
+            return result;
+        }
+        return -1;
+    }
+
+}
+```

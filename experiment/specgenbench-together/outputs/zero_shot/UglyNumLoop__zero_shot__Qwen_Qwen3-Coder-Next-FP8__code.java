@@ -1,0 +1,59 @@
+class UglyNumLoop {
+    /*@ spec_public @*/
+    public static boolean isUgly(int n) {
+        // Precondition: none explicitly required, but behavior is defined for all int values
+        // Postcondition: returns true iff n is an ugly number (positive integer whose prime factors are only 2, 3, and 5)
+        /*@ ensures (\result <==> (n > 0 && 
+                \forall int i; (i % 2 != 0 && i % 3 != 0 && i % 5 != 0) ==> 
+                (\exists int k; k >= 0 && n == (\power(2, k) * \power(3, k) * \power(5, k)))); @*/
+        
+        if (n <= 0) {
+            // Postcondition: returns false for non-positive numbers
+            /*@ ensures !\result; @*/
+            return false;
+        }
+        
+        // Loop 1: remove all factors of 2
+        /*@ loop_invariant 
+            n > 0 && 
+            (\exists int k2, k3, k5; k2 >= 0 && k3 >= 0 && k5 >= 0 && 
+                original_n == (\power(2, k2) * \power(3, k3) * \power(5, k5)) <==>
+                (\exists int k2', k3', k5'; k2' >= 0 && k3' >= 0 && k5' >= 0 && 
+                    n == (\power(2, k2') * \power(3, k3') * \power(5, k5'))));
+            decreases 0; // This loop always terminates because n decreases each iteration
+        @*/
+        while (n % 2 == 0) {
+            n /= 2;
+        }
+        
+        // Loop 2: remove all factors of 3
+        /*@ loop_invariant 
+            n > 0 && 
+            (\exists int k2, k3, k5; k2 >= 0 && k3 >= 0 && k5 >= 0 && 
+                original_n == (\power(2, k2) * \power(3, k3) * \power(5, k5)) <==>
+                (\exists int k2', k3', k5'; k2' >= 0 && k3' >= 0 && k5' >= 0 && 
+                    n == (\power(2, k2') * \power(3, k3') * \power(5, k5'))));
+            decreases 0; // This loop always terminates because n decreases each iteration
+        @*/
+        while (n % 3 == 0) {
+            n /= 3;
+        }
+        
+        // Loop 3: remove all factors of 5
+        /*@ loop_invariant 
+            n > 0 && 
+            (\exists int k2, k3, k5; k2 >= 0 && k3 >= 0 && k5 >= 0 && 
+                original_n == (\power(2, k2) * \power(3, k3) * \power(5, k5)) <==>
+                (\exists int k2', k3', k5'; k2' >= 0 && k3' >= 0 && k5' >= 0 && 
+                    n == (\power(2, k2') * \power(3, k3') * \power(5, k5'))));
+            decreases 0; // This loop always terminates because n decreases each iteration
+        @*/
+        while (n % 5 == 0) {
+            n /= 5;
+        }
+        
+        // Postcondition: returns true iff remaining n equals 1 (meaning original n had only 2,3,5 as prime factors)
+        /*@ ensures \result <==> (n == 1); @*/
+        return n == 1;
+    }
+}

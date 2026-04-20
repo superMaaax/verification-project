@@ -1,0 +1,11 @@
+class PowerOfTwo {
+    /*@ spec_public @*/
+    public boolean isPowerOfTwo(int n) {
+        // Precondition: none explicitly needed, but behavior is defined for all int values
+        // Postcondition: returns true if and only if n is a power of two (positive integer of form 2^k for some k >= 0)
+        /*@ ensures (\result <==> (n > 0 && (n & (n - 1)) == 0));
+            ensures \result <==> (\exists int k; k >= 0 && n == (1 << k));
+        @*/
+        return n > 0 && (n & (n - 1)) == 0;
+    }
+}

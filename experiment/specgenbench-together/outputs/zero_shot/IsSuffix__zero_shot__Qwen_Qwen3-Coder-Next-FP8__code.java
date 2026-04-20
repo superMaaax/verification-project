@@ -1,0 +1,23 @@
+public class IsSuffix {
+
+    /*@ spec_public @*/
+    public boolean isSuffix (String pat, String txt) {
+	
+        int i = pat.length() - 1;
+
+        /*@ loop_invariant 
+        @   0 <= i && i <= pat.length() - 1;
+        @   \forall int k; i < k && k < pat.length() ==> pat.charAt(k) == txt.charAt(k - pat.length() + txt.length());
+        @   decreases i;
+        @*/
+        while(i >= 0) {
+            int j = i - pat.length() + txt.length();
+            if(j < 0 || pat.charAt(i) != txt.charAt(j))
+                return false;
+            i = i - 1;
+        }
+
+        return true;
+    }
+
+}

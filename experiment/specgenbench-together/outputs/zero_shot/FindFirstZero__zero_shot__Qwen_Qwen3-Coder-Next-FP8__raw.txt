@@ -1,0 +1,35 @@
+```java
+public class FindFirstZero {
+
+    /*@ spec_public @*/
+    public static int FindFirstZero(int[] x) {
+        // Precondition: x is not null
+        requires x != null;
+        
+        // Postcondition: Returns the index of the first zero element in the array,
+        // or -1 if no zero element exists
+        ensures (\forall int i; 0 <= i && i < \result; x[i] != 0) || \result == -1;
+        ensures (\result != -1) ==> (x[\result] == 0 && (\forall int i; 0 <= i && i < \result; x[i] != 0));
+        
+        assert x.length >= 0;
+        if (x.length == 0) {
+            return -1;
+        } else {
+            int index = 0;
+            
+            /*@ loop_invariant 0 <= index && index <= x.length;
+                loop_invariant (\forall int i; 0 <= i && i < index; x[i] != 0);
+                decreases x.length - index;
+            @*/
+            while (x.length - index > 0 && x[index] != 0) {
+                index = index + 1;
+            }
+            
+            if (x.length - index == 0) {
+                index = -1;
+            }
+            return index;
+        }
+    }
+}
+```

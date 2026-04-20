@@ -1,0 +1,55 @@
+```java
+public class SelectionSortDesc {
+
+    /*@ spec_public @*/
+    public static void selectionSort(int[] arr){  
+        // Precondition: arr is not null
+        requires arr != null;
+        
+        // Postcondition: arr is sorted in descending order
+        ensures (\forall int i, j; 0 <= i && i < j && j < arr.length; arr[i] >= arr[j]);
+        
+        // Postcondition: arr contains the same elements as the original array (permutation)
+        ensures (\forall int k; 0 <= k && k < arr.length; 
+                 (\exists int m; 0 <= m && m < arr.length; 
+                  (\old(arr[m]) == arr[k])));
+        
+        for (int i = 0; i < arr.length - 1; i++)  
+        /*@ loop_invariant 
+            // Elements before index i are in their final positions (sorted in descending order)
+            (\forall int k, l; 0 <= k && k < i && 0 <= l && l < i; arr[k] >= arr[l]) &&
+            // Elements before index i are greater than or equal to elements from index i onwards
+            (\forall int k; 0 <= k && k < i; 
+             (\forall int l; i <= l && l < arr.length; arr[k] >= arr[l])) &&
+            // arr is a permutation of the original array up to this point
+            (\forall int k; 0 <= k && k < arr.length; 
+             (\exists int m; 0 <= m && m < arr.length; 
+              (\old(arr[m]) == arr[k]))) &&
+            // i is within bounds
+            0 <= i && i <= arr.length - 1;
+            decreases arr.length - 1 - i;
+        @/
+        {  
+            int index = i;  
+            for (int j = i + 1; j < arr.length; j++){  
+                /*@ loop_invariant 
+                    // index is always in range [i, j-1]
+                    i <= index && index < j &&
+                    // arr[index] is the maximum element in the range [i, j-1]
+                    (\forall int k; i <= k && k < j; arr[index] >= arr[k]) &&
+                    // j is within bounds
+                    i + 1 <= j && j <= arr.length;
+                    decreases arr.length - j;
+                @/
+                if (arr[j] > arr[index]){  
+                    index = j;
+                }  
+            }  
+            int smallerNumber = arr[index];   
+            arr[index] = arr[i];  
+            arr[i] = smallerNumber;  
+        }  
+    }
+    
+}
+```

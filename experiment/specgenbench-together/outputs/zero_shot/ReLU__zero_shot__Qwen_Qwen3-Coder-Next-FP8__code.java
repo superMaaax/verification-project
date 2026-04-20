@@ -1,0 +1,17 @@
+public class ReLU {
+    /*@ spec_public @*/
+    public static double computeReLU(double x) 
+        /*@ 
+            requires \true;
+            ensures 
+                (\result >= 0) &&
+                ((x >= 0) <==> (\result == x)) &&
+                ((x < 0) <==> (\result == 0.0));
+        @*/
+    {
+        if(x >= 0) {
+            return x;
+        }
+        return 0.0;
+    }
+}

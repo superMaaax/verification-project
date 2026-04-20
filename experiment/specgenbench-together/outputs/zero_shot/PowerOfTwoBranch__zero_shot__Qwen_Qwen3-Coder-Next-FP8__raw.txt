@@ -1,0 +1,19 @@
+```java
+class PowerOfTwoBranch {
+    /*@ spec_public @*/
+    public boolean isPowerOfTwo(int n) {
+        // Precondition: none explicitly required, but behavior is defined for all int values
+        // Postcondition: returns true if and only if n is a power of two (i.e., n = 2^k for some integer k >= 0)
+        /*@ ensures (\result <==> (n > 0 && (n & (n - 1)) == 0));
+          @ assignable \nothing;
+          @*/
+        if (n <= 0) {
+            return false;
+        }
+        if ((n & (n - 1)) != 0) {
+            return false;
+        }
+        return true;
+    }
+}
+```

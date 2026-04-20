@@ -1,0 +1,21 @@
+public class Disjunction {
+    /*@ spec_public @*/
+    public static /*@ pure @*/ boolean disjunctOf(boolean b1, boolean b2) 
+        /*@ 
+            requires true;
+            ensures (\result <==> (b1 || b2));
+        @*/
+    {
+        /*@ loop_invariant true;
+            decreases 0;
+        @*/
+        if(b1 == true)
+            return true;
+        /*@ loop_invariant true;
+            decreases 0;
+        @*/
+        if(b2 == true)
+            return true;
+        return false;
+    }
+}

@@ -1,0 +1,25 @@
+public class Absolute {
+	
+	/*@ spec_public @*/
+	public  int Absolute(int num) {
+		requires true;
+		ensures (\result == num && num >= 0) || (\result == -num && num < 0);
+		ensures \result >= 0;
+		if (0 <= num)
+			return num;
+		else
+			return -num;
+	}
+
+	
+	/*@ spec_public @*/
+	public  long Absolute(long num) {
+		requires true;
+		ensures (\result == num && num >= 0) || (\result == -num && num < 0);
+		ensures \result >= 0;
+		if (0 <= num)
+			return num;
+		else
+			return -num;	
+	}
+}
