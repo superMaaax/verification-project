@@ -1,0 +1,5 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/xiangxinzhong/Code/verification-project/benchmark/SpecGenBench/common_few_shot_jml/BinarySearch/BinarySearch.java:4: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+    //@ requires (\forall int p, q; 0 <= p && p <= q && q < arr.length; arr[p] <= arr[q]);
+                  ^
+2 warnings

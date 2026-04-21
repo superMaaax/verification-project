@@ -1,0 +1,13 @@
+# 工具（不属于实验结果）
+.tools/
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 系统文件
+.DS_Store
+
+# IDE
+.idea/
+.vscode/

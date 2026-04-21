@@ -1,0 +1,5 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/xiangxinzhong/Code/verification-project/benchmark/SpecGenBench/common_few_shot_jml/Fibonacci/Fibonacci.java:8: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+	//@   (\exists int[] a;
+	       ^
+2 warnings

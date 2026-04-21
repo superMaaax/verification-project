@@ -1,0 +1,8 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/xiangxinzhong/Code/verification-project/.tools/openjml/specs/java/util/Arrays.jml:89: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+      @   ensures (\forall int i,j; 0 <= i < j < a.length; a[i] <= a[j]);
+                   ^
+/Users/xiangxinzhong/Code/verification-project/benchmark/SpecGenBench/common_few_shot_jml/ContainsDuplicate/ContainsDuplicate.java:6: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+    //@ ensures \result <==> (\exists int p, q; 0 <= p && p < q && q < \old(nums.length); \old(nums[p]) == \old(nums[q]));
+                              ^
+3 warnings

@@ -1,0 +1,5 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/xiangxinzhong/Code/verification-project/benchmark/SpecGenBench/common_few_shot_jml/CheckABeforeB/CheckABeforeB.java:3: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+    //@ ensures \result <==> (\forall int u, v; 0 <= u && u < v && v < s.length(); s.charAt(u) == 'b' ==> s.charAt(v) != 'a');
+                              ^
+2 warnings

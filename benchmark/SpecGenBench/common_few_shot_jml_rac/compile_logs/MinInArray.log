@@ -1,0 +1,6 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/xiangxinzhong/Code/verification-project/benchmark/SpecGenBench/common_few_shot_jml/MinInArray/MinInArray.java:10: error: A \result expression may not be in a loop_invariant clause
+        //@ maintaining a.length > 0 ==> (\forall int k; 0 <= k && k < i; \result <= a[k]);
+                                                                           ^
+1 error
+1 warning
