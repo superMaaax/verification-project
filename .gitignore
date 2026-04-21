@@ -11,3 +11,13 @@ __pycache__/
 # IDE
 .idea/
 .vscode/
+
+# Stage 3/4 generated artifacts (reproducible)
+benchmark/SpecGenBench/common_few_shot_jml_rac_javamath/
+benchmark/SpecGenBench/stage4_common_few_shot_jpf/
+benchmark/SpecGenBench/stage4_common_few_shot_jpf_javamath/
+
+# Local bytecode diff diagnostics
+passing.txt
+failing.txt
+passing_vs_failing.diff
