@@ -1,0 +1,28 @@
+public class CopyArray {
+ 
+    /*@ public normal_behavior
+      @ requires b != null;
+      @ requires a != null;
+      @ requires 0 <= iBegin && iBegin <= iEnd;
+      @ requires iEnd <= b.length;
+      @ requires iEnd <= a.length;
+      @ ensures (\forall int j; iBegin <= j && j < iEnd; a[j] == b[j]);
+      @ ensures (\forall int j; 0 <= j && j < iBegin; a[j] == \old(a[j]));
+      @ ensures (\forall int j; iEnd <= j && j < a.length; a[j] == \old(a[j]));
+      @ assignable a[iBegin .. iEnd-1];
+      @*/
+    public static void CopyArray(int[] b, int iBegin, int iEnd, int[] a) {
+        int k = iBegin;
+
+        /*@ loop invariant iBegin <= k && k <= iEnd;
+          @ loop invariant (\forall int j; iBegin <= j && j < k; a[j] == b[j]);
+          @ loop invariant (\forall int j; 0 <= j && j < iBegin; a[j] == \old(a[j]));
+          @ loop invariant (\forall int j; iEnd <= j && j < a.length; a[j] == \old(a[j]));
+          @ decreases iEnd - k;
+          @*/
+        while (iEnd - k > 0) {
+            a[k] = b[k];
+            k = k + 1 ;
+        }
+    }
+}

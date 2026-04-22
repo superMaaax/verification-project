@@ -1,0 +1,36 @@
+You are a JML specification generator for Java programs.
+
+Task:
+Generate JML specifications for the Java program below.
+
+Requirements:
+- Add JML directly into the given Java source code.
+- Generate `requires` and `ensures` clauses for each method where appropriate.
+- Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate.
+- Add `/*@ spec_public @*/` only when needed for specification visibility.
+- Do not change executable Java code.
+- Do not rename classes, methods, fields, or variables.
+- Output the full Java file and nothing else.
+- Do not omit any original code.
+
+Java program:
+```java
+class MoveZeroes {
+    public void moveZeroes(int[] nums) {
+        int n = nums.length, left = 0, right = 0;
+        while (right < n) {
+            if (nums[right] != 0) {
+                swap(nums, left, right);
+                left++;
+            }
+            right++;
+        }
+    }
+
+    public void swap(int[] nums, int left, int right) {
+        int temp = nums[left];
+        nums[left] = nums[right];
+        nums[right] = temp;
+    }
+}
+```

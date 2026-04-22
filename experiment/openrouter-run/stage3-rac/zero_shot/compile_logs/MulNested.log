@@ -1,0 +1,39 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MulNested/MulNested.java:18: error: ';' expected
+          @ loop invariant 0 <= i && i <= m;
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MulNested/MulNested.java:18: error: not a statement
+          @ loop invariant 0 <= i && i <= m;
+                                  ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MulNested/MulNested.java:18: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant 0 <= i && i <= m;
+                                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MulNested/MulNested.java:19: error: ';' expected
+          @ loop invariant res == i * n;
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MulNested/MulNested.java:19: error: not a statement
+          @ loop invariant res == i * n;
+                               ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MulNested/MulNested.java:19: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant res == i * n;
+                           ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MulNested/MulNested.java:24: error: ';' expected
+              @ loop invariant 0 <= j && j <= n;
+                              ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MulNested/MulNested.java:24: error: not a statement
+              @ loop invariant 0 <= j && j <= n;
+                                      ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MulNested/MulNested.java:24: error: Expected a declaration or a JML construct inside the JML annotation here
+              @ loop invariant 0 <= j && j <= n;
+                                    ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MulNested/MulNested.java:25: error: ';' expected
+              @ loop invariant res == i * n + j;
+                              ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MulNested/MulNested.java:25: error: not a statement
+              @ loop invariant res == i * n + j;
+                                   ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MulNested/MulNested.java:25: error: Expected a declaration or a JML construct inside the JML annotation here
+              @ loop invariant res == i * n + j;
+                               ^
+12 errors
+1 warning

@@ -1,0 +1,39 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsAllUnique/IsAllUnique.java:14: error: ';' expected
+          @ loop invariant 0 <= i && i <= len;
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsAllUnique/IsAllUnique.java:14: error: not a statement
+          @ loop invariant 0 <= i && i <= len;
+                                  ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsAllUnique/IsAllUnique.java:14: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant 0 <= i && i <= len;
+                                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsAllUnique/IsAllUnique.java:15: error: ';' expected
+          @ loop invariant num >= 0;
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsAllUnique/IsAllUnique.java:15: error: not a statement
+          @ loop invariant num >= 0;
+                               ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsAllUnique/IsAllUnique.java:15: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant num >= 0;
+                           ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsAllUnique/IsAllUnique.java:16: error: ';' expected
+          @ loop invariant (\forall int p, q; 0 <= p && p < q && q < i;
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsAllUnique/IsAllUnique.java:16: error: not a statement
+          @ loop invariant (\forall int p, q; 0 <= p && p < q && q < i;
+                                                              ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsAllUnique/IsAllUnique.java:16: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant (\forall int p, q; 0 <= p && p < q && q < i;
+                                              ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsAllUnique/IsAllUnique.java:17: error: not a statement
+          @                  str.charAt(p) != str.charAt(q));
+                                           ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsAllUnique/IsAllUnique.java:17: error: ';' expected
+          @                  str.charAt(p) != str.charAt(q));
+                                                           ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsAllUnique/IsAllUnique.java:17: error: Expected a declaration or a JML construct inside the JML annotation here
+          @                  str.charAt(p) != str.charAt(q));
+                             ^
+12 errors
+1 warning

@@ -1,0 +1,21 @@
+class DigitRoot {
+    //@ requires num >= 0;
+    //@ ensures 0 <= \result && \result < 10;
+    //@ ensures num == 0 ==> \result == 0;
+    public int digitRoot(int num) {
+        //@ maintaining num >= 0;
+        //@ decreases num;
+        while (num >= 10) {
+            int sum = 0;
+            //@ maintaining 0 <= num;
+            //@ maintaining 0 <= sum;
+            //@ decreases num;
+            while (num > 0) {
+                sum += num % 10;
+                num /= 10;
+            }
+            num = sum;
+        }
+        return num;
+    }
+}

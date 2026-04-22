@@ -1,0 +1,54 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:22: error: ';' expected
+            @ loop invariant 0 <= c && c <= n;
+                            ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:22: error: not a statement
+            @ loop invariant 0 <= c && c <= n;
+                                    ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:22: error: Expected a declaration or a JML construct inside the JML annotation here
+            @ loop invariant 0 <= c && c <= n;
+                                  ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:23: error: ';' expected
+            @ loop invariant (\forall int j; 0 <= j && j < c;
+                            ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:23: error: not a statement
+            @ loop invariant (\forall int j; 0 <= j && j < c;
+                                                    ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:23: error: Expected a declaration or a JML construct inside the JML annotation here
+            @ loop invariant (\forall int j; 0 <= j && j < c;
+                                             ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:24: error: not a statement
+            @                     (\forall int i; 0 <= i && i < m; transpose[j][i] == matrix[i][j]));
+                                  ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:24: error: ';' expected
+            @                     (\forall int i; 0 <= i && i < m; transpose[j][i] == matrix[i][j]));
+                                                                                                   ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:30: error: ';' expected
+                @ loop invariant 0 <= d && d <= m;
+                                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:30: error: not a statement
+                @ loop invariant 0 <= d && d <= m;
+                                        ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:30: error: Expected a declaration or a JML construct inside the JML annotation here
+                @ loop invariant 0 <= d && d <= m;
+                                      ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:31: error: ';' expected
+                @ loop invariant (\forall int i; 0 <= i && i < d; transpose[c][i] == matrix[i][c]);
+                                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:31: error: not a statement
+                @ loop invariant (\forall int i; 0 <= i && i < d; transpose[c][i] == matrix[i][c]);
+                                                        ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:31: error: Expected a declaration or a JML construct inside the JML annotation here
+                @ loop invariant (\forall int i; 0 <= i && i < d; transpose[c][i] == matrix[i][c]);
+                                                 ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:31: error: not a statement
+                @ loop invariant (\forall int i; 0 <= i && i < d; transpose[c][i] == matrix[i][c]);
+                                                                                  ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:31: error: ';' expected
+                @ loop invariant (\forall int i; 0 <= i && i < d; transpose[c][i] == matrix[i][c]);
+                                                                                                 ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/TransposeMatrix/TransposeMatrix.java:31: error: Expected a declaration or a JML construct inside the JML annotation here
+                @ loop invariant (\forall int i; 0 <= i && i < d; transpose[c][i] == matrix[i][c]);
+                                                                  ^
+17 errors
+1 warning

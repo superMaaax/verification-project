@@ -1,0 +1,81 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:26: error: ';' expected
+          @ loop invariant 0 <= i && i <= 2;
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:26: error: not a statement
+          @ loop invariant 0 <= i && i <= 2;
+                                  ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:26: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant 0 <= i && i <= 2;
+                                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:27: error: ';' expected
+          @ loop invariant c != null && c.length == 2;
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:27: error: not a statement
+          @ loop invariant c != null && c.length == 2;
+                                     ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:27: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant c != null && c.length == 2;
+                           ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:28: error: ';' expected
+          @ loop invariant c[0] != null && c[1] != null;
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:28: error: not a statement
+          @ loop invariant c[0] != null && c[1] != null;
+                                        ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:28: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant c[0] != null && c[1] != null;
+                           ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:29: error: ';' expected
+          @ loop invariant (\forall int x; 0 <= x && x < i ==>
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:29: error: not a statement
+          @ loop invariant (\forall int x; 0 <= x && x < i ==>
+                                                           ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:31: error: ';' expected
+          @     c[x][1] == a[x][0] * b[0][1] + a[x][1] * b[1][1]);
+                                                                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:29: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant (\forall int x; 0 <= x && x < i ==>
+                                           ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:36: error: ';' expected
+              @ loop invariant 0 <= j && j <= 2;
+                              ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:36: error: not a statement
+              @ loop invariant 0 <= j && j <= 2;
+                                      ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:36: error: Expected a declaration or a JML construct inside the JML annotation here
+              @ loop invariant 0 <= j && j <= 2;
+                                    ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:37: error: ';' expected
+              @ loop invariant c != null && c.length == 2;
+                              ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:37: error: not a statement
+              @ loop invariant c != null && c.length == 2;
+                                         ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:37: error: Expected a declaration or a JML construct inside the JML annotation here
+              @ loop invariant c != null && c.length == 2;
+                               ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:38: error: ';' expected
+              @ loop invariant c[i] != null;
+                              ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:38: error: not a statement
+              @ loop invariant c[i] != null;
+                                    ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:38: error: Expected a declaration or a JML construct inside the JML annotation here
+              @ loop invariant c[i] != null;
+                               ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:39: error: ';' expected
+              @ loop invariant (\forall int y; 0 <= y && y < j ==>
+                              ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:39: error: not a statement
+              @ loop invariant (\forall int y; 0 <= y && y < j ==>
+                                                               ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:40: error: ';' expected
+              @     c[i][y] == a[i][0] * b[0][y] + a[i][1] * b[1][y]);
+                                                                    ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixMul/MatrixMul.java:39: error: Expected a declaration or a JML construct inside the JML annotation here
+              @ loop invariant (\forall int y; 0 <= y && y < j ==>
+                                               ^
+26 errors
+1 warning

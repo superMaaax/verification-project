@@ -1,0 +1,13 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/ReverseString/ReverseString.java:12: error: cannot find symbol
+          @ loop_invariant (\forall int i; 0 <= i && i < left; s[i] == \old(s[n - 1 - i]));
+                                                                              ^
+  symbol:   variable n
+  location: class ReverseString
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/ReverseString/ReverseString.java:13: error: cannot find symbol
+          @ loop_invariant (\forall int i; right < i && i < n; s[i] == \old(s[n - 1 - i]));
+                                                                              ^
+  symbol:   variable n
+  location: class ReverseString
+2 errors
+1 warning

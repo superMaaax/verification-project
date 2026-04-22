@@ -1,0 +1,27 @@
+public class StrPalindrome {
+   
+   /*@ public normal_behavior
+     @ requires str != null;
+     @ ensures \result <==> (\forall int i; 0 <= i && i < str.length(); str.charAt(i) == str.charAt(str.length() - 1 - i));
+     @ assignable \nothing;
+     @*/
+   public boolean isPalindrome(String str) {
+      String reverse = "";
+      
+      int length = str.length();
+
+      /*@ maintaining 0 <= i + 1 && i < length;
+        @ maintaining reverse.equals(
+        @     (new StringBuilder(str.substring(i + 1, length)).reverse()).toString()
+        @ );
+        @ decreasing i;
+        @*/
+      for (int i = length - 1; 0 <= i; i--) {
+         reverse = reverse + str.charAt(i);
+	 
+      }
+      
+      return reverse.equals(str);
+   }
+
+}

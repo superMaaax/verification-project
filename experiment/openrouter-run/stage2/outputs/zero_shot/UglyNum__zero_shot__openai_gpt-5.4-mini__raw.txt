@@ -1,0 +1,34 @@
+class UglyNum {
+    /*@ public normal_behavior
+      @ requires true;
+      @ ensures \result <==> (\old(n) > 0 && (\exists int a, b, c;
+      @                       a >= 0 && b >= 0 && c >= 0 &&
+      @                       \old(n) == (int)(Math.pow(2, a) * Math.pow(3, b) * Math.pow(5, c))));
+      @ also
+      @ public normal_behavior
+      @ requires n <= 0;
+      @ ensures !\result;
+      @*/
+    public static boolean isUgly(int n) {
+        if (n <= 0) {
+            return false;
+        }
+        int[] factors = {2, 3, 5};
+        /*@ loop_invariant 0 <= i && i <= factors.length;
+          @ loop_invariant n > 0;
+          @ loop_invariant (\forall int k; 0 <= k && k < i; n % factors[k] != 0);
+          @ decreases factors.length - i;
+          @*/
+        for (int i = 0; i < factors.length; i++) {
+            int factor = factors[i];
+            /*@ loop_invariant n > 0;
+              @ loop_invariant n % factor != 0;
+              @ decreases n;
+              @*/
+            while (n % factor == 0) {
+                n /= factor;
+            }
+        }
+        return n == 1;
+    }
+}

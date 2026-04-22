@@ -1,0 +1,45 @@
+class MoveZeroes {
+    /*@
+      @ requires nums != null;
+      @ ensures (\forall int i; 0 <= i && i < nums.length;
+      @             (\exists int j; 0 <= j && j < \old(nums.length) &&
+      @                 \old(nums[j]) != 0 &&
+      @                 i == (\num_of int k; 0 <= k && k < j; \old(nums[k]) != 0))
+      @          ==> nums[i] != 0);
+      @ ensures (\forall int i; 0 <= i && i < nums.length;
+      @             (\forall int j; 0 <= j && j < i; nums[j] != 0)
+      @          ==> nums[i] == 0);
+      @*/
+    public void moveZeroes(int[] nums) {
+        int n = nums.length, left = 0, right = 0;
+        /*@
+          @ loop_invariant 0 <= left && left <= right && right <= n;
+          @ loop_invariant (\forall int i; 0 <= i && i < left; nums[i] != 0);
+          @ loop_invariant (\forall int i; left <= i && i < right; nums[i] == 0);
+          @ loop_invariant (\forall int i; right <= i && i < n; true);
+          @ decreases n - right;
+          @*/
+        while (right < n) {
+            if (nums[right] != 0) {
+                swap(nums, left, right);
+                left++;
+            }
+            right++;
+        }
+    }
+
+    /*@
+      @ requires nums != null;
+      @ requires 0 <= left && left < nums.length;
+      @ requires 0 <= right && right < nums.length;
+      @ ensures nums[left] == \old(nums[right]);
+      @ ensures nums[right] == \old(nums[left]);
+      @ ensures (\forall int i; 0 <= i && i < nums.length && i != left && i != right;
+      @             nums[i] == \old(nums[i]));
+      @*/
+    public void swap(int[] nums, int left, int right) {
+        int temp = nums[left];
+        nums[left] = nums[right];
+        nums[right] = temp;
+    }
+}

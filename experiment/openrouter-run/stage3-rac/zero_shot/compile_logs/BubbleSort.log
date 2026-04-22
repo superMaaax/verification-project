@@ -1,0 +1,17 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/BubbleSort/BubbleSort.java:3: warning: [jml-lint] There is no point to a specification case having more visibility than its method
+    /*@ public normal_behavior
+        ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/BubbleSort/BubbleSort.java:11: warning: [jml-lint] There is no point to a specification case having more visibility than its method
+      @ public exceptional_behavior
+        ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/BubbleSort/BubbleSort.java:22: warning: [jml-lint] There is no point to a specification case having more visibility than its method
+    /*@ public normal_behavior
+        ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/BubbleSort/BubbleSort.java:9: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+      @   ensures (\forall int i; i != x && i != y; array[i] == \old(array[i]));
+                   ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/BubbleSort/BubbleSort.java:9: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+      @   ensures (\forall int i; i != x && i != y; array[i] == \old(array[i]));
+                   ^
+6 warnings

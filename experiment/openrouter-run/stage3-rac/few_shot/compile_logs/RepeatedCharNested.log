@@ -1,0 +1,17 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/RepeatedCharNested/RepeatedCharNested.java:9: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+        //@ maintaining (\forall int p, q; 0 <= p && p < q && q < i; s.charAt(p) != s.charAt(q));
+                         ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/RepeatedCharNested/RepeatedCharNested.java:9: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+        //@ maintaining (\forall int p, q; 0 <= p && p < q && q < i; s.charAt(p) != s.charAt(q));
+                         ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/RepeatedCharNested/RepeatedCharNested.java:9: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+        //@ maintaining (\forall int p, q; 0 <= p && p < q && q < i; s.charAt(p) != s.charAt(q));
+                         ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/RepeatedCharNested/RepeatedCharNested.java:9: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+        //@ maintaining (\forall int p, q; 0 <= p && p < q && q < i; s.charAt(p) != s.charAt(q));
+                         ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/RepeatedCharNested/RepeatedCharNested.java:4: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+    //@ ensures (\result == -1) <==> (\forall int i, j; 0 <= i && i < j && j < s.length(); s.charAt(i) != s.charAt(j));
+                                      ^
+6 warnings

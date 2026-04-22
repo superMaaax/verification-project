@@ -1,0 +1,18 @@
+class MyPower {
+    /*@ public normal_behavior
+      @ requires n >= 0;
+      @ ensures \result == (\bigint) (\product int i; 0 <= i && i < n; x);
+      @ assignable \nothing;
+      @*/
+    public static int power(int x, int n) {
+        int res = 1;
+        /*@ loop invariant 0 <= i && i <= n;
+          @ loop invariant res == (\product int j; 0 <= j && j < i; x);
+          @ decreases n - i;
+          @ assignable \nothing;
+          @*/
+        for(int i = 0; i < n; i++)
+	    res = res * x;
+        return res;
+    }
+}

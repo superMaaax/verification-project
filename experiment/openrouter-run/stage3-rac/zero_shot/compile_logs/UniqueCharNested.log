@@ -1,0 +1,54 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:12: error: ';' expected
+          @ loop invariant 0 <= i && i <= s.length();
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:12: error: not a statement
+          @ loop invariant 0 <= i && i <= s.length();
+                                  ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:12: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant 0 <= i && i <= s.length();
+                                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:13: error: ';' expected
+          @ loop invariant (\forall int k; 0 <= k && k < i; 
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:13: error: not a statement
+          @ loop invariant (\forall int k; 0 <= k && k < i; 
+                                                  ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:13: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant (\forall int k; 0 <= k && k < i; 
+                                           ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:14: error: not a statement
+          @                 (\exists int j; 0 <= j && j < s.length() && k != j && s.charAt(k) == s.charAt(j)));
+                            ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:14: error: ';' expected
+          @                 (\exists int j; 0 <= j && j < s.length() && k != j && s.charAt(k) == s.charAt(j)));
+                                                                                                             ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:20: error: ';' expected
+              @ loop invariant 0 <= j && j <= s.length();
+                              ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:20: error: not a statement
+              @ loop invariant 0 <= j && j <= s.length();
+                                      ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:20: error: Expected a declaration or a JML construct inside the JML annotation here
+              @ loop invariant 0 <= j && j <= s.length();
+                                    ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:21: error: ';' expected
+              @ loop invariant (\forall int k; 0 <= k && k < j; 
+                              ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:21: error: not a statement
+              @ loop invariant (\forall int k; 0 <= k && k < j; 
+                                                      ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:21: error: Expected a declaration or a JML construct inside the JML annotation here
+              @ loop invariant (\forall int k; 0 <= k && k < j; 
+                                               ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:22: error: not a statement
+              @                 k == i || s.charAt(i) != s.charAt(k));
+                                       ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:22: error: ';' expected
+              @                 k == i || s.charAt(i) != s.charAt(k));
+                                                                    ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UniqueCharNested/UniqueCharNested.java:22: error: Expected a declaration or a JML construct inside the JML annotation here
+              @                 k == i || s.charAt(i) != s.charAt(k));
+                                ^
+17 errors
+1 warning

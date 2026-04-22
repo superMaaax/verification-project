@@ -1,0 +1,18 @@
+public class EchoIntLoop {
+    /*@ public normal_behavior
+      @ requires x >= 0;
+      @ ensures \result == x;
+      @ assignable \nothing;
+      @*/
+    public static int echo(int x) {
+        int res = 0;
+        /*@ loop_invariant 0 <= i && i <= x;
+          @ loop_invariant res == i;
+          @ loop_variant x - i;
+          @*/
+        for(int i = 0; i < x; i++) {
+            res = res + 1;
+        }
+        return res;
+    }
+}

@@ -1,0 +1,33 @@
+public class SelectionSortDesc {
+
+    /*@ public normal_behavior
+      @ requires arr != null;
+      @ ensures (\forall int i, j; 0 <= i && i < j && j < arr.length; arr[i] >= arr[j]);
+      @ ensures (\exists int[] oldArr; true); // placeholder for old-state reference not needed in executable code
+      @ assignable arr[*];
+      @*/
+    public static void selectionSort(int[] arr){  
+        /*@ loop_invariant 0 <= i && i <= arr.length - 1;
+          @ loop_invariant (\forall int m, n; 0 <= m && m < n && n < i; arr[m] >= arr[n]);
+          @ decreases arr.length - 1 - i;
+          @*/
+        for (int i = 0; i < arr.length - 1; i++)  
+        {  
+            int index = i;  
+            /*@ loop_invariant i + 1 <= j && j <= arr.length;
+              @ loop_invariant i <= index && index < arr.length;
+              @ loop_invariant (\forall int k; i <= k && k < j; arr[index] >= arr[k]);
+              @ decreases arr.length - j;
+              @*/
+            for (int j = i + 1; j < arr.length; j++){  
+                if (arr[j] > arr[index]){  
+                    index = j;
+                }  
+            }  
+            int smallerNumber = arr[index];   
+            arr[index] = arr[i];  
+            arr[i] = smallerNumber;  
+        }  
+    }
+    
+}

@@ -1,0 +1,26 @@
+class LargestPerimeter {
+    /*@
+      @ public normal_behavior
+      @ requires A != null;
+      @ ensures \result == 0 ||
+      @         (\exists int i; 2 <= i && i < A.length;
+      @             \result == A[i - 2] + A[i - 1] + A[i] &&
+      @             A[i - 2] + A[i - 1] > A[i]);
+      @ ensures \result >= 0;
+      @*/
+    public int largestPerimeter(int[] A) {
+        Arrays.sort(A);
+        /*@
+          @ loop_invariant 2 <= i + 1 && i < A.length;
+          @ loop_invariant (\forall int j; i < j && j < A.length - 1;
+          @                    !(A[j - 2] + A[j - 1] > A[j]));
+          @ decreases i;
+          @*/
+        for (int i = A.length - 1; i >= 2; --i) {
+            if (A[i - 2] + A[i - 1] > A[i]) {
+                return A[i - 2] + A[i - 1] + A[i];
+            }
+        }
+        return 0;
+    }
+}

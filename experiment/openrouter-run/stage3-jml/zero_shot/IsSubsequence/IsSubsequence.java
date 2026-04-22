@@ -1,0 +1,33 @@
+class IsSubsequence {
+    /*@ public normal_behavior
+      @ requires s != null && t != null;
+      @ ensures \result <==> (\forall int k; 0 <= k && k < s.length();
+      @                     (\exists int p; 0 <= p && p < t.length();
+      @                         (\forall int q; 0 <= q && q < k ==> 
+      @                             (\exists int r; q < r && r < p;
+      @                                 s.charAt(q) != t.charAt(r)))
+      @                         && s.charAt(k) == t.charAt(p)));
+      @*/
+    public boolean isSubsequence(String s, String t) {
+        int n = s.length(), m = t.length();
+        int i = 0, j = 0;
+
+        /*@
+          @ maintaining 0 <= i && i <= n;
+          @ maintaining 0 <= j && j <= m;
+          @ maintaining i <= j;
+          @ maintaining (\exists int k; 0 <= k && k <= i;
+          @                 (\forall int x; 0 <= x && x < k;
+          @                     (\exists int y; 0 <= y && y < m;
+          @                         s.charAt(x) == t.charAt(y))));
+          @ decreases (n - i) + (m - j);
+          @*/
+        while (i < n && j < m) {
+            if (s.charAt(i) == t.charAt(j)) {
+                i++;
+            }
+            j++;
+        }
+        return i == n;
+    }
+}

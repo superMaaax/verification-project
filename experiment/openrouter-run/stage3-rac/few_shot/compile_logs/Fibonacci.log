@@ -1,0 +1,6 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/Fibonacci/Fibonacci.java:6: error: A non-pure method is being called where it is not permitted: Fibonacci.fibCompute(int)
+	//@ ensures n > 0 ==> \result == fibCompute(n);
+	                                           ^
+1 error
+1 warning

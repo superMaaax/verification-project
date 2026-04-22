@@ -1,0 +1,40 @@
+class JewelsInStones {
+    /*@ requires jewels != null && stones != null;
+      @ ensures 0 <= \result && \result <= stones.length();
+      @ ensures (\forall int i; 0 <= i && i < stones.length();
+      @             (\exists int j; 0 <= j && j < jewels.length();
+      @                 stones.charAt(i) == jewels.charAt(j))) <==> 
+      @           (\exists int k; 0 <= k && k < stones.length();
+      @                 (\exists int j; 0 <= j && j < jewels.length();
+      @                     stones.charAt(k) == jewels.charAt(j)));
+      @*/
+    public int numJewelsInStones(String jewels, String stones) {
+        int jewelsCount = 0;
+        int jewelsLength = jewels.length(), stonesLength = stones.length();
+        /*@ maintaining 0 <= i && i <= stonesLength;
+          @ maintaining 0 <= jewelsCount && jewelsCount <= i;
+          @ maintaining jewelsCount == (\num_of int k; 0 <= k && k < i;
+          @                    (\exists int j; 0 <= j && j < jewelsLength;
+          @                        stones.charAt(k) == jewels.charAt(j)) ? 1 : 0);
+          @ decreases stonesLength - i;
+          @*/
+        for (int i = 0; i < stonesLength; i++) {
+            char stone = stones.charAt(i);
+            /*@ maintaining 0 <= j && j <= jewelsLength;
+              @ maintaining jewelsCount == (\num_of int k; 0 <= k && k < i;
+              @                    (\exists int jj; 0 <= jj && jj < jewelsLength;
+              @                        stones.charAt(k) == jewels.charAt(jj)) ? 1 : 0)
+              @               + (\num_of int kk; 0 <= kk && kk < i && false; 1 : 0);
+              @ decreases jewelsLength - j;
+              @*/
+            for (int j = 0; j < jewelsLength; j++) {
+                char jewel = jewels.charAt(j);
+                if (stone == jewel) {
+                    jewelsCount++;
+                    break;
+                }
+            }
+        }
+        return jewelsCount;
+    }
+}

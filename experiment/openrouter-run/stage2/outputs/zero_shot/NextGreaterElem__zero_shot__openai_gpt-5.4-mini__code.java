@@ -1,0 +1,44 @@
+class NextGreaterElem {
+    /*@
+      @ public normal_behavior
+      @ requires nums1 != null && nums2 != null;
+      @ ensures \result != null;
+      @ ensures \result.length == nums1.length;
+      @ assignable \nothing;
+      @*/
+    public int[] nextGreaterElement(int[] nums1, int[] nums2) {
+        int m = nums1.length, n = nums2.length;
+        int[] res = new int[m];
+        /*@
+          @ loop_invariant 0 <= i && i <= m;
+          @ loop_invariant res.length == m;
+          @ loop_invariant (\forall int t; 0 <= t && t < i; true);
+          @ assignable res[*];
+          @ decreases m - i;
+          @*/
+        for (int i = 0; i < m; ++i) {
+            int j = 0;
+            /*@
+              @ loop_invariant 0 <= j && j <= n;
+              @ loop_invariant (\forall int t; 0 <= t && t < j; nums2[t] != nums1[i]);
+              @ assignable \nothing;
+              @ decreases n - j;
+              @*/
+            while (j < n && nums2[j] != nums1[i]) {
+                ++j;
+            }
+            int k = j + 1;
+            /*@
+              @ loop_invariant j + 1 <= k && k <= n;
+              @ loop_invariant (\forall int t; j + 1 <= t && t < k; nums2[t] < nums2[j]);
+              @ assignable \nothing;
+              @ decreases n - k;
+              @*/
+            while (k < n && nums2[k] < nums2[j]) {
+                ++k;
+            }
+            res[i] = k < n ? nums2[k] : -1;
+        }
+        return res;
+    }
+}

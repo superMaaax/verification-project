@@ -1,0 +1,14 @@
+class PowerOfFourLoop {
+    //@ requires true;
+    //@ ensures \result <==> (\exists int k; k >= 0; n == 1 << (2 * k));
+    public boolean isPowerOfFour(int n) {
+        if(n <= 0) {
+            return false;
+        }
+        //@ decreases n;
+        while (n % 4 == 0) {
+            n /= 4;
+        }
+        return n == 1;
+    }
+}

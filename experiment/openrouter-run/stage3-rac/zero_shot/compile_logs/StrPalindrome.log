@@ -1,0 +1,9 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/StrPalindrome/StrPalindrome.java:15: error: Object allocation is not permitted in specification expressions
+        @     (new StringBuilder(str.substring(i + 1, length)).reverse()).toString()
+               ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/StrPalindrome/StrPalindrome.java:15: warning: A non-pure method is being called where it is not permitted: java.lang.StringBuilder.reverse()
+        @     (new StringBuilder(str.substring(i + 1, length)).reverse()).toString()
+                                                                      ^
+1 error
+2 warnings

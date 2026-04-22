@@ -1,0 +1,13 @@
+class MyPower {
+    //@ requires n >= 0;
+    //@ ensures \result == (\product int i; 0 <= i && i < n; x);
+    public static int power(int x, int n) {
+        int res = 1;
+        //@ maintaining 0 <= i && i <= n;
+        //@ maintaining res == (\product int j; 0 <= j && j < i; x);
+        //@ decreases n - i;
+        for(int i = 0; i < n; i++)
+	    res = res * x;
+        return res;
+    }
+}

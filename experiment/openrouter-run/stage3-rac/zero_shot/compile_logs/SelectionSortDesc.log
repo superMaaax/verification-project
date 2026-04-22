@@ -1,0 +1,20 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/SelectionSortDesc/SelectionSortDesc.java:11: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ loop_invariant (\forall int m, n; 0 <= m && m < n && n < i; arr[m] >= arr[n]);
+                            ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/SelectionSortDesc/SelectionSortDesc.java:11: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ loop_invariant (\forall int m, n; 0 <= m && m < n && n < i; arr[m] >= arr[n]);
+                            ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/SelectionSortDesc/SelectionSortDesc.java:11: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ loop_invariant (\forall int m, n; 0 <= m && m < n && n < i; arr[m] >= arr[n]);
+                            ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/SelectionSortDesc/SelectionSortDesc.java:11: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ loop_invariant (\forall int m, n; 0 <= m && m < n && n < i; arr[m] >= arr[n]);
+                            ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/SelectionSortDesc/SelectionSortDesc.java:5: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+      @ ensures (\forall int i, j; 0 <= i && i < j && j < arr.length; arr[i] >= arr[j]);
+                 ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/SelectionSortDesc/SelectionSortDesc.java:6: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+      @ ensures (\exists int[] oldArr; true); // placeholder for old-state reference not needed in executable code
+                 ^
+7 warnings

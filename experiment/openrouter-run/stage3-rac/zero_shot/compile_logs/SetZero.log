@@ -1,0 +1,6 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/SetZero/SetZero.java:3: error: A method specification incorrectly follows non-JML modifiers
+	public static /*@ requires a != null;
+	                  ^
+1 error
+1 warning

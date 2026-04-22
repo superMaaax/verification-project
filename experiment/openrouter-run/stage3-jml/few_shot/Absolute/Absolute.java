@@ -1,0 +1,21 @@
+public class Absolute {
+	
+	//@ ensures (\result == num) || (\result == -num);
+	//@ ensures \result >= 0;
+	public  int Absolute(int num) {
+		if (0 <= num)
+			return num;
+		else
+			return -num;
+	}
+
+	
+	//@ ensures (\result == num) || (\result == -num);
+	//@ ensures \result >= 0;
+	public  long Absolute(long num) {
+		if (0 <= num)
+			return num;
+		else
+			return -num;	
+	}
+}

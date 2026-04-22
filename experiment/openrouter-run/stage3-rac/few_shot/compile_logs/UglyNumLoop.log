@@ -1,0 +1,5 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/UglyNumLoop/UglyNumLoop.java:3: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+    //@ ensures \result <==> (\exists int a, b, c; a >= 0 && b >= 0 && c >= 0; n == (1 << a) * (int)Math.pow(3, b) * (int)Math.pow(5, c));
+                              ^
+2 warnings

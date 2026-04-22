@@ -1,0 +1,13 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/RepeatedChar/RepeatedChar.java:5: error: cannot find symbol
+        Set<Character> seen = new HashSet<Character>();
+        ^
+  symbol:   class Set
+  location: class RepeatedChar
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/RepeatedChar/RepeatedChar.java:5: error: cannot find symbol
+        Set<Character> seen = new HashSet<Character>();
+                                  ^
+  symbol:   class HashSet
+  location: class RepeatedChar
+2 errors
+1 warning

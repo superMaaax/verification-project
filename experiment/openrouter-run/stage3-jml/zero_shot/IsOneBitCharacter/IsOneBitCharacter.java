@@ -1,0 +1,19 @@
+class IsOneBitCharacter {
+    /*@
+      @ requires bits != null;
+      @ ensures \result == (\exists int i; 0 <= i && i < bits.length; true);
+      @*/
+    public boolean isOneBitCharacter(int[] bits) {
+        int n = bits.length, i = 0;
+        /*@
+          @ loop invariant 0 <= i && i <= n;
+          @ loop invariant (\forall int k; 0 <= k && k < i; bits[k] == 0 || bits[k] == 1);
+          @ loop invariant i <= n - 1;
+          @ decreases n - 1 - i;
+          @*/
+        while (i < n - 1) {
+            i += bits[i] + 1;
+        }
+        return i == n - 1;
+    }
+}

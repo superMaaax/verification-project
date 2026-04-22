@@ -1,0 +1,10 @@
+class ConvertToKelvin {
+    /*@ public normal_behavior
+      @ requires true;
+      @ ensures \result == celsius + 273.15;
+      @ assignable \nothing;
+      @*/
+    public double convertTemperature(double celsius) {
+        return celsius + 273.15;
+    }
+}

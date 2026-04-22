@@ -1,0 +1,22 @@
+class PowerOfTwoLoop {
+    /*@
+      @ public normal_behavior
+      @ requires true;
+      @ ensures \result <==> (\exists int k; k >= 0; n == (1 << k)) ;
+      @ assignable \nothing;
+      @*/
+    public boolean isPowerOfTwo(int n) {
+        if(n <= 0) {
+            return false;
+        }
+        /*@
+          @ loop_invariant n > 0;
+          @ loop_invariant (\exists int k; k >= 0; \old(n) == n * (1 << k));
+          @ decreases n;
+          @*/
+        while (n % 2 == 0) {
+            n /= 2;
+        }
+        return n == 1;
+    }
+}

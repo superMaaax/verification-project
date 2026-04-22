@@ -1,0 +1,31 @@
+public class ContainsDuplicate {
+
+    /*@
+      @ public normal_behavior
+      @ requires nums != null;
+      @ assignable nums[*];
+      @ ensures (\result == true) <==> (\exists int i, j; 0 <= i && i < j && j < nums.length; nums[i] == nums[j]);
+      @ ensures (\result == false) <==> (\forall int i, j; 0 <= i && i < j && j < nums.length; nums[i] != nums[j]);
+      @ also
+      @ public exceptional_behavior
+      @ requires nums == null;
+      @ signals (NullPointerException) true;
+      @*/
+    public boolean containsDuplicate(int[] nums) {
+        Arrays.sort(nums);
+        int n = nums.length;
+
+        /*@
+          @ loop_invariant 0 <= i && i <= n - 1;
+          @ loop_invariant (\forall int a, b; 0 <= a && a < b && b < i; nums[a] != nums[b]);
+          @ loop_invariant (\forall int a, b; 0 <= a && a < b && b < n; nums[a] == nums[b] ==> (\exists int k; 0 <= k && k < i; (k == a || k == b) || nums[k] == nums[a]));
+          @ decreases n - 1 - i;
+          @*/
+        for (int i = 0; i < n - 1; i++) {
+            if (nums[i] == nums[i + 1]) {
+                return true;
+            }
+        }
+        return false;
+    }
+}

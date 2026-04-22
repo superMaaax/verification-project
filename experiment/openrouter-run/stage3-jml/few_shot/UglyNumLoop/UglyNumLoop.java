@@ -1,0 +1,25 @@
+class UglyNumLoop {
+    //@ requires n > 0;
+    //@ ensures \result <==> (\exists int a, b, c; a >= 0 && b >= 0 && c >= 0; n == (1 << a) * (int)Math.pow(3, b) * (int)Math.pow(5, c));
+    public static boolean isUgly(int n) {
+        if (n <= 0) {
+            return false;
+        }
+        //@ decreases n;
+        //@ maintaining n > 0;
+        while (n % 2 == 0) {
+            n /= 2;
+        }
+        //@ decreases n;
+        //@ maintaining n > 0;
+        while (n % 3 == 0) {
+            n /= 3;
+        }
+        //@ decreases n;
+        //@ maintaining n > 0;
+        while (n % 5 == 0) {
+            n /= 5;
+        }
+        return n == 1;
+    }
+}

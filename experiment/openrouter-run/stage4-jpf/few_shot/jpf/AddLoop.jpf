@@ -1,0 +1,8 @@
+target=Harness_AddLoop
+classpath=/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-rac/few_shot/classes:/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage4-jpf/few_shot/generated/harness_build:/Users/tiancheng/Documents/Software Validation/openjml-macos-14-21.0.24/jmlruntime_java11.jar:/Users/tiancheng/Documents/Software Validation/jpf-core/build/jpf-classes.jar:/Users/tiancheng/Documents/Software Validation/jpf-core/build/jpf.jar
+vm.enable_assertions=*
+report.console.finished=statistics
+report.console.property_violation=error,trace
+search.multiple_errors=true
+search.depth_limit=40
+search.state_limit=50000

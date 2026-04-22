@@ -1,0 +1,120 @@
+Abs/Abs.java	Abs	ok
+AbsSeq/AbsSeq.java	AbsSeq	ok
+Absolute/Absolute.java	Absolute	ok
+AddLoop/AddLoop.java	AddLoop	ok
+AddLoopFor/AddLoopFor.java	AddLoopFor	ok
+AddTwoLoop/AddTwoLoop.java	AddTwoLoop	fail	exit=1
+Biggest/Biggest.java	Biggest	fail	exit=1
+BinarySearch/BinarySearch.java	BinarySearch	ok
+BubbleSort/BubbleSort.java	BubbleSort	ok
+BubbleSortDesc/BubbleSortDesc.java	BubbleSortDesc	ok
+Calculator/Calculator.java	Calculator	ok
+CalculatorShuffled/CalculatorShuffled.java	CalculatorShuffled	ok
+CanWinNim/CanWinNim.java	CanWinNim	ok
+ChangeCase/ChangeCase.java	ChangeCase	ok
+CheckABeforeB/CheckABeforeB.java	CheckABeforeB	ok
+CompareArray/CompareArray.java	CompareArray	ok
+ComputeArea/ComputeArea.java	ComputeArea	ok
+ComputeAreaBranch/ComputeAreaBranch.java	ComputeAreaBranch	fail	exit=1
+ComputeOverlap/ComputeOverlap.java	ComputeOverlap	ok
+ComputeOverlapBranch/ComputeOverlapBranch.java	ComputeOverlapBranch	fail	exit=1
+Conjunction/Conjunction.java	Conjunction	ok
+ContainsDuplicate/ContainsDuplicate.java	ContainsDuplicate	fail	exit=1
+ConvertTemperature/ConvertTemperature.java	ConvertTemperature	ok
+ConvertToFahrenheit/ConvertToFahrenheit.java	ConvertToFahrenheit	ok
+ConvertToKelvin/ConvertToKelvin.java	ConvertToKelvin	ok
+ConvertToTitle/ConvertToTitle.java	ConvertToTitle	ok
+CopyArray/CopyArray.java	CopyArray	fail	exit=1
+DigitRoot/DigitRoot.java	DigitRoot	fail	exit=1
+Disjunction/Disjunction.java	Disjunction	ok
+DivisorGame/DivisorGame.java	DivisorGame	ok
+DominantIndex/DominantIndex.java	DominantIndex	ok
+EchoIntLoop/EchoIntLoop.java	EchoIntLoop	fail	exit=1
+Fibonacci/Fibonacci.java	Fibonacci	ok
+FindClosestNum/FindClosestNum.java	FindClosestNum	ok
+FindFirstZero/FindFirstZero.java	FindFirstZero	ok
+FizzBuzz/FizzBuzz.java	FizzBuzz	ok
+FizzBuzzSeq/FizzBuzzSeq.java	FizzBuzzSeq	ok
+GCD/GCD.java	GCD	ok
+IntCube/IntCube.java	IntCube	ok
+IntSquare/IntSquare.java	IntSquare	ok
+Inverse/Inverse.java	Inverse	ok
+IsAllUnique/IsAllUnique.java	IsAllUnique	fail	exit=1
+IsAscending/IsAscending.java	IsAscending	ok
+IsBoomerang/IsBoomerang.java	IsBoomerang	ok
+IsCommonFactor/IsCommonFactor.java	IsCommonFactor	ok
+IsCommonFactorBranch/IsCommonFactorBranch.java	IsCommonFactorBranch	ok
+IsCommonMultiple/IsCommonMultiple.java	IsCommonMultiple	ok
+IsCommonMultipleBranch/IsCommonMultipleBranch.java	IsCommonMultipleBranch	ok
+IsDescending/IsDescending.java	IsDescending	ok
+IsMonotonic/IsMonotonic.java	IsMonotonic	ok
+IsOneBitCharacter/IsOneBitCharacter.java	IsOneBitCharacter	fail	exit=1
+IsPalindrome/IsPalindrome.java	IsPalindrome	ok
+IsPrefix/IsPrefix.java	IsPrefix	ok
+IsSubsequence/IsSubsequence.java	IsSubsequence	ok
+IsSuffix/IsSuffix.java	IsSuffix	ok
+JewelsInStones/JewelsInStones.java	JewelsInStones	ok
+LCM/LCM.java	LCM	ok
+LargestPerimeter/LargestPerimeter.java	LargestPerimeter	fail	exit=1
+LeapYear/LeapYear.java	LeapYear	ok
+LeapYearSeq/LeapYearSeq.java	LeapYearSeq	ok
+LinearSearch/LinearSearch.java	LinearSearch	fail	exit=1
+MatrixAdd/MatrixAdd.java	MatrixAdd	fail	exit=1
+MatrixMul/MatrixMul.java	MatrixMul	fail	exit=1
+MaxInArray/MaxInArray.java	MaxInArray	ok
+MinInArray/MinInArray.java	MinInArray	fail	exit=1
+MoveZeroes/MoveZeroes.java	MoveZeroes	ok
+MulLoop/MulLoop.java	MulLoop	fail	exit=1
+MulNested/MulNested.java	MulNested	fail	exit=1
+MyPower/MyPower.java	MyPower	fail	exit=1
+MySqrt/MySqrt.java	MySqrt	ok
+NegAbs/NegAbs.java	NegAbs	ok
+NextGreaterElem/NextGreaterElem.java	NextGreaterElem	fail	exit=1
+NotCommonFactor/NotCommonFactor.java	NotCommonFactor	ok
+NotCommonFactorBranch/NotCommonFactorBranch.java	NotCommonFactorBranch	ok
+NotCommonMultiple/NotCommonMultiple.java	NotCommonMultiple	ok
+NumberOfCuts/NumberOfCuts.java	NumberOfCuts	ok
+NumberOfCutsSeq/NumberOfCutsSeq.java	NumberOfCutsSeq	ok
+OddEven/OddEven.java	OddEven	ok
+PassPillow/PassPillow.java	PassPillow	ok
+PassPillowBranch/PassPillowBranch.java	PassPillowBranch	ok
+Perimeter/Perimeter.java	Perimeter	ok
+PowerOfFour/PowerOfFour.java	PowerOfFour	ok
+PowerOfFourBranch/PowerOfFourBranch.java	PowerOfFourBranch	ok
+PowerOfFourLoop/PowerOfFourLoop.java	PowerOfFourLoop	ok
+PowerOfThree/PowerOfThree.java	PowerOfThree	ok
+PowerOfTwo/PowerOfTwo.java	PowerOfTwo	ok
+PowerOfTwoBranch/PowerOfTwoBranch.java	PowerOfTwoBranch	ok
+PowerOfTwoLoop/PowerOfTwoLoop.java	PowerOfTwoLoop	ok
+PrimeCheck/PrimeCheck.java	PrimeCheck	ok
+PrimeNumbers/PrimeNumbers.java	PrimeNumbers	fail	exit=1
+ReLU/ReLU.java	ReLU	ok
+ReLUSeq/ReLUSeq.java	ReLUSeq	ok
+RepeatedChar/RepeatedChar.java	RepeatedChar	fail	exit=1
+RepeatedCharNested/RepeatedCharNested.java	RepeatedCharNested	ok
+RepeatedNumNested/RepeatedNumNested.java	RepeatedNumNested	ok
+Return100/Return100.java	Return100	ok
+Return100Nested/Return100Nested.java	Return100Nested	fail	exit=1
+ReverseArray/ReverseArray.java	ReverseArray	ok
+ReverseString/ReverseString.java	ReverseString	fail	exit=1
+RotateArray/RotateArray.java	RotateArray	fail	exit=4
+SelectionSort/SelectionSort.java	SelectionSort	ok
+SelectionSortDesc/SelectionSortDesc.java	SelectionSortDesc	ok
+SetZero/SetZero.java	SetZero	fail	exit=1
+Smallest/Smallest.java	Smallest	ok
+SmallestEvenMul/SmallestEvenMul.java	SmallestEvenMul	ok
+SmallestEvenMulBranch/SmallestEvenMulBranch.java	SmallestEvenMulBranch	ok
+SolveQuadraticEquation/SolveQuadraticEquation.java	SolveQuadraticEquation	ok
+SortLibrary/SortLibrary.java	SortLibrary	fail	exit=1
+StrPalindrome/StrPalindrome.java	StrPalindrome	fail	exit=1
+SubLoop/SubLoop.java	SubLoop	ok
+Swap/Swap.java	Swap	ok
+Temperatures/Temperatures.java	Temperatures	ok
+ThreeConsecutiveOdds/ThreeConsecutiveOdds.java	ThreeConsecutiveOdds	ok
+TransposeMatrix/TransposeMatrix.java	TransposeMatrix	fail	exit=1
+TwoSum/TwoSum.java	TwoSum	ok
+UglyNum/UglyNum.java	UglyNum	ok
+UglyNumLoop/UglyNumLoop.java	UglyNumLoop	fail	exit=1
+UniqueCharNested/UniqueCharNested.java	UniqueCharNested	fail	exit=1
+UniqueNumNested/UniqueNumNested.java	UniqueNumNested	ok
+XOR/XOR.java	XOR	ok

@@ -1,0 +1,10 @@
+class CanWinNim {
+    /*@ 
+      @ public normal_behavior
+      @ requires true;
+      @ ensures \result <==> (n % 4 != 0);
+      @*/
+    public boolean canWinNim(int n) {
+        return n % 4 != 0;
+    }
+}

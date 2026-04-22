@@ -1,0 +1,57 @@
+public class PrimeNumbers
+{
+    
+    //@ requires d != 0;
+    //@ ensures \result <==> n % d == 0;
+    private  static boolean div(int n, int d) { return n%d == 0; }
+
+    private  int primeArray[];
+    
+    //@ requires n >= 1;
+    //@ ensures \result != null;
+    //@ ensures \result.length == n;
+    //@ ensures \result[0] == 2;
+    //@ ensures (\forall int i; 0 <= i && i < n; \result[i] > 1);
+    //@ ensures (\forall int i; 0 <= i && i < n; (\forall int j; i < j && j < n; \result[i] <= \result[j]));
+    public int[] primeList(int n)
+    {
+      int status = 1, num = 3, count, j;
+      primeArray = new int[n];
+      primeArray[0] = 2;
+  
+      //@ maintaining 2 <= count && count <= n + 1;
+      //@ maintaining num >= 3;
+      //@ maintaining status == 0 || status == 1;
+      //@ maintaining primeArray != null && primeArray.length == n;
+      //@ maintaining primeArray[0] == 2;
+      //@ maintaining (\forall int i; 1 <= i && i < count - 1; primeArray[i] > 1);
+      //@ maintaining (\forall int i; 1 <= i && i < count - 1; (\forall int k; i < k && k < count - 1; primeArray[i] <= primeArray[k]));
+      //@ decreases n - count + 1;
+      for (count = 2; count <= n;)
+      { 
+
+         //@ maintaining 2 <= j && j <= num/2 + 1;
+         //@ maintaining status == 0 || status == 1;
+         //@ decreases num/2 - j + 1;
+         for (j = 2; j <= num/2; j++)
+         { 
+            if (div(num,j))
+            {
+               status = 0;
+               break;
+            }
+         }
+
+         if (status != 0)
+         {  
+            primeArray[count - 1] = num;
+            count++;
+		
+         }
+         status = 1;
+	     
+         num++;
+      } 
+	      return primeArray; 
+       }
+    }

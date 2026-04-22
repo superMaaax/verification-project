@@ -1,0 +1,17 @@
+class PowerOfThree {
+    /*@
+      @ requires true;
+      @ ensures \result <==> (\exists int k; k >= 0; n == (\product int i; 0 <= i && i < k; 3));
+      @*/
+    public boolean isPowerOfThree(int n) {
+        int temp = n;
+        /*@
+          @ maintaining temp == 0 || (\exists int k; k >= 0; n == temp * (\product int i; 0 <= i && i < k; 3));
+          @ decreases Math.abs(temp);
+          @*/
+        while (temp != 0 && temp % 3 == 0) {
+            temp /= 3;
+        }
+        return temp == 1;
+    }
+}

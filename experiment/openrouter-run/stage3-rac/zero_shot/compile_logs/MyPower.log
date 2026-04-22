@@ -1,0 +1,24 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MyPower/MyPower.java:9: error: ';' expected
+        /*@ loop invariant 0 <= i && i <= n;
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MyPower/MyPower.java:9: error: not a statement
+        /*@ loop invariant 0 <= i && i <= n;
+                                  ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MyPower/MyPower.java:9: error: Expected a declaration or a JML construct inside the JML annotation here
+        /*@ loop invariant 0 <= i && i <= n;
+                                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MyPower/MyPower.java:10: error: ';' expected
+          @ loop invariant res == (\product int j; 0 <= j && j < i; x);
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MyPower/MyPower.java:10: error: not a statement
+          @ loop invariant res == (\product int j; 0 <= j && j < i; x);
+                               ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MyPower/MyPower.java:10: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant res == (\product int j; 0 <= j && j < i; x);
+                           ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MyPower/MyPower.java:12: error: Expected loop specifications while in JML: assignable is not a loop specification keyword
+          @ assignable \nothing;
+            ^
+7 errors
+1 warning

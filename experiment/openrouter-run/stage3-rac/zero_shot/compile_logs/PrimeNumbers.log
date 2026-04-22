@@ -1,0 +1,26 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PrimeNumbers/PrimeNumbers.java:4: warning: [jml-lint] There is no point to a specification case having more visibility than its method
+    /*@ public normal_behavior
+        ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PrimeNumbers/PrimeNumbers.java:17: error: An identifier with private visibility may not be used in a ensures clause with public visibility
+      @ ensures primeArray == \result;
+                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PrimeNumbers/PrimeNumbers.java:17: error: bad operand types for binary operator '=='
+      @ ensures primeArray == \result;
+                           ^
+  first type:  int
+  second type: int[]
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PrimeNumbers/PrimeNumbers.java:22: error: incompatible types: int[] cannot be converted to int
+      primeArray = new int[n];
+                   ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PrimeNumbers/PrimeNumbers.java:23: error: array required, but int found
+      primeArray[0] = 2;
+                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PrimeNumbers/PrimeNumbers.java:48: error: array required, but int found
+            primeArray[count - 1] = num;
+                      ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PrimeNumbers/PrimeNumbers.java:56: error: incompatible types: int cannot be converted to int[]
+	      return primeArray; 
+	             ^
+6 errors
+2 warnings

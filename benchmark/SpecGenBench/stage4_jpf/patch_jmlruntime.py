@@ -1,4 +1,5 @@
 import zipfile, struct
+from pathlib import Path
 
 def patch_class(data):
     # class文件格式：magic(4) + minor(2) + major(2) + ...
@@ -10,8 +11,9 @@ def patch_class(data):
         return data[:6] + struct.pack('>H', 55) + data[8:]
     return data
 
-src = '/Users/xiangxinzhong/Code/verification-project/.tools/openjml/jmlruntime.jar'
-dst = '/Users/xiangxinzhong/Code/verification-project/.tools/openjml/jmlruntime_java11.jar'
+REPO_ROOT = Path(__file__).resolve().parents[3]
+src = str(REPO_ROOT / '.tools' / 'openjml' / 'jmlruntime.jar')
+dst = str(REPO_ROOT / '.tools' / 'openjml' / 'jmlruntime_java11.jar')
 
 with zipfile.ZipFile(src, 'r') as zin, \
      zipfile.ZipFile(dst, 'w', zipfile.ZIP_DEFLATED) as zout:

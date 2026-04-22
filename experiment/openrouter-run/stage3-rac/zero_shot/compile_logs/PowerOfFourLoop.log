@@ -1,0 +1,17 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PowerOfFourLoop/PowerOfFourLoop.java:12: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ maintaining (\exists int k; k >= 0; \old(n) == n * (int) Math.pow(4, k));
+                         ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PowerOfFourLoop/PowerOfFourLoop.java:12: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ maintaining (\exists int k; k >= 0; \old(n) == n * (int) Math.pow(4, k));
+                         ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PowerOfFourLoop/PowerOfFourLoop.java:12: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ maintaining (\exists int k; k >= 0; \old(n) == n * (int) Math.pow(4, k));
+                         ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PowerOfFourLoop/PowerOfFourLoop.java:12: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ maintaining (\exists int k; k >= 0; \old(n) == n * (int) Math.pow(4, k));
+                         ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PowerOfFourLoop/PowerOfFourLoop.java:4: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+      @ ensures \result <==> (\exists int k; k >= 0; n == (int) Math.pow(4, k));
+                              ^
+6 warnings

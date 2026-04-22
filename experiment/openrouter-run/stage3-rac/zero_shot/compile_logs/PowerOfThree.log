@@ -1,0 +1,17 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PowerOfThree/PowerOfThree.java:9: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ maintaining temp == 0 || (\exists int k; k >= 0; n == temp * (\product int i; 0 <= i && i < k; 3));
+                                      ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PowerOfThree/PowerOfThree.java:9: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ maintaining temp == 0 || (\exists int k; k >= 0; n == temp * (\product int i; 0 <= i && i < k; 3));
+                                      ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PowerOfThree/PowerOfThree.java:9: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ maintaining temp == 0 || (\exists int k; k >= 0; n == temp * (\product int i; 0 <= i && i < k; 3));
+                                      ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PowerOfThree/PowerOfThree.java:9: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ maintaining temp == 0 || (\exists int k; k >= 0; n == temp * (\product int i; 0 <= i && i < k; 3));
+                                      ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PowerOfThree/PowerOfThree.java:4: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+      @ ensures \result <==> (\exists int k; k >= 0; n == (\product int i; 0 <= i && i < k; 3));
+                              ^
+6 warnings

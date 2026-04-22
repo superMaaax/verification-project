@@ -1,0 +1,39 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/AddTwoLoop/AddTwoLoop.java:12: error: ';' expected
+          @ loop invariant 0 <= i && i <= m;
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/AddTwoLoop/AddTwoLoop.java:12: error: not a statement
+          @ loop invariant 0 <= i && i <= m;
+                                  ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/AddTwoLoop/AddTwoLoop.java:12: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant 0 <= i && i <= m;
+                                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/AddTwoLoop/AddTwoLoop.java:13: error: ';' expected
+          @ loop invariant res == (((a < 0) ? -1 : 1) * i);
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/AddTwoLoop/AddTwoLoop.java:13: error: not a statement
+          @ loop invariant res == (((a < 0) ? -1 : 1) * i);
+                               ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/AddTwoLoop/AddTwoLoop.java:13: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant res == (((a < 0) ? -1 : 1) * i);
+                           ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/AddTwoLoop/AddTwoLoop.java:20: error: ';' expected
+          @ loop invariant 0 <= i && i <= n;
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/AddTwoLoop/AddTwoLoop.java:20: error: not a statement
+          @ loop invariant 0 <= i && i <= n;
+                                  ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/AddTwoLoop/AddTwoLoop.java:20: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant 0 <= i && i <= n;
+                                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/AddTwoLoop/AddTwoLoop.java:21: error: ';' expected
+          @ loop invariant res == a + (((b < 0) ? -1 : 1) * i);
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/AddTwoLoop/AddTwoLoop.java:21: error: not a statement
+          @ loop invariant res == a + (((b < 0) ? -1 : 1) * i);
+                               ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/AddTwoLoop/AddTwoLoop.java:21: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant res == a + (((b < 0) ? -1 : 1) * i);
+                           ^
+12 errors
+1 warning

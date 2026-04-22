@@ -1,0 +1,34 @@
+public class UniqueNumNested {
+
+    /*@ public normal_behavior
+      @ requires arr != null;
+      @ ensures (\result == -1) || (0 <= \result && \result < arr.length);
+      @ ensures (\result != -1) ==> (\forall int k; 0 <= k && k < arr.length && k != \result; arr[\result] != arr[k]);
+      @ ensures (\result == -1) ==> (\forall int i; 0 <= i && i < arr.length; (\exists int j; 0 <= j && j < arr.length && i != j && arr[i] == arr[j]));
+      @ assignable \nothing;
+      @*/
+    public static int uniqueNum(int[] arr) {
+        /*@
+          @ loop_invariant 0 <= i && i <= arr.length;
+          @ loop_invariant (\forall int m; 0 <= m && m < i; (\exists int n; 0 <= n && n < arr.length && m != n && arr[m] == arr[n]));
+          @ decreases arr.length - i;
+          @*/
+        for (int i = 0; i < arr.length; ++i) {
+            int j = 0;
+            /*@
+              @ loop_invariant 0 <= j && j <= arr.length;
+              @ loop_invariant (\forall int k; 0 <= k && k < j; (i == k) || arr[i] != arr[k]);
+              @ decreases arr.length - j;
+              @*/
+            while(j < arr.length) {
+                if(i != j && arr[i] == arr[j])
+                    break;
+                j++;
+            }
+            if(j == arr.length)
+                return i;
+        }
+        return -1;
+    }
+    
+}

@@ -1,0 +1,9 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/Return100Nested/Return100Nested.java:13: error: variable declaration not allowed here
+        int res = 0;
+            ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/Return100Nested/Return100Nested.java:9: error: Loop specifications must immediately precede a loop statement
+          @ maintaining 0 <= res && res <= 100;
+            ^
+2 errors
+1 warning

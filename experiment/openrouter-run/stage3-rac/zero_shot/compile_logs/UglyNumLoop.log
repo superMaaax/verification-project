@@ -1,0 +1,24 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UglyNumLoop/UglyNumLoop.java:6: error: This backslash token is unknown: \pow
+      @                         n == (1 * (\bigint)2 \pow a) * (\bigint)3 \pow b * (\bigint)5 \pow c));
+                                                     ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UglyNumLoop/UglyNumLoop.java:6: error: This backslash token is unknown: \pow
+      @                         n == (1 * (\bigint)2 \pow a) * (\bigint)3 \pow b * (\bigint)5 \pow c));
+                                                                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UglyNumLoop/UglyNumLoop.java:6: error: This backslash token is unknown: \pow
+      @                         n == (1 * (\bigint)2 \pow a) * (\bigint)3 \pow b * (\bigint)5 \pow c));
+                                                                                              ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UglyNumLoop/UglyNumLoop.java:13: error: ')' expected
+          @ loop_invariant (\forall int k; k >= 0; k < 31; true);
+                                                         ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UglyNumLoop/UglyNumLoop.java:13: error: not a statement
+          @ loop_invariant (\forall int k; k >= 0; k < 31; true);
+                                                           ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UglyNumLoop/UglyNumLoop.java:13: error: ';' expected
+          @ loop_invariant (\forall int k; k >= 0; k < 31; true);
+                                                               ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/UglyNumLoop/UglyNumLoop.java:12: error: Loop specifications must immediately precede a loop statement
+        /*@ loop_invariant n > 0;
+            ^
+7 errors
+1 warning

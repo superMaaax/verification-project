@@ -1,0 +1,17 @@
+public class Return100 {
+    /*@ public normal_behavior
+      @ ensures \result == 100;
+      @ assignable \nothing;
+      @*/
+    public static int return100 () {
+        int res = 0;
+        /*@ loop_invariant 0 <= i && i <= 100;
+          @ loop_invariant res == i;
+          @ decreases 100 - i;
+          @*/
+        for(int i = 0; i < 100; i++) {
+            res = res + 1;
+        }
+        return res;
+    }
+}

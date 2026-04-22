@@ -1,0 +1,54 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:19: error: ';' expected
+        /*@ loop invariant 0 <= i && i <= 2;
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:19: error: not a statement
+        /*@ loop invariant 0 <= i && i <= 2;
+                                  ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:19: error: Expected a declaration or a JML construct inside the JML annotation here
+        /*@ loop invariant 0 <= i && i <= 2;
+                                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:20: error: ';' expected
+          @ loop invariant (\forall int x; 0 <= x && x < i;
+                          ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:20: error: not a statement
+          @ loop invariant (\forall int x; 0 <= x && x < i;
+                                                  ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:20: error: Expected a declaration or a JML construct inside the JML annotation here
+          @ loop invariant (\forall int x; 0 <= x && x < i;
+                                           ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:21: error: not a statement
+          @                    (\forall int y; 0 <= y && y < 2;
+                               ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:22: error: ';' expected
+          @                        c[x][y] == a[x][y] + b[x][y]));
+                                                                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:26: error: ';' expected
+            /*@ loop invariant 0 <= j && j <= 2;
+                              ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:26: error: not a statement
+            /*@ loop invariant 0 <= j && j <= 2;
+                                      ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:26: error: Expected a declaration or a JML construct inside the JML annotation here
+            /*@ loop invariant 0 <= j && j <= 2;
+                                    ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:27: error: ';' expected
+              @ loop invariant (\forall int y; 0 <= y && y < j;
+                              ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:27: error: not a statement
+              @ loop invariant (\forall int y; 0 <= y && y < j;
+                                                      ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:27: error: Expected a declaration or a JML construct inside the JML annotation here
+              @ loop invariant (\forall int y; 0 <= y && y < j;
+                                               ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:28: error: not a statement
+              @                    c[i][y] == a[i][y] + b[i][y]);
+                                           ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:28: error: ';' expected
+              @                    c[i][y] == a[i][y] + b[i][y]);
+                                                               ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/MatrixAdd/MatrixAdd.java:28: error: Expected a declaration or a JML construct inside the JML annotation here
+              @                    c[i][y] == a[i][y] + b[i][y]);
+                                   ^
+17 errors
+1 warning

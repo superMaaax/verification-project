@@ -1,0 +1,10 @@
+public class ReLUSeq {
+    /*@ public normal_behavior
+      @ requires true;
+      @ ensures \result == ((x >= 0) ? x : 0);
+      @ assignable \nothing;
+      @*/
+    public static double computeReLU(double x) {
+        return ((x >= 0) ? x : 0);
+    }
+}

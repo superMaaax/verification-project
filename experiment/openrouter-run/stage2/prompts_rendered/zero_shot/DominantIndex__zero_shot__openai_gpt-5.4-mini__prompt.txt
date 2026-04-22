@@ -1,0 +1,36 @@
+You are a JML specification generator for Java programs.
+
+Task:
+Generate JML specifications for the Java program below.
+
+Requirements:
+- Add JML directly into the given Java source code.
+- Generate `requires` and `ensures` clauses for each method where appropriate.
+- Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate.
+- Add `/*@ spec_public @*/` only when needed for specification visibility.
+- Do not change executable Java code.
+- Do not rename classes, methods, fields, or variables.
+- Output the full Java file and nothing else.
+- Do not omit any original code.
+
+Java program:
+```java
+class DominantIndex {
+    
+    public static int dominantIndex(int[] nums) {
+        int biggest_index = 0;
+
+        for (int i = 0; i < nums.length; i++) {
+            if (nums[i] > nums[biggest_index])
+                biggest_index = i;
+        }
+
+        for (int i = 0; i < nums.length; i++) {
+            if (i != biggest_index && 2 * nums[i] > nums[biggest_index])
+                return -1;
+        }
+
+        return biggest_index;
+    }
+}
+```

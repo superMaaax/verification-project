@@ -1,0 +1,12 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/ComputeArea/ComputeArea.java:11: error: Incorrectly formed or terminated ensures statement near here -- perhaps a missing semicolon
+    //@ ensures \result == ((ax2 - ax1) * (ay2 - ay1)) + ((bx2 - bx1) * (by2 - by1))
+                                                                                    ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/ComputeArea/ComputeArea.java:12: error: ')' expected
+    //@ ensures    - (((((ax2<bx2?ax2:bx2) - (ax1>bx1?ax1:bx1)) > 0 ? ((ax2<bx2?ax2:bx2) - (ax1>bx1?ax1:bx1)) : 0)
+                                                                                                                  ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/ComputeArea/ComputeArea.java:13: error: Incorrectly formed or terminated ensures statement near here
+    //@ ensures        * ((((ay2<by2?ay2:by2) - (ay1>by1?ay1:by1)) > 0 ? ((ay2<by2?ay2:by2) - (ay1>by1?ay1:by1)) : 0));
+                         ^
+3 errors
+1 warning

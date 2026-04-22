@@ -1,0 +1,17 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/RepeatedNumNested/RepeatedNumNested.java:10: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ loop_invariant (\forall int p, q; 0 <= p && p < q && p < i && q < arr.length; arr[p] != arr[q]);
+                            ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/RepeatedNumNested/RepeatedNumNested.java:10: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ loop_invariant (\forall int p, q; 0 <= p && p < q && p < i && q < arr.length; arr[p] != arr[q]);
+                            ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/RepeatedNumNested/RepeatedNumNested.java:10: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ loop_invariant (\forall int p, q; 0 <= p && p < q && p < i && q < arr.length; arr[p] != arr[q]);
+                            ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/RepeatedNumNested/RepeatedNumNested.java:10: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+          @ loop_invariant (\forall int p, q; 0 <= p && p < q && p < i && q < arr.length; arr[p] != arr[q]);
+                            ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/RepeatedNumNested/RepeatedNumNested.java:4: warning: Runtime assertion checking is not implemented for this type or number of declarations in a quantified expression
+      @ ensures (\result == -1) <==> (\forall int i, j; 0 <= i && i < j && j < arr.length; arr[i] != arr[j]);
+                                      ^
+6 warnings

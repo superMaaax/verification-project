@@ -1,0 +1,121 @@
+method,jpf_pass,violation_type,counterexample,instructions,states_new,states_end,depth,timeout,notes
+Abs.Abs,true,,,10702,2,9,2,false,pass_kind=A; entry=Abs
+AbsSeq.Abs,true,,,10787,2,9,2,false,pass_kind=A; entry=Abs
+Absolute.Absolute,true,,,10722,2,9,2,false,pass_kind=A; entry=Absolute
+AddLoop.AddLoop,true,,,77794,11,81,3,false,pass_kind=A; entry=AddLoop
+AddLoopFor.addLoop,true,,,71746,11,81,3,false,pass_kind=A; entry=addLoop
+AddTwoLoop,false,skipped,,,,,,false,no_rac_class
+Biggest,false,skipped,,,,,,false,no_rac_class
+BinarySearch.Binary,true,,,54244386,3277,25209,7,false,pass_kind=A; entry=Binary
+BubbleSort.bubbleSort,true,,,32184285,483,2801,6,false,pass_kind=A; entry=bubbleSort
+BubbleSortDesc.bubbleSort,true,,,28944879,477,2801,6,false,pass_kind=A; entry=bubbleSort
+Calculator.calculate,false,NoUncaughtExceptionsProperty,"      [2507 insn w/o sources]\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/Calculator/Calculator.java:15: verify: JML signals condition is false\n    public  int calculate(int num1, int num2, char operator) {\n                ^\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/Calculator/Calculator.java:3: verify: Associated declaration: /Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/Calculato...",2539645,93,7695,4,false,pass_kind=n/a; entry=calculate
+CalculatorShuffled.calculate,false,NoUncaughtExceptionsProperty,        ^\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/CalculatorShuffled/CalculatorShuffled.java:4: verify: JML precondition is false\n      @ requires operator == '-' || operator == '*' || operator == '/' || operator == '+';\n        ^\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/CalculatorShuffled/CalculatorShuffled.java:4: verify: JML precondition is false\n      @ requires operator == '-' || operator == '*' || operator == '/' || operator == '+';\n     ...,3707305,94,7695,4,false,pass_kind=n/a; entry=calculate
+CanWinNim.canWinNim,true,,,10720,2,9,2,false,pass_kind=A; entry=canWinNim
+ChangeCase.changeCase,true,,,42655,2,95,2,false,pass_kind=A; entry=changeCase
+CheckABeforeB.checkString,true,,,748073,31,703,3,false,pass_kind=A; entry=checkString
+CompareArray.arrcmp,false,exit_code_-9,"JavaPathfinder core system v8.0 (rev 2bf98722c49a8149f9a6f68acb9edc6ba5cdd557) - (C) 2005-2014 United States Government. All rights reserved.\n\n\n====================================================== system under test\nHarness_CompareArray.main()\n\n====================================================== search started: 4/21/26, 7:27 PM\n",,,,,true,pass_kind=n/a; entry=arrcmp; wall_timeout_s=30.0
+ComputeArea.computeOverlapArea,false,exit_code_-9,"JavaPathfinder core system v8.0 (rev 2bf98722c49a8149f9a6f68acb9edc6ba5cdd557) - (C) 2005-2014 United States Government. All rights reserved.\n\n\n====================================================== system under test\nHarness_ComputeArea.main()\n\n====================================================== search started: 4/21/26, 7:28 PM\n",,,,,true,pass_kind=n/a; entry=computeOverlapArea; wall_timeout_s=30.0
+ComputeAreaBranch,false,skipped,,,,,,false,no_rac_class
+ComputeOverlap.computeOverlapArea,false,exit_code_-9,"JavaPathfinder core system v8.0 (rev 2bf98722c49a8149f9a6f68acb9edc6ba5cdd557) - (C) 2005-2014 United States Government. All rights reserved.\n\n\n====================================================== system under test\nHarness_ComputeOverlap.main()\n\n====================================================== search started: 4/21/26, 7:28 PM\n",,,,,true,pass_kind=n/a; entry=computeOverlapArea; wall_timeout_s=30.0
+ComputeOverlapBranch,false,skipped,,,,,,false,no_rac_class
+Conjunction.conjunctOf,true,,,9663,4,4,3,false,pass_kind=A; entry=conjunctOf
+ContainsDuplicate,false,skipped,,,,,,false,no_rac_class
+ConvertTemperature.convertTemperature,true,,,10264,2,5,2,false,pass_kind=A; entry=convertTemperature
+ConvertToFahrenheit.convertTemperature,true,,,9924,2,5,2,false,pass_kind=A; entry=convertTemperature
+ConvertToKelvin.convertTemperature,true,,,9884,2,5,2,false,pass_kind=A; entry=convertTemperature
+ConvertToTitle.convertToTitle,true,,,19554,4,9,2,false,pass_kind=A; entry=convertToTitle
+CopyArray,false,skipped,,,,,,false,no_rac_class
+DigitRoot,false,skipped,,,,,,false,no_rac_class
+Disjunction.disjunctOf,true,,,9597,4,4,3,false,pass_kind=A; entry=disjunctOf
+DivisorGame.divisorGame,true,,,11801,3,9,2,false,pass_kind=A; entry=divisorGame
+DominantIndex.dominantIndex,true,,,9414480,469,2801,5,false,pass_kind=A; entry=dominantIndex
+EchoIntLoop,false,skipped,,,,,,false,no_rac_class
+Fibonacci.fibCompute,true,,,16272,3,9,2,false,pass_kind=A; entry=fibCompute
+FindClosestNum.findClosestNumber,true,,,11045519,470,2801,5,false,pass_kind=A; entry=findClosestNumber
+FindFirstZero.FindFirstZero,true,,,3741277,468,2801,5,false,pass_kind=A; entry=FindFirstZero
+FizzBuzz.fizzBuzz,true,,,12293,2,9,2,false,pass_kind=A; entry=fizzBuzz
+FizzBuzzSeq.fizzBuzz,true,,,11971,2,9,2,false,pass_kind=A; entry=fizzBuzz
+GCD.gcd,true,,,148027,11,81,3,false,pass_kind=A; entry=gcd
+IntCube.cubeOf,true,,,166136,2,9,2,false,pass_kind=A; entry=cubeOf
+IntSquare.squareOf,true,,,38742,2,9,2,false,pass_kind=A; entry=squareOf
+Inverse.Inverse,false,exit_code_-9,"JavaPathfinder core system v8.0 (rev 2bf98722c49a8149f9a6f68acb9edc6ba5cdd557) - (C) 2005-2014 United States Government. All rights reserved.\n\n\n====================================================== system under test\nHarness_Inverse.main()\n\n====================================================== search started: 4/21/26, 7:29 PM\n",,,,,true,pass_kind=n/a; entry=Inverse; wall_timeout_s=30.0
+IsAllUnique,false,skipped,,,,,,false,no_rac_class
+IsAscending.isAscending,false,NoUncaughtExceptionsProperty,"                   ^\n\n====================================================== error 90\ngov.nasa.jpf.vm.NoUncaughtExceptionsProperty\njava.lang.ArrayIndexOutOfBoundsException: 4\n	at IsAscending.isAscending(IsAscending.java:17)\n	at Harness_IsAscending.main(Harness_IsAscending.java:10)\n\n\n====================================================== trace #90\n------------------------------------------------------ transition #0 thread: 0\ngov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:""ROOT"" ,1/1,isCascaded:false}\n      [9169 insn w/o sources]\n------------------------------------------------------ transit...",2043231,469,2801,5,false,pass_kind=n/a; entry=isAscending
+IsBoomerang,false,skipped,,,,,,false,harness_unsupported:unsupported param type: int[][]
+IsCommonFactor.isCommonFactor,false,NoUncaughtExceptionsProperty,"gov.nasa.jpf.vm.NoUncaughtExceptionsProperty\njava.lang.ArithmeticException: division by zero\n	at IsCommonFactor.isCommonFactor(IsCommonFactor.java:7)\n	at Harness_IsCommonFactor.main(Harness_IsCommonFactor.java:8)\n\n\n====================================================== trace #79\n------------------------------------------------------ transition #0 thread: 0\ngov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:""ROOT"" ,1/1,isCascaded:false}\n      [9169 insn w/o sources]\n------------------------------------------------------ transition #1 thread: 0\ngov.nasa.jpf.vm.choice.IntIntervalGenerator[id=""veri...",208673,93,729,4,false,pass_kind=n/a; entry=isCommonFactor
+IsCommonFactorBranch.isCommonFactor,false,NoUncaughtExceptionsProperty,"gov.nasa.jpf.vm.NoUncaughtExceptionsProperty\njava.lang.ArithmeticException: division by zero\n	at IsCommonFactorBranch.isCommonFactor(IsCommonFactorBranch.java:7)\n	at Harness_IsCommonFactorBranch.main(Harness_IsCommonFactorBranch.java:8)\n\n\n====================================================== trace #79\n------------------------------------------------------ transition #0 thread: 0\ngov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:""ROOT"" ,1/1,isCascaded:false}\n      [9169 insn w/o sources]\n------------------------------------------------------ transition #1 thread: 0\ngov.nasa.jpf.vm.choice.IntIn...",210265,93,729,4,false,pass_kind=n/a; entry=isCommonFactor
+IsCommonMultiple.isCommonMultiple,false,NoUncaughtExceptionsProperty,      [462 insn w/o sources]\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsCommonMultiple/IsCommonMultiple.java:2: verify: JML precondition is false\n    /*@ public normal_behavior\n               ^\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsCommonMultiple/IsCommonMultiple.java:2: verify: JML precondition is false\n    /*@ public normal_behavior\n               ^\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-...,226271,94,729,4,false,pass_kind=n/a; entry=isCommonMultiple
+IsCommonMultipleBranch.isCommonMultiple,false,NoUncaughtExceptionsProperty,      [451 insn w/o sources]\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsCommonMultipleBranch/IsCommonMultipleBranch.java:3: verify: JML precondition is false\n      @ requires a != 0 && b != 0;\n        ^\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsCommonMultipleBranch/IsCommonMultipleBranch.java:3: verify: JML precondition is false\n      @ requires a != 0 && b != 0;\n        ^\n/Users/tiancheng/Documents/Software Validation/verification-project/expe...,226331,94,729,4,false,pass_kind=n/a; entry=isCommonMultiple
+IsDescending.isDescending,false,NoUncaughtExceptionsProperty,"                   ^\n\n====================================================== error 90\ngov.nasa.jpf.vm.NoUncaughtExceptionsProperty\njava.lang.ArrayIndexOutOfBoundsException: 4\n	at IsDescending.isDescending(IsDescending.java:18)\n	at Harness_IsDescending.main(Harness_IsDescending.java:10)\n\n\n====================================================== trace #90\n------------------------------------------------------ transition #0 thread: 0\ngov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:""ROOT"" ,1/1,isCascaded:false}\n      [9169 insn w/o sources]\n------------------------------------------------------ tr...",1826826,469,2801,5,false,pass_kind=n/a; entry=isDescending
+IsMonotonic.isMonotonic,true,,,6454358,469,2801,5,false,pass_kind=A; entry=isMonotonic
+IsOneBitCharacter,false,skipped,,,,,,false,no_rac_class
+IsPalindrome.isPalindrome,true,,,685659,31,703,3,false,pass_kind=A; entry=isPalindrome
+IsPrefix.isPrefix,false,exit_code_-9,"JavaPathfinder core system v8.0 (rev 2bf98722c49a8149f9a6f68acb9edc6ba5cdd557) - (C) 2005-2014 United States Government. All rights reserved.\n\n\n====================================================== system under test\nHarness_IsPrefix.main()\n\n====================================================== search started: 4/21/26, 7:30 PM\n",,,,,true,pass_kind=n/a; entry=isPrefix; wall_timeout_s=30.0
+IsSubsequence.isSubsequence,false,exit_code_-9,"        ^\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsSubsequence/IsSubsequence.java:11: verify: JML postcondition is false\n    public boolean isSubsequence(String s, String t) {\n                   ^\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsSubsequence/IsSubsequence.java:4: verify: Associated declaration: /Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/IsSubsequence/IsSubsequenc...",,,,,true,pass_kind=n/a; entry=isSubsequence; wall_timeout_s=30.0
+IsSuffix.isSuffix,false,exit_code_-9,"JavaPathfinder core system v8.0 (rev 2bf98722c49a8149f9a6f68acb9edc6ba5cdd557) - (C) 2005-2014 United States Government. All rights reserved.\n\n\n====================================================== system under test\nHarness_IsSuffix.main()\n\n====================================================== search started: 4/21/26, 7:31 PM\n",,,,,true,pass_kind=n/a; entry=isSuffix; wall_timeout_s=30.0
+JewelsInStones.numJewelsInStones,false,exit_code_-9,"JavaPathfinder core system v8.0 (rev 2bf98722c49a8149f9a6f68acb9edc6ba5cdd557) - (C) 2005-2014 United States Government. All rights reserved.\n\n\n====================================================== system under test\nHarness_JewelsInStones.main()\n\n====================================================== search started: 4/21/26, 7:31 PM\n",,,,,true,pass_kind=n/a; entry=numJewelsInStones; wall_timeout_s=30.0
+LCM.lcm,true,,,67481,11,81,3,false,pass_kind=A; entry=lcm
+LargestPerimeter,false,skipped,,,,,,false,no_rac_class
+LeapYear.isLeapYear,true,,,11096,2,9,2,false,pass_kind=A; entry=isLeapYear
+LeapYearSeq.isLeapYear,true,,,11060,2,9,2,false,pass_kind=A; entry=isLeapYear
+LinearSearch,false,skipped,,,,,,false,no_rac_class
+MatrixAdd,false,skipped,,,,,,false,no_rac_class
+MatrixMul,false,skipped,,,,,,false,no_rac_class
+MaxInArray.maxElementInArray,true,,,5129851,468,2801,5,false,pass_kind=A; entry=maxElementInArray
+MinInArray,false,skipped,,,,,,false,no_rac_class
+MoveZeroes.moveZeroes,true,,,18698567,469,2801,5,false,pass_kind=A; entry=moveZeroes
+MulLoop,false,skipped,,,,,,false,no_rac_class
+MulNested,false,skipped,,,,,,false,no_rac_class
+MyPower,false,skipped,,,,,,false,no_rac_class
+MySqrt.mySqrt,true,,,23388,4,9,2,false,pass_kind=A; entry=mySqrt
+NegAbs.negAbs,true,,,10730,2,9,2,false,pass_kind=A; entry=negAbs
+NextGreaterElem,false,skipped,,,,,,false,no_rac_class
+NotCommonFactor.notCommonFactor,false,NoUncaughtExceptionsProperty,"gov.nasa.jpf.vm.NoUncaughtExceptionsProperty\njava.lang.ArithmeticException: division by zero\n	at NotCommonFactor.notCommonFactor(NotCommonFactor.java:8)\n	at Harness_NotCommonFactor.main(Harness_NotCommonFactor.java:8)\n\n\n====================================================== trace #79\n------------------------------------------------------ transition #0 thread: 0\ngov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:""ROOT"" ,1/1,isCascaded:false}\n      [9169 insn w/o sources]\n------------------------------------------------------ transition #1 thread: 0\ngov.nasa.jpf.vm.choice.IntIntervalGenerator[id=...",209157,93,729,4,false,pass_kind=n/a; entry=notCommonFactor
+NotCommonFactorBranch.notCommonFactor,false,NoUncaughtExceptionsProperty,"gov.nasa.jpf.vm.NoUncaughtExceptionsProperty\njava.lang.ArithmeticException: division by zero\n	at NotCommonFactorBranch.notCommonFactor(NotCommonFactorBranch.java:8)\n	at Harness_NotCommonFactorBranch.main(Harness_NotCommonFactorBranch.java:8)\n\n\n====================================================== trace #79\n------------------------------------------------------ transition #0 thread: 0\ngov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:""ROOT"" ,1/1,isCascaded:false}\n      [9169 insn w/o sources]\n------------------------------------------------------ transition #1 thread: 0\ngov.nasa.jpf.vm.choice....",209733,93,729,4,false,pass_kind=n/a; entry=notCommonFactor
+NotCommonMultiple.NotCommonMultiple,false,NoUncaughtExceptionsProperty,      [461 insn w/o sources]\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/NotCommonMultiple/NotCommonMultiple.java:2: verify: JML precondition is false\n    /*@ public normal_behavior\n               ^\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/NotCommonMultiple/NotCommonMultiple.java:2: verify: JML precondition is false\n    /*@ public normal_behavior\n               ^\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrou...,224759,94,729,4,false,pass_kind=n/a; entry=NotCommonMultiple
+NumberOfCuts.numberOfCuts,true,,,12505,3,9,2,false,pass_kind=A; entry=numberOfCuts
+NumberOfCutsSeq.numberOfCuts,true,,,12532,3,9,2,false,pass_kind=A; entry=numberOfCuts
+OddEven.isEven,true,,,10718,2,9,2,false,pass_kind=A; entry=isEven
+PassPillow.passPillow,false,NoUncaughtExceptionsProperty,"====================================================== trace #8\n------------------------------------------------------ transition #0 thread: 0\ngov.nasa.jpf.vm.choice.ThreadChoiceFromSet {id:""ROOT"" ,1/1,isCascaded:false}\n      [9169 insn w/o sources]\n------------------------------------------------------ transition #1 thread: 0\ngov.nasa.jpf.vm.choice.IntIntervalGenerator[id=""verifyGetInt(II)"",isCascaded:false,-4..4,delta=+1,cur=1]\n      [7 insn w/o sources]\n------------------------------------------------------ transition #2 thread: 0\ngov.nasa.jpf.vm.choice.IntIntervalGenerator[id=""verifyGet...",48174,13,81,3,false,pass_kind=n/a; entry=passPillow
+PassPillowBranch.passPillow,false,NoUncaughtExceptionsProperty,"        ^\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PassPillowBranch/PassPillowBranch.java:10: verify: JML postcondition is false\n    public int passPillow(int n, int time) {\n               ^\n/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PassPillowBranch/PassPillowBranch.java:6: verify: Associated declaration: /Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/PassPillowBranch/PassPillowB...",55617,14,81,3,false,pass_kind=n/a; entry=passPillow
+Perimeter.Perimeter,true,,,10735,2,9,2,false,pass_kind=A; entry=Perimeter
+PowerOfFour.isPowerOfFour,true,,,10967,2,9,2,false,pass_kind=A; entry=isPowerOfFour
+PowerOfFourBranch.isPowerOfFour,true,,,10946,2,9,2,false,pass_kind=A; entry=isPowerOfFour
+PowerOfFourLoop.isPowerOfFour,true,,,14047,5,9,2,false,pass_kind=A; entry=isPowerOfFour
+PowerOfThree.isPowerOfThree,true,,,17081,6,9,2,false,pass_kind=A; entry=isPowerOfThree
+PowerOfTwo.isPowerOfTwo,true,,,10786,2,9,2,false,pass_kind=A; entry=isPowerOfTwo
+PowerOfTwoBranch.isPowerOfTwo,true,,,10805,2,9,2,false,pass_kind=A; entry=isPowerOfTwo
+PowerOfTwoLoop.isPowerOfTwo,true,,,15285,6,9,2,false,pass_kind=A; entry=isPowerOfTwo
+PrimeCheck.isPrime,true,,,18826,3,9,2,false,pass_kind=A; entry=isPrime
+PrimeNumbers,false,skipped,,,,,,false,no_rac_class
+ReLU.computeReLU,true,,,9947,2,5,2,false,pass_kind=A; entry=computeReLU
+ReLUSeq.computeReLU,true,,,9743,2,5,2,false,pass_kind=A; entry=computeReLU
+RepeatedChar,false,skipped,,,,,,false,no_rac_class
+RepeatedCharNested.repeatedChar,true,,,2616211,33,703,4,false,pass_kind=A; entry=repeatedChar
+RepeatedNumNested.repeatedNum,true,,,9710571,475,2801,6,false,pass_kind=A; entry=repeatedNum
+Return100.return100,true,,,24632,1,1,1,false,pass_kind=B; entry=return100
+Return100Nested,false,skipped,,,,,,false,no_rac_class
+ReverseArray.reverse,true,,,8337366,468,2801,5,false,pass_kind=A; entry=reverse
+ReverseString,false,skipped,,,,,,false,no_rac_class
+RotateArray,false,skipped,,,,,,false,no_rac_class
+SelectionSort.selectionSort,true,,,16262291,469,2801,5,false,pass_kind=A; entry=selectionSort
+SelectionSortDesc.selectionSort,true,,,17916229,472,2801,6,false,pass_kind=A; entry=selectionSort
+SetZero,false,skipped,,,,,,false,no_rac_class
+Smallest.Smallest,true,,,5594093,468,2801,5,false,pass_kind=A; entry=Smallest
+SmallestEvenMul.smallestEvenMultiple,true,,,11994,3,9,2,false,pass_kind=A; entry=smallestEvenMultiple
+SmallestEvenMulBranch.smallestEvenMultiple,true,,,15262,4,9,2,false,pass_kind=A; entry=smallestEvenMultiple
+SolveQuadraticEquation.solve,true,,,961752,94,729,4,false,pass_kind=A; entry=solve
+SortLibrary,false,skipped,,,,,,false,no_rac_class
+StrPalindrome,false,skipped,,,,,,false,no_rac_class
+SubLoop.subLoop,true,,,131911,15,81,3,false,pass_kind=A; entry=subLoop
+Swap.swap,false,exit_code_-9,"JavaPathfinder core system v8.0 (rev 2bf98722c49a8149f9a6f68acb9edc6ba5cdd557) - (C) 2005-2014 United States Government. All rights reserved.\n\n\n====================================================== system under test\nHarness_Swap.main()\n\n====================================================== search started: 4/21/26, 7:32 PM\n",,,,,true,pass_kind=n/a; entry=swap; wall_timeout_s=30.0
+Temperatures.convertTemperature,true,,,10294,2,5,2,false,pass_kind=A; entry=convertTemperature
+ThreeConsecutiveOdds.threeConsecutiveOdds,true,,,3622045,470,2801,5,false,pass_kind=A; entry=threeConsecutiveOdds
+TransposeMatrix,false,skipped,,,,,,false,no_rac_class
+TwoSum.twoSum,true,,,157534524,3269,25209,6,false,pass_kind=A; entry=twoSum
+UglyNum.isUgly,true,,,23091,5,9,2,false,pass_kind=A; entry=isUgly
+UglyNumLoop,false,skipped,,,,,,false,no_rac_class
+UniqueCharNested,false,skipped,,,,,,false,no_rac_class
+UniqueNumNested.uniqueNum,true,,,6939574,468,2801,5,false,pass_kind=A; entry=uniqueNum
+XOR.xor,true,,,9674,4,4,3,false,pass_kind=A; entry=xor

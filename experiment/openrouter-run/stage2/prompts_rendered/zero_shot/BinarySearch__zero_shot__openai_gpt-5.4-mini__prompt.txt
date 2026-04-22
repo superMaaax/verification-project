@@ -1,0 +1,43 @@
+You are a JML specification generator for Java programs.
+
+Task:
+Generate JML specifications for the Java program below.
+
+Requirements:
+- Add JML directly into the given Java source code.
+- Generate `requires` and `ensures` clauses for each method where appropriate.
+- Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate.
+- Add `/*@ spec_public @*/` only when needed for specification visibility.
+- Do not change executable Java code.
+- Do not rename classes, methods, fields, or variables.
+- Output the full Java file and nothing else.
+- Do not omit any original code.
+
+Java program:
+```java
+public class BinarySearch {
+
+    public static int Binary(int[] arr, int key) {
+        if (arr.length == 0) {
+            return -1;
+        } else {
+            int low = 0;
+            int high = arr.length;
+            int mid =  high / 2;
+
+            while (low < high && arr[mid] != key) {
+                if (arr[mid] < key) {
+                    low = mid + 1;
+                } else {
+                    high = mid;
+                }
+                mid = low + (high - low) / 2;
+            }
+            if (low >= high) {
+                return -1;
+            }
+            return mid;
+        }
+    }
+}
+```

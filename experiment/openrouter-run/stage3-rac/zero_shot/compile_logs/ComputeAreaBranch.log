@@ -1,0 +1,9 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/ComputeAreaBranch/ComputeAreaBranch.java:7: error: illegal start of type
+      @      - (\max(0, (\min(ax2, bx2) - \max(ax1, bx1)))
+                             ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/ComputeAreaBranch/ComputeAreaBranch.java:7: error: ')' expected
+      @      - (\max(0, (\min(ax2, bx2) - \max(ax1, bx1)))
+                              ^
+2 errors
+1 warning

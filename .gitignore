@@ -1,0 +1,28 @@
+# Secrets / local config
+.env
+
+# Tool symlinks (machine-local)
+.tools/
+
+# Zhong's full-run build outputs (not our work; reproducible)
+benchmark/SpecGenBench/common_*_jml_rac_javamath/
+benchmark/SpecGenBench/stage4_common_*_jpf_javamath/
+
+# OpenRouter run: build artifacts only (keep sources, logs, results)
+experiment/openrouter-run/stage3-rac/*/classes/
+experiment/openrouter-run/stage3-rac/*/jmlruntime.jar
+experiment/openrouter-run/stage4-jpf/*/generated/harness_build/
+
+# JPF traces are huge (single file up to 8M lines / total ~1.2 GB).
+# The CSV jpf_verification.csv keeps the per-method summary; traces stay local.
+experiment/openrouter-run/stage4-jpf/*/results/traces/
+
+# Smoke test outputs (superseded by full run)
+smoke-test/
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store

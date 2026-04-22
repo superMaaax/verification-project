@@ -1,0 +1,12 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/NextGreaterElem/NextGreaterElem.java:16: error: Expected loop specifications while in JML: assignable is not a loop specification keyword
+          @ assignable res[*];
+            ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/NextGreaterElem/NextGreaterElem.java:24: error: Expected loop specifications while in JML: assignable is not a loop specification keyword
+              @ assignable \nothing;
+                ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/zero_shot/NextGreaterElem/NextGreaterElem.java:34: error: Expected loop specifications while in JML: assignable is not a loop specification keyword
+              @ assignable \nothing;
+                ^
+3 errors
+1 warning

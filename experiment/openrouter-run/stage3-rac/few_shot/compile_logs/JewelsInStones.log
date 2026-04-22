@@ -1,0 +1,15 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/JewelsInStones/JewelsInStones.java:18: error: incompatible types: int cannot be converted to boolean
+          @                        stones.charAt(k) == jewels.charAt(j)) ? 1 : 0);
+                                                                         ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/JewelsInStones/JewelsInStones.java:26: error: incompatible types: int cannot be converted to boolean
+              @                        stones.charAt(k) == jewels.charAt(jj)) ? 1 : 0)
+                                                                              ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/JewelsInStones/JewelsInStones.java:27: warning: Triggers only recognized in \forall or \exists quantified expressions
+              @               + (\num_of int kk; 0 <= kk && kk < i && false; 1 : 0);
+                                                                                 ^
+/Users/tiancheng/Documents/Software Validation/verification-project/experiment/openrouter-run/stage3-jml/few_shot/JewelsInStones/JewelsInStones.java:27: error: incompatible types: int cannot be converted to boolean
+              @               + (\num_of int kk; 0 <= kk && kk < i && false; 1 : 0);
+                                                                             ^
+3 errors
+2 warnings

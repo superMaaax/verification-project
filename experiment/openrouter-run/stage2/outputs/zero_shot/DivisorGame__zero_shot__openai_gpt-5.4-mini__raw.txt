@@ -1,0 +1,10 @@
+public class DivisorGame {
+    /*@ public normal_behavior
+      @ requires n >= 1;
+      @ ensures \result <==> (n % 2 == 0);
+      @ assignable \nothing;
+      @*/
+    public boolean divisorGame(int n) {
+        return n % 2 == 0;
+    }
+}

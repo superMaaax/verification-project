@@ -1,0 +1,11 @@
+class SmallestEvenMulBranch {
+    //@ requires n != Integer.MIN_VALUE || n % 2 == 0;
+    //@ ensures (\result % 2 == 0) && (\result % n == 0);
+    //@ ensures (\result == n) <==> (n % 2 == 0);
+    public int smallestEvenMultiple(int n) {
+        if(n % 2 == 0) {
+            return n;
+        }
+        return 2 * n;
+    }
+}
