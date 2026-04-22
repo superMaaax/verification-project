@@ -1,0 +1,275 @@
+We need to generate JML specifications for the given Java program. The program is a simple BubbleSort class with a swap method and a bubbleSort method. We need to add JML comments directly into the source code. The requirements:
+
+- Add JML directly into the given Java source code.
+- Generate `requires` and `ensures` clauses for each method where appropriate.
+- Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate.
+- Add `/*@ spec_public @*/` only when needed for specification visibility.
+- Do not change executable Java code.
+- Do not rename classes, methods, fields, or variables.
+- Output the full Java file and nothing else.
+- Do not omit any original code.
+
+We need to output the complete Java file with JML annotations.
+
+First, let's analyze the methods.
+
+1. `swap(int x, int y, int array[])`: This method swaps elements at indices x and y in the array. It takes three parameters: x, y, and array. It modifies the array. We need to specify that the array is not null, and indices are within bounds. Also, we need to ensure that after swap, the elements at x and y are exchanged, and all other elements remain the same.
+
+2. `bubbleSort(int arr[])`: This method sorts the array in ascending order using bubble sort. It returns the sorted array. We need to specify that the array is not null, and after sorting, the array is sorted in non-decreasing order. Also, we need to specify that the method does not change the length of the array. Additionally, we need to specify the loop specifications for the two nested loops.
+
+We need to add JML comments. In JML, we use `//@` for single-line annotations or `/*@ ... @*/` for block annotations. Since we are inserting into the source code, we should use block comments for specifications to avoid interfering with the code structure. However, note that the original code does not have any JML comments. We need to add them.
+
+We must be careful to not change the executable code. So we only add comments.
+
+Let's think about the specifications.
+
+For the `swap` method:
+
+- We need to specify that the array is not null, and x and y are valid indices. Since the method is void and modifies the array, we need to specify the behavior.
+
+In JML, for methods that modify objects, we use `requires` and `ensures` clauses. Also, we might use `assignable` to specify what can be modified. However, the requirement says to add `requires` and `ensures` clauses for each method where appropriate. It does not explicitly require `assignable`, but we might include it for completeness. However, note that the requirement says to add `requires` and `ensures` clauses for each method where appropriate. We might also add `assignable` if needed, but it is not explicitly required. However, for the swap method, we know that it modifies the array at indices x and y. We can specify that the array is not null, and x and y are between 0 and array.length-1. Also, we can specify that after swap, the elements at x and y are swapped.
+
+We can write:
+
+/*@
+  requires array != null;
+  requires 0 <= x && x < array.length;
+  requires 0 <= y && y < array.length;
+  ensures array[x] == \old(array[y]);
+  ensures array[y] == \old(array[x]);
+  ensures \forall int i; i != x && i != y; array[i] == \old(array[i]);
+@*/
+
+But note: the method takes parameters x, y, and array. We need to specify the parameters in the requires and ensures. Also, note that the method does not return anything.
+
+We might also specify that the method does not throw an exception, but that's implicit.
+
+Now, for the `bubbleSort` method:
+
+- We need to specify that the array is not null.
+- We need to specify that after sorting, the array is sorted in non-decreasing order.
+- We might also specify that the method returns the same array (the sorted array). Since the return type is int[], we can specify that the returned array is the same as the input array (after sorting). However, note that the method returns the arr parameter, so we can specify that the returned value is arr.
+
+We can write:
+
+/*@
+  requires arr != null;
+  ensures \forall int i; 0 <= i && i < arr.length-1; arr[i] <= arr[i+1];
+  ensures arr.length == \old(arr.length);
+@*/
+
+But note: we also need to specify that the method does not change the length of the array, which is already covered by the ensures that the length is the same.
+
+Now, for the loops in bubbleSort: we have two nested loops.
+
+The outer loop: for (int i = 0; i < n-1; i++)
+
+We need to specify a loop specification. In JML, we use `loop_invariant`, `maintains`, and `decreases` for loops. However, note that the requirement says to generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate. In JML, the loop specification is written as a comment before the loop, and it includes `loop_invariant`, `maintains` (which is the same as `loop_invariant` in some versions, but in JML we use `loop_invariant` and `decreases`). Actually, in JML, we use `loop_invariant` and `decreases`. The requirement says `maintaining` and `decreases`, which are keywords in JML? Actually, in JML, the keywords are `loop_invariant` and `decreases`. However, the requirement says `maintaining` and `decreases`. In some specification languages, `maintaining` is used, but in JML it is `loop_invariant`. But note: the requirement says "Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate." So we should use `maintaining` and `decreases`? Actually, in JML, the keyword for loop invariant is `loop_invariant`. However, the requirement says `maintaining`, which might be a mistake. But let's look at the requirement: "Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate." It might be that they want us to use `maintaining` and `decreases` as in some other specification language, but since we are doing JML, we should use the JML keywords. However, note that the requirement says "JML specification generator", so we should use JML syntax. In JML, the loop specification is done with `loop_invariant` and `decreases`. But the requirement says `maintaining` and `decreases`. Maybe they want us to use `maintaining` as the loop invariant? Actually, in JML, the loop invariant is specified with `loop_invariant`. However, there is also a keyword `maintaining` in some versions? I'm not sure. Let's check: In JML, the loop specification is written as:
+
+/*@
+  loop_invariant <expression>;
+  decreases <expression>;
+@*/
+
+So we should use `loop_invariant` and `decreases`. But the requirement says `maintaining` and `decreases`. Maybe they want us to use `maintaining` as the loop invariant? But note that the requirement says "such as `maintaining` and `decreases`", so they are giving examples. We can use `loop_invariant` and `decreases` because that's the JML way. However, to be safe, let's use the JML keywords: `loop_invariant` and `decreases`. But note: the requirement says `maintaining`, which might be a typo. Alternatively, we can use `maintaining` if we are using a tool that supports it, but since we are generating JML, we should use the standard JML keywords.
+
+Let's read the requirement again: "Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate."
+
+It says "such as", so we can choose. But note that in JML, the loop invariant is specified with `loop_invariant`. However, there is also a keyword `maintaining` in JML? Let me recall: In JML, the loop specification is done with `loop_invariant` and `decreases`. There is no `maintaining` keyword. So we should use `loop_invariant` and `decreases`.
+
+But note: the requirement says `maintaining`, which might be a mistake. Alternatively, we can use `maintaining` if we are using a tool that supports it, but since we are generating JML, we should use the standard JML keywords.
+
+Given that the requirement says "JML specification generator", we should use JML syntax. So we will use `loop_invariant` and `decreases`.
+
+Now, let's design the loop specifications for the two loops.
+
+First, the outer loop: for (int i = 0; i < n-1; i++)
+
+We need to come up with a loop invariant. The loop invariant should hold at the beginning of each iteration. In bubble sort, we know that after i iterations, the last i elements are sorted and are the largest i elements. So we can specify:
+
+- The array is partitioned into two parts: the sorted part (the last i elements) and the unsorted part (the first n-i elements).
+- The sorted part is sorted in non-decreasing order.
+- The sorted part contains the largest i elements.
+
+But note: the loop invariant must be such that when the loop terminates, we can conclude that the array is sorted.
+
+We also need to specify the decreases clause. The decreases clause should be a non-negative integer that decreases in each iteration. For the outer loop, we can use (n-1-i) or something similar.
+
+Let's define:
+
+Let n = arr.length.
+
+Loop invariant for outer loop:
+
+/*@
+  loop_invariant 0 <= i && i <= n-1;
+  loop_invariant \forall int k; n-i <= k && k < n-1; arr[k] <= arr[k+1];
+  loop_invariant \forall int p; 0 <= p && p < n-i-1; arr[p] <= arr[n-i];
+@*/
+
+But note: the loop invariant must be such that we can prove that the array is sorted at the end. Actually, we don't need to be too detailed. We can use a simpler loop invariant:
+
+We can say that the array is sorted in the last i elements. But note that the loop variable i starts at 0 and goes to n-1. So at the beginning of the loop (i=0), the last 0 elements are sorted (vacuously true). At the end (i=n-1), the last n-1 elements are sorted, but we need to sort all n elements. Actually, the outer loop runs n-1 times, so at the end, we have sorted n-1 elements, but the last element is already in place. So we can say that after the outer loop, the entire array is sorted.
+
+We can use:
+
+loop_invariant: 0 <= i && i <= n-1;
+
+But we also need to relate to the sorting. We can say that the last i elements are sorted and are the largest i elements. However, that might be complicated.
+
+Alternatively, we can use a loop invariant that says that after i iterations, the array is sorted in the last i elements. But note that the inner loop is doing the bubbling. We might not need to specify the entire sorting invariant in the outer loop if we specify the inner loop properly. However, we need to specify both loops.
+
+Let's think about the inner loop. The inner loop runs for j from 0 to n-i-2. In each iteration, it swaps adjacent elements if they are out of order. This bubbles the largest element to the end.
+
+We can specify the inner loop invariant:
+
+At the beginning of the inner loop (for a fixed i), we have that the array is sorted in the last i elements (from the outer loop invariant) and the inner loop is going to sort the first n-i elements by bubbling the largest to the end.
+
+We can specify:
+
+loop_invariant: 0 <= j && j <= n-i-1;
+
+But we also need to specify that the last i elements are sorted and are the largest i elements, and that the first j elements are sorted? Actually, the inner loop is moving the largest element to the end. So we can say that after j iterations, the first j elements are the smallest j elements? Not exactly.
+
+We can say that the inner loop is sorting the array from index 0 to n-i-1. After the inner loop, the element at index n-i-1 is the largest in the unsorted part.
+
+So the inner loop invariant can be:
+
+/*@
+  loop_invariant 0 <= j && j <= n-i-1;
+  loop_invariant \forall int k; n-i-1 <= k && k < n-1; arr[k] <= arr[k+1]; // the last i elements are sorted? Actually, we are building the sorted part at the end.
+  loop_invariant \forall int k; 0 <= k && k < j; arr[k] <= arr[k+1]; // the first j elements are sorted? But note that we are swapping, so we might not have that.
+@*/
+
+Actually, in bubble sort, the inner loop does not guarantee that the first j elements are sorted. It only guarantees that after the inner loop, the element at index n-i-1 is the largest in the unsorted part.
+
+We can use a simpler loop invariant: the inner loop is sorting the array in the sense that it is moving the largest element to the end. But we don't need to specify too much. We can just specify that the array is sorted in the last i elements (from the outer loop) and that the inner loop is decreasing the unsorted part.
+
+Given the complexity, we can use a simpler approach. We can specify the loop invariants in a way that is easy to understand and that leads to the final sorted array.
+
+We can specify:
+
+For the outer loop:
+
+/*@
+  loop_invariant 0 <= i && i <= n-1;
+  loop_invariant \forall int k; n-i <= k && k < n-1; arr[k] <= arr[k+1];
+@*/
+
+For the inner loop:
+
+/*@
+  loop_invariant 0 <= j && j <= n-i-1;
+  loop_invariant \forall int k; n-i-1 <= k && k < n-1; arr[k] <= arr[k+1];
+@*/
+
+But note: the inner loop invariant must also specify that the last i elements are sorted? Actually, the outer loop invariant says that the last i elements are sorted. The inner loop is going to add one more sorted element at the end. So after the inner loop, the last i+1 elements are sorted. So we can say that at the beginning of the inner loop, the last i elements are sorted, and at the end, the last i+1 elements are sorted.
+
+We can write:
+
+Outer loop invariant:
+
+/*@
+  loop_invariant 0 <= i && i <= n-1;
+  loop_invariant \forall int k; n-i <= k && k < n-1; arr[k] <= arr[k+1];
+@*/
+
+Inner loop invariant:
+
+/*@
+  loop_invariant 0 <= j && j <= n-i-1;
+  loop_invariant \forall int k; n-i-1 <= k && k < n-1; arr[k] <= arr[k+1];
+@*/
+
+But note: the inner loop invariant does not specify the state of the first n-i-1 elements. However, we can add a condition that the largest element in the unsorted part is at index n-i-1. But that might be too detailed.
+
+Alternatively, we can use a decreases clause for both loops.
+
+For the outer loop, we can use (n-1-i) as the decreases clause.
+
+For the inner loop, we can use (n-i-1-j) as the decreases clause.
+
+Now, let's write the specifications.
+
+We need to add the specifications as comments in the code.
+
+We must be careful to not change the code. We only add comments.
+
+Let's write the code with JML annotations.
+
+We'll start with the class declaration.
+
+We'll add a JML comment for the class, but it's not necessary. We can add a class invariant if needed, but the requirement does not require it.
+
+Now, for the swap method:
+
+We add a JML comment before the method.
+
+We'll write:
+
+/*@
+  requires array != null;
+  requires 0 <= x && x < array.length;
+  requires 0 <= y && y < array.length;
+  ensures array[x] == \old(array[y]);
+  ensures array[y] == \old(array[x]);
+  ensures \forall int i; i != x && i != y; array[i] == \old(array[i]);
+@*/
+
+Now, for the bubbleSort method:
+
+We add a JML comment before the method.
+
+We'll write:
+
+/*@
+  requires arr != null;
+  ensures \forall int i; 0 <= i && i < arr.length-1; arr[i] <= arr[i+1];
+  ensures arr.length == \old(arr.length);
+@*/
+
+But note: we also need to specify the loop specifications. We add them before the loops.
+
+For the outer loop:
+
+We'll add:
+
+/*@
+  loop_invariant 0 <= i && i <= n-1;
+  loop_invariant \forall int k; n-i <= k && k < n-1; arr[k] <= arr[k+1];
+  decreases n-1-i;
+@*/
+
+For the inner loop:
+
+We'll add:
+
+/*@
+  loop_invariant 0 <= j && j <= n-i-1;
+  loop_invariant \forall int k; n-i-1 <= k && k < n-1; arr[k] <= arr[k+1];
+  decreases n-i-1-j;
+@*/
+
+But note: the inner loop invariant must also specify that the last i elements are sorted? Actually, the outer loop invariant says that the last i elements are sorted. The inner loop is going to sort the first n-i elements, but we don't need to specify that in the inner loop invariant if we are only specifying the inner loop by itself. However, we are specifying the inner loop in the context of the outer loop. So we can use the above.
+
+Alternatively, we can use a more precise loop invariant. But let's stick to the above for simplicity.
+
+Now, let's write the complete code.
+
+We'll insert the JML comments as block comments.
+
+We must be careful with the placement: the JML comment for the method should be placed before the method, and the JML comment for the loop should be placed before the loop.
+
+Let's write the code accordingly.
+
+We'll write:
+
+public class BubbleSort { 
+    
+    /*@
+      requires array != null;
+      requires 0 <= x && x < array.length;
+      requires 0 <= y && y < array.length;
+      ensures array[x] == \old(array[y]);
+      ensures array[y] == \old(array[x]);
+      ensures \forall int

@@ -1,0 +1,45 @@
+We need to generate JML specifications for the given Java program. The program is:
+
+```java
+public class UniqueNumNested {
+
+    public static int uniqueNum(int[] arr) {
+        for (int i = 0; i < arr.length; ++i) {
+            int j = 0;
+            while(j < arr.length) {
+                if(i != j && arr[i] == arr[j])
+                    break;
+                j++;
+            }
+            if(j == arr.length)
+                return i;
+        }
+        return -1;
+    }
+    
+}
+```
+
+We need to add JML comments: requires, ensures, loop specifications (maintaining, decreases) for each loop. Also spec_public if needed for specification visibility.
+
+We need to consider the semantics: The method returns the index i such that arr[i] is unique (i.e., no other element equals arr[i] except at index i). If no unique element, returns -1.
+
+We need to add JML for the method: requires? Possibly non-null array, but not required. Usually JML requires arr != null. So we can add //@ requires arr != null;.
+
+Ensures: The method returns an index i such that either i == -1 and no unique element exists, or i is a valid index and arr[i] is unique. Also ensures that if result != -1 then for all j with 0 <= j < arr.length and j != i, arr[i] != arr[j]. Also ensures that if result == -1 then for all i, there exists j != i such that arr[i] == arr[j] (i.e., no unique element). But we can express more elegantly: ensures \result == -1 ==> (\forall int i; 0 <= i && i < arr.length; (\exists int j; 0 <= j && j < arr.length && j != i; arr[i] == arr[j])); ensures -1 < \result ==> (\forall int j; 0 <= j && j < arr.length && j != \result; arr[\result] != arr[j]);
+
+But we need to be careful: The ensures clause should reflect the method's behavior.
+
+We also need to add loop specifications for the outer for loop and inner while loop.
+
+The outer for loop is essentially a for loop with index i from 0 to arr.length - 1. In JML, we can treat it as a while loop: for (int i = 0; i < arr.length; ++i) { ... } can be expressed as while (i < arr.length) { ... i++; }. But we can also annotate the for loop directly with //@ for loop.
+
+In JML, we can use //@ loop invariant for loops. The syntax is //@ maintaining ...; and //@ decreases ...; for loops. The standard is to use //@ loop invariant (maintaining) and //@ decreases for loops. However, the examples show using //@ maintaining and //@ decreases for while loops. For for loops, we can also use //@ maintaining and //@ decreases, but we need to ensure the loop variable is updated appropriately.
+
+The problem statement says: "Generate loop specifications such as maintaining and decreases for each loop where appropriate." So we need to add loop invariants for each loop. The outer for loop is a loop, and the inner while loop is also a loop.
+
+We need to decide what invariants to maintain.
+
+For the outer for loop: We have i being the current index being examined for uniqueness. The loop iterates over i from 0 to arr.length. At each iteration, we check if arr[i] is unique by scanning all j. The loop invariant should capture that we have not yet found a unique element (i.e., we haven't returned). But the method returns inside the loop when found. So the loop invariant might be something like: "i is the next index to check, and all previous indices (0 <= k < i) do not contain a unique element." But we can also express that we are searching for a unique element among indices i to arr.length-1. However, the loop invariant is only needed for the loop to be correct; we can also express that i is within bounds.
+
+But we need to be careful: The outer for loop is not a while loop, but we can treat it as a loop with a loop invariant. In JML, we can use //@ maintaining ...; for a for loop as well. The invariant should hold before the loop and after each iteration. The invariant can be something like: "0 <= i && i <= arr.length". But also we might want to maintain that for all k in [0, i), arr[k] is not unique. However, the method returns early when found, so the invariant might be that we haven't found a unique element yet, i.e., for all k in [0, i), there exists some j != k such that arr[k] == arr[j]. But that might be too strong for the invariant because

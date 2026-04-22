@@ -1,0 +1,132 @@
+We need to generate JML specifications for the given Java program. The program is:
+
+```java
+class RotateArray {
+    public static void rotate(int[] nums, int k) {
+        int n = nums.length;
+        int[] newArr = new int[n];
+        for (int i = 0; i < n; ++i) {
+            newArr[(i + k) % n] = nums[i];
+        }
+        System.arraycopy(newArr, 0, nums, 0, n);
+    }
+}
+```
+
+We need to add JML comments: requires and ensures clauses for each method, loop specifications for loops (maintaining, decreases). Also spec_public if needed for specification visibility.
+
+We need to output the full Java file with JML annotations.
+
+We need to consider the semantics: rotate array to the right by k steps? The code: newArr[(i + k) % n] = nums[i]; So for each i, it puts nums[i] at position (i + k) mod n. That effectively rotates the array to the right by k positions (or left? Let's check: Suppose n=5, nums = [0,1,2,3,4], k=2. Then newArr[(i+2)%5] = nums[i]. So newArr[2]=0, newArr[3]=1, newArr[4]=2, newArr[0]=3, newArr[1]=4. Then copy back: nums becomes [3,4,0,1,2]. That's a right rotation by k (i.e., each element moves to index (i+k)%n). So the method rotates the array to the right by k steps.
+
+We need to specify that the method modifies the input array nums such that after rotation, nums[i] = old nums[(i - k) mod n] (or something). Usually, for a right rotation by k, the element at index i after rotation is the element that was at index (i - k) mod n before rotation. Equivalent: nums[i] = old nums[(i - k + n) % n] for all i.
+
+We need to generate requires and ensures. The method is static void, takes int[] nums, int k. We need to ensure that k is non-negative? The code doesn't restrict k, but we can assume k may be any integer (including negative?). The code uses (i + k) % n, which in Java for negative k yields negative remainder? Actually in Java, the remainder operator % can produce negative results if the dividend is negative. However, i is non-negative, n is positive, but k could be negative. If k is negative, then (i + k) may be negative, leading to negative index for array access, causing ArrayIndexOutOfBoundsException. So we need to restrict k to be non-negative? Or at least ensure that k % n is non-negative? Usually rotation is defined for any integer k, but we can restrict k >= 0. However, the problem statement does not specify constraints. We can assume typical usage: k >= 0. But we can also handle negative k by adjusting to k % n. But the code as given will fail for negative k. So we might want to specify that k >= 0. However, the problem might not require us to add such constraints; we just need to add JML specs that are appropriate. Usually for rotation, we require k >= 0 and k <= n maybe? Actually if k >= n, we can still rotate by k % n steps. The code uses (i + k) % n, which works for any integer k (including negative) as long as the result is not negative? Actually if k is negative, i + k may be negative, and (negative) % n yields negative in Java, which is not allowed for array index. So we should restrict k to be non-negative. But we can also specify that k may be any integer, but the effect is defined for k >= 0. The ensures clause can express the relationship.
+
+We also need to consider that the method modifies nums. So we need to specify that after rotation, the array is rotated right by k positions, i.e., for all i, nums[i] = \old(nums)[(i - k) mod n]. But we need to be careful with mod for negative values. Usually we define (i - k + n) % n. So we can write: /*@ ensures (\forall int i; 0 <= i && i < n; nums[i] == \old(nums)[(i - k) % n]) */ but need to adjust for negative k. Since we may restrict k >= 0, we can just do (i - k + n) % n. But we can also use \old(nums) and (i - k + n) % n.
+
+Better: ensure that after rotation, the array is rotated right by k positions: for all i in [0,n-1], nums[i] = \old(nums)[(i - k + n) % n]. Also we need to ensure that the length of nums remains unchanged.
+
+We also need to consider that the method may be called with k > n. In that case, the rotation is effectively by k % n. The code uses (i + k) % n, which yields correct behavior for any integer k (including > n). So we can specify that the result is rotation by k mod n. But we can also restrict k to be within [0,n). Usually we can say k >= 0. But we can also say k may be any integer, but the effect is as if rotated by k % n steps. However, the ensures clause can reflect that.
+
+We also need to consider the case where n == 0 (empty array). The code will create newArr of length 0, and then System.arraycopy will do nothing. So we need to handle that. The requires clause can allow any nums (including empty). The ensures clause should hold for empty array as well: if n == 0, then nums remains empty (unchanged). The formula with mod n would cause division by zero. So we need to handle that case separately. Usually we can add condition: if n > 0, then the rotation holds; else unchanged. But we can also incorporate the condition in the ensures clause using \old(n) > 0.
+
+Better: Write ensures clause as: /*@ ensures nums.length == \old(nums.length) && (nums.length > 0 ==> (\forall int i; 0 <= i && i < nums.length; nums[i] == \old(nums)[(i - k) % nums.length])) */. However, we need to be careful with mod for negative k. If we restrict k >= 0, we can do (i - k + nums.length) % nums.length. But we can also use \old(nums) and (i - k + nums.length) % nums.length. But if k may be negative, we need to adjust. The problem does not specify constraints, but typical rotation functions accept any integer k. However, the code will break for negative k. So we might want to restrict k to be non-negative. The problem statement does not require us to add constraints beyond what is appropriate. Usually for such a method, we would require k >= 0. But we can also require k <= Integer.MAX_VALUE? Not needed.
+
+Better to add a requires clause: /*@ requires k >= 0; */. But is that appropriate? The code does not check for negative k, but we can assume that the caller will pass non-negative k. However, the problem might want us to generate specs that reflect the code's behavior for any integer k, but we might need to restrict k to avoid runtime errors. Usually in JML, we would specify the precondition that k is non-negative, because otherwise the method may throw an exception. But the problem statement does not specify that we need to handle negative k. The code uses modulo operation with negative numbers, which yields negative indices, causing out-of-bounds. So we might want to restrict k to be non-negative. However, the problem might not require us to add precondition constraints beyond what is necessary for correctness. The typical approach is to specify that k is any integer, but the effect is defined for any integer, but the code may fail for negative k. But we can specify that k may be any integer, but the ensures clause will hold only if k >= 0? Actually we can specify that after rotation, the array is rotated right by k positions modulo n. But if k is negative, the code will produce wrong result. So we should restrict k to be non-negative. The problem does not specify any constraints, but we can add a requires clause for k >= 0. However, the problem might want us to generate specs that reflect the code's behavior exactly, which is to rotate right by k steps for any integer k (including negative?), but the code will break for negative k. So maybe we should not add a precondition, but we can add a ensures clause that describes the result for any integer k, but we need to handle the case where k may be negative? Actually we can define the rotation for any integer k as moving elements to the right by k positions, where negative k means left rotation. But the code's implementation uses (i + k) % n, which for negative k yields negative indices, causing out-of-bounds. So we cannot guarantee the ensures clause for negative k. So we should restrict k to be non-negative. Usually in JML we would specify the precondition that k >= 0, because otherwise the method's behavior is undefined (may throw exception). So we can add a requires clause: /*@ requires k >= 0; */.
+
+But we also need to consider that k may be larger than n. The code uses modulo, so it's fine. But we might also restrict k <= Integer.MAX_VALUE? Not needed.
+
+We also need to consider that the method modifies nums. So we need to specify that after rotation, the array is rotated. The ensures clause should reflect that.
+
+We also need to add loop specifications for the for loop. The for loop is:
+
+```
+for (int i = 0; i < n; ++i) {
+    newArr[(i + k) % n] = nums[i];
+}
+```
+
+We need to add a /*@ maintaining */ and /*@ decreases */ clause for this loop. The loop iterates i from 0 to n-1. The loop invariant should capture that the assignment is done for each i, but we can also capture that newArr is being filled. However, we can just add a loop invariant that says something about the state of newArr after each iteration. Usually we can maintain that for all j in [0,i], newArr[(j + k) % n] = nums[j]. But we also need to ensure that the loop variable i is decreasing? Actually we need a decreases clause for the loop. The loop variable i is increasing, so we cannot use i as decreases. Usually we can use a separate counter that decreases, but we can also use the loop condition to define decreases: we can say decreases n - i, but that is not guaranteed to be non-negative? Actually we can use decreases n - i, which is non-negative because i < n. But we need to ensure that the decreases measure is non-negative and decreases each iteration. So we can add: /*@ decreases n - i; */. However, we need to ensure that the decreases clause is placed correctly. In JML, the decreases clause is placed before the loop or after the maintaining? The example shows they placed decreases after maintaining. Actually in the example, they placed maintaining and decreases in separate lines. In Example 1, they placed:
+
+```
+//@ decreases n;
+//@ maintaining sum == x + y - n && 0 <= n;
+while (n > 0) {
+```
+
+In Example 2, they placed:
+
+```
+//@ maintaining 0 <= index && index <= a.length;
+//@ maintaining 0 <= smallest && smallest < a.length;
+//@ maintaining (\forall int i; 0 <= i && i < index; a[smallest] <= a[i]);
+//@ decreases a.length - index;
+while (a.length - index > 0) {
+```
+
+So they placed maintaining and decreases in any order, but they placed them before the while. For a for loop, we can also place them before the for. But we need to be careful: In JML, we can place loop specifications before the loop statement. For a for loop, we can write:
+
+```
+//@ maintaining ...
+//@ decreases ...
+for (int i = 0; i < n; ++i) {
+    ...
+}
+```
+
+But we need to ensure that the maintaining clause is correct for the loop. Usually we need to maintain a condition that holds at the beginning of each iteration. For a for loop, the loop variable is initialized before the loop. The loop condition is checked before each iteration. So we can place the loop invariant after the for but before the loop body? Actually typical JML usage is to place the loop invariant before the loop statement, like:
+
+```
+//@ maintaining invariant;
+//@ decreases measure;
+for (int i = 0; i < n; ++i) {
+    //@ maintaining invariant; // optional inside
+    ...
+}
+```
+
+But we can also place the invariant inside the loop. However, the example shows they placed them before the while. For a for loop, we can also place them before the for. But we need to ensure that the invariant is correct for the loop variable. Usually we need to include the loop variable in the invariant. For the for loop, we can maintain that for all j in [0,i), newArr[(j + k) % n] = nums[j]. At the start of the loop, i = 0, so the condition holds vacuously. Then each iteration sets newArr[(i + k) % n] = nums[i] and increments i. So after each iteration, the condition holds for the new i. So we can maintain that condition.
+
+Thus we can add:
+
+```
+//@ maintaining (\forall int j; 0 <= j && j < i; newArr[(j + k) % n] == nums[j]);
+//@ decreases n - i;
+for (int i = 0; i < n; ++i) {
+    newArr[(i + k) % n] = nums[i];
+}
+```
+
+But we also need to ensure that the index (i + k) % n is within bounds. Since i ranges from 0 to n-1, and k >= 0, (i + k) % n will be in [0,n-1]. So it's safe. However, if k >= n, it's still safe.
+
+We also need to consider that the loop variable i is declared inside the for. The maintaining clause can refer to i, but we need to ensure that i is in scope. In JML, we can refer to the loop variable inside the maintaining clause, but we need to be careful about the order. Usually we can write the maintaining clause after the for but before the loop body? Actually typical usage is to place the loop invariant before the loop, but we can also place it after the for but before the body? Let's check typical JML syntax. In JML, loop invariants are placed before the loop statement, and they are preceded by //@ maintaining. For a for loop, we can write:
+
+```
+//@ maintaining invariant;
+for (int i = 0; i < n; ++i) {
+    //@ maintaining invariant; // optional
+    ...
+}
+```
+
+But the invariant must hold at the start of each iteration. The loop variable i is initialized before the loop, but the condition is checked before each iteration. So we can place the invariant before the for, but we need to include i in the invariant. However, i is not yet defined at that point. Usually we can refer to i in the invariant if we define it in the for statement? Actually we can write the invariant after the for but before the loop body? Let's check typical JML examples. In the example for AddLoop, they placed the maintaining and decreases before the while, and they used the variable n defined before the while. For a for loop, we can also place the invariant before the for, but we need to refer to the loop variable. However, the loop variable is declared in the for statement, so we cannot refer to it before it's declared. But we can refer to it in the invariant if we use a different variable name? Actually we can use the loop variable in the invariant if we declare it before the loop, but in the for loop, the variable is declared in the for. So we cannot refer to it before it's declared. However, we can place the invariant after the for but before the loop body? In JML, the loop invariant is placed before the loop statement, but we can also place it after the for but before the loop body? Let's check typical syntax. In JML, we can write:
+
+```
+//@ maintaining invariant;
+for (int i = 0; i < n; ++i) {
+    //@ maintaining invariant; // optional inside
+    ...
+}
+```
+
+But the invariant must hold at the start of each iteration. At the point before the for, i is not yet defined. However, we can still write an invariant that refers to i, but we need to ensure that i is in scope. In JML, the loop invariant is evaluated after the loop variable is initialized but before the condition is checked. Actually the loop invariant is considered to hold at the beginning of each iteration, after the initialization of the loop variable but before the condition. So we can refer to i in the invariant. However, we cannot refer to i before it's declared. So we need to place the invariant after the for statement but before the loop body? But the for statement includes the initialization, condition, and update. In JML, we can place the loop invariant after the for statement but before the loop body? Let's check typical usage. In the example for AddLoop, they used a while loop, which is straightforward. For a for loop, we can also place the invariant before the for, but we need to refer to the loop variable. However, we can also use a different variable name for the loop counter and refer to it in the invariant. But we cannot refer to the loop variable before it's declared. So we might need to declare the loop variable before the for loop, then use it in the for. But the original code declares the loop variable inside the for. We cannot change that. So we need to find a way to write the invariant that does not require referencing the loop variable before it's declared. Actually we can write the invariant after the for but before the loop body, but we need to check the syntax. In JML, we can place the loop invariant after the for statement but before the loop body, like:
+
+```
+for (int i = 0; i < n; ++i) {
+    //@ maintaining invariant;
+    ...
+}
+```
+
+But the example shows they placed the invariant before the while, not inside. However, we can place the invariant inside the loop as a maintaining clause at the start of each iteration. Actually in JML, we can place the loop invariant either before the loop or at the start of the loop body. But typical usage is to place it before the loop. However, we can also place it inside the loop as a statement: //@ maintaining invariant; but that would be a loop invariant that must hold at that point each iteration. But we need to ensure that the invariant holds at the beginning of each iteration, not just at the start of the body. Usually we place it before the loop

@@ -1,0 +1,413 @@
+I need to add JML specifications to this Java program. Let me analyze the code:
+
+1. The class `LeapYear` has a single method `isLeapYear(int year)` that determines if a year is a leap year.
+
+2. The logic for leap year is:
+   - If year is divisible by 4, it might be a leap year
+   - If it's also divisible by 100, it's NOT a leap year UNLESS
+   - It's divisible by 400, in which case it IS a leap year
+   - Otherwise, if divisible by 4 but not 100, it's a leap year
+
+Let me add JML specifications:
+
+For the class:
+- I should add a class-level specification if needed
+
+For the method `isLeapYear`:
+- **Requires clause**: The year should typically be a positive integer (years start from 1 or 0, but in practice positive). I'll use `year > 0` or `year >= 0`. Actually, looking at the logic, year 0 would be divisible by 4, 100, and 400, so it would be considered a leap year. But typically years are positive. Let me use `year > 0` or `year >= 0`. I'll go with `year > 0` as it's more common, or actually, let me check if year 0 should be allowed. In the Gregorian calendar, year 0 doesn't exist traditionally, but in computational contexts it might. I'll use `year > 0` to be safe.
+
+Actually, looking at the code more carefully, there's no explicit constraint on year in the code, so I should probably just specify that it's an integer. But for a leap year calculation, year should typically be positive. Let me use `year > 0`.
+
+- **Ensures clause**: The method returns a boolean indicating whether the year is a leap year.
+
+The specification for a leap year:
+- A year is a leap year if:
+  - It's divisible by 400, OR
+  - It's divisible by 4 but NOT by 100
+
+So the ensures clause should express this.
+
+Let me write the JML:
+
+```java
+public class LeapYear {
+    
+    /*@
+      @ public model non_null int year;
+      @*/
+    
+    public /*@ pure @*/ boolean isLeapYear(int year) {
+        boolean leap = false;
+         
+        if (year % 4 == 0)
+        {
+            if ( year % 100 == 0)
+            {
+                if ( year % 400 == 0)
+                    leap = true;
+                else
+                    leap = false;
+            }
+            else
+                leap = true;
+        }
+        else
+            leap = false;
+	
+	return leap;
+   }
+}
+```
+
+Wait, I need to think about the ensures clause more carefully. The method should ensure that:
+- `leap == true` if and only if the year is a leap year according to the Gregorian calendar rules.
+
+So:
+```java
+ensures \result == true <==> (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0));
+```
+
+Or equivalently:
+```java
+ensures \result == (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0));
+```
+
+Also, I should add the `pure` modifier since the method doesn't have side effects.
+
+Let me also consider if I need `spec_public` for any fields. There are no fields in this class, so I don't need to add any `spec_public` annotations.
+
+Let me also check if I need to add anything for the nested ifs. The code structure is:
+- if (year % 4 == 0)
+  - if (year % 100 == 0)
+    - if (year % 400 == 0)
+      leap = true
+    else
+      leap = false
+  else
+    leap = true
+else
+  leap = false
+
+This is a straightforward leap year calculation. No loops, so no need for maintaining/decreases clauses.
+
+Final version:
+
+```java
+public class LeapYear {
+    
+    /*@
+      @ requires year > 0;
+      @ ensures \result == (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0));
+      @*/
+    public /*@ pure @*/ boolean isLeapYear(int year) {
+        boolean leap = false;
+         
+        if (year % 4 == 0)
+        {
+            if ( year % 100 == 0)
+            {
+                if ( year % 400 == 0)
+                    leap = true;
+                else
+                    leap = false;
+            }
+            else
+                leap = true;
+        }
+        else
+            leap = false;
+	
+	return leap;
+   }
+}
+```
+
+Wait, I should double-check the requires clause. Should it be `year >= 0` or `year > 0`? In the proleptic Gregorian calendar, year 0 exists and is a leap year (since 0 % 400 == 0). But in common usage, years start from 1. However, since the code doesn't explicitly restrict the input, and JML should match the code behavior, I should probably allow any integer, or at least non-negative.
+
+Actually, looking at the code again, if year is 0:
+- 0 % 4 == 0 (true)
+- 0 % 100 == 0 (true)
+- 0 % 400 == 0 (true)
+- So leap = true
+
+So year 0 would be considered a leap year by this code. Therefore, the requires clause should probably be `year >= 0` or just no requires clause at all.
+
+But typically, leap year calculations assume positive years. Let me check standard practices. In most programming contexts, year 0 is allowed in the proleptic Gregorian calendar. But in everyday calendar calculations, years start from 1.
+
+Since the problem doesn't specify, I'll use `year > 0` to be safe, or I could use `year >= 0`. Let me think about what makes more sense.
+
+Actually, I think `year >= 0` is more accurate because:
+1. The code doesn't prevent year 0
+2. Year 0 is a valid leap year in the proleptic Gregorian calendar
+3. It makes the specification more general
+
+But wait, what about negative years? Those don't exist in the Gregorian calendar. So `year >= 0` is probably the best choice.
+
+Let me reconsider. The problem says "Generate JML specifications for the Java program below." It doesn't specify what constraints should be on the input. Since the code doesn't check for invalid input, I should probably just specify the behavior without adding extra constraints, OR I should specify what the code actually does (which is handle any integer).
+
+Actually, looking at the code, if year is negative:
+- -4 % 4 == 0 (in Java, -4 % 4 == 0)
+- So it would be treated as a leap year potentially
+
+But negative years don't make physical sense for a calendar. However, the code doesn't restrict it.
+
+I think the safest approach is to either:
+1. Not add a requires clause (allow any integer)
+2. Add `requires year >= 0` (allow non-negative)
+3. Add `requires year > 0` (allow positive)
+
+Given that this is a calendar calculation and years are typically positive, and the problem likely expects a standard leap year specification, I'll go with `requires year > 0` or `requires year >= 0`.
+
+Actually, looking at various sources, year 0 is technically valid in astronomical year numbering and the proleptic Gregorian calendar. But in common programming, we usually start from year 1.
+
+Let me check if there's a standard for this. In Java's `java.time.Year` class, the range is from -999,999,999 to 999,999,999. So negative years are allowed.
+
+Given that the code doesn't restrict input, and JML should describe what the code does, not what we think it should do, I should probably not add a requires clause, or add one that matches the code behavior.
+
+But actually, the code behavior for negative years is well-defined in Java (modulo operation works as expected), so the code is correct for any integer.
+
+However, for a leap year specification, it's conventional to assume positive years. I'll add `requires year > 0` as it's the most common assumption.
+
+Wait, I should reconsider. The problem says "Generate JML specifications for the Java program below." It doesn't say to add constraints that aren't there. The code doesn't check for negative years, so maybe I shouldn't add a requires clause at all, or I should add one that allows what the code allows.
+
+Let me look at the ensures clause. The ensures clause I wrote is correct:
+```java
+ensures \result == (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0));
+```
+
+This correctly captures the leap year logic.
+
+Now, for the requires, I'll use `requires year > 0` to be conventional, but I'm a bit unsure. Let me think about whether to include it or not.
+
+Actually, I think I should include `requires year >= 0` because:
+1. Year 0 is a leap year in the Gregorian calendar
+2. The code treats year 0 as a leap year
+3. It's more inclusive than `year > 0`
+
+But I'm still not sure about negative years. In the proleptic Gregorian calendar, negative years are valid (year -1 is 2 BC, etc.), and leap year rules apply to them as well (with some variations for the switch from Julian to Gregorian, but for the proleptic calendar, the rules are applied retrospectively).
+
+Given the complexity, and since the code doesn't restrict input, I think the best approach is to not add a requires clause, or to add a very general one. But the problem asks for "requires and ensures clauses for each method where appropriate."
+
+Since the method clearly works for any integer (and produces a well-defined result), I could either:
+1. Add no requires clause
+2. Add `requires true` (which is redundant)
+3. Add `requires year >= 0` or `requires year > 0`
+
+Given that this is a leap year function and typically years are positive, and to make the specification useful, I'll add `requires year > 0`.
+
+Actually, wait. Let me reconsider the ensures clause. Is it correct?
+
+Leap year rules:
+- Divisible by 4: leap year
+- EXCEPT divisible by 100: NOT a leap year
+- EXCEPT divisible by 400: IS a leap year
+
+So: leap = (divisible by 400) OR (divisible by 4 AND NOT divisible by 100)
+
+My ensures clause: `\result == (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0))`
+
+This is correct.
+
+Now, about the `pure` modifier. The method doesn't modify any state, so it should be marked as `pure`.
+
+Also, I should check if I need to add `spec_public` anywhere. There are no fields, so no need.
+
+One more thing: should I add a class-level specification? The problem says "Add JML directly into the given Java source code" and "Generate `requires` and `ensures` clauses for each method where appropriate."
+
+So I'll focus on the method.
+
+Final check of the code structure:
+- The method is public
+- It returns boolean
+- It takes an int parameter
+
+The JML should be:
+```java
+/*@
+  @ requires year > 0;
+  @ ensures \result == (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0));
+  @*/
+public /*@ pure @*/ boolean isLeapYear(int year)
+```
+
+Wait, I should verify the parentheses in my ensures clause:
+`(year % 400 == 0 || (year % 4 == 0 && year % 100 != 0))`
+
+This is correct. It means:
+- year % 400 == 0, OR
+- (year % 4 == 0 AND year % 100 != 0)
+
+Which is exactly the leap year rule.
+
+Actually, I just realized: the code has:
+```java
+if (year % 4 == 0)
+{
+    if (year % 100 == 0)
+    {
+        if (year % 400 == 0)
+            leap = true;
+        else
+            leap = false;
+    }
+    else
+        leap = true;
+}
+else
+    leap = false;
+```
+
+This is equivalent to:
+- if year % 4 != 0: leap = false
+- else (year % 4 == 0):
+  - if year % 100 != 0: leap = true
+  - else (year % 100 == 0):
+    - if year % 400 == 0: leap = true
+    - else: leap = false
+
+So leap = true when:
+- year % 4 == 0 AND year % 100 != 0, OR
+- year % 4 == 0 AND year % 100 == 0 AND year % 400 == 0
+
+Which simplifies to:
+- year % 4 == 0 AND (year % 100 != 0 OR year % 400 == 0)
+
+Wait, that's different from what I had!
+
+Let me check:
+My ensures: `\result == (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0))`
+
+This means:
+- year % 400 == 0, OR
+- (year % 4 == 0 AND year % 100 != 0)
+
+But the code actually does:
+- If year % 4 != 0: false
+- If year % 4 == 0:
+  - If year % 100 != 0: true
+  - If year % 100 == 0:
+    - If year % 400 == 0: true
+    - Else: false
+
+So the result is true when:
+- year % 4 == 0 AND year % 100 != 0, OR
+- year % 4 == 0 AND year % 100 == 0 AND year % 400 == 0
+
+Factor out year % 4 == 0:
+- year % 4 == 0 AND (year % 100 != 0 OR year % 400 == 0)
+
+Now, is `(year % 400 == 0 || (year % 4 == 0 && year % 100 != 0))` equivalent to `year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)`?
+
+Let's check:
+Case 1: year % 400 == 0
+- Then year % 4 == 0 (since 400 is divisible by 4)
+- And year % 400 == 0 satisfies the second form
+- And year % 400 == 0 satisfies the first form (as the first disjunct)
+
+Case 2: year % 4 == 0 && year % 100 != 0
+- This satisfies the first form (as the second disjunct)
+- This satisfies the second form: year % 4 == 0 AND (year % 100 != 0 OR ...) - wait, year % 100 != 0 is true, so (true || ...) is true. So yes.
+
+Case 3: year % 4 != 0
+- First form: year % 400 == 0 is false (since 400 % 4 == 0, but year % 4 != 0 means year % 400 can't be 0... wait, actually it could be. For example, year = 4? No, 4 % 400 = 4. Year = 404? 404 % 400 = 4. So if year % 4 != 0, then year % 400 != 0.
+- So first disjunct is false.
+- Second disjunct requires year % 4 == 0, which is false.
+- So first form is false.
+- Second form requires year % 4 == 0, which is false.
+- So second form is false.
+
+Case 4: year % 4 == 0 && year % 100 == 0 && year % 400 != 0
+- First form: year % 400 == 0 is false. year % 4 == 0 is true but year % 100 != 0 is false. So second disjunct is false. Overall false.
+- Second form: year % 4 == 0 is true. (year % 100 != 0 || year % 400 == 0) is (false || false) = false. So overall false.
+
+So both forms are equivalent! Great.
+
+My ensures clause is correct.
+
+Now, I need to format the output properly. The problem says "Output the full Java file and nothing else."
+
+So I should output:
+
+```java
+public class LeapYear {
+    
+    /*@
+      @ requires year > 0;
+      @ ensures \result == (year % 400 == 0 || (year % 4 == 0 && year % 100 != 0));
+      @*/
+    public /*@ pure @*/ boolean isLeapYear(int year) {
+        boolean leap = false;
+         
+        if (year % 4 == 0)
+        {
+            if ( year % 100 == 0)
+            {
+                if ( year % 400 == 0)
+                    leap = true;
+                else
+                    leap = false;
+            }
+            else
+                leap = true;
+        }
+        else
+            leap = false;
+	
+	return leap;
+   }
+}
+```
+
+Wait, I should double-check the spacing and formatting. The original code has specific indentation. I should preserve that.
+
+Also, I notice the original code has:
+```java
+public  boolean isLeapYear(int year) {
+```
+with two spaces before `boolean`. I should preserve that.
+
+And the closing brace has 5 spaces indentation (or 4 spaces inside the method body). Let me check:
+```
+   }
+}
+```
+The first `}` has 3 spaces, the second has 0 spaces. Actually looking at the provided code:
+```
+    public  boolean isLeapYear(int year) {
+        boolean leap = false;
+         
+        if (year % 4 == 0)
+        {
+            if ( year % 100 == 0)
+            {
+                if ( year % 400 == 0)
+                    leap = true;
+                else
+                    leap = false;
+            }
+            else
+                leap = true;
+        }
+        else
+            leap = false;
+	
+	return leap;
+   }
+}
+```
+The `return leap;` has a tab. The closing `}` of the method has 3 spaces. The closing `}` of the class has 0 spaces.
+
+I should preserve this exactly.
+
+Also, I should check if I need to add `spec_public`. There are no fields, so no.
+
+One more thing: should the JML comment be inside the method or before it? It should be before the method, as a method specification.
+
+Let me write the final version:
+
+```java
+public class LeapYear {
+    
+    /*@
+      @ requires year > 0;
+      @ ensures \result == (year % 400 == 0 ||

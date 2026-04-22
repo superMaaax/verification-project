@@ -1,0 +1,194 @@
+We need to generate JML specifications for the given Java program. The program is:
+
+```java
+public class MulLoop {
+
+	public static int mulLoop(int a, int b) {
+        int res = 0;
+        if (b >= 0) {
+            for(int i = 0; i < b; i++) {
+                res = res + a;
+            }
+        } else {
+            for(int i = 0; i < -b; i++) {
+                res = res - a;
+            }
+        }
+        return res;
+    }
+
+}
+```
+
+We need to add JML comments: requires, ensures, loop specifications (maintaining, decreases). Also spec_public if needed for specification visibility. The code must not be changed.
+
+We need to consider overflow issues: multiplication a * b may overflow int range. JML requires conditions for arithmetic. The method computes a * b using repeated addition/subtraction. The result should be a * b, assuming no overflow. We can specify that requires that a * b fits in int range, or that b != Integer.MIN_VALUE to avoid overflow when negating. Actually, if b is negative, -b may overflow if b == Integer.MIN_VALUE. So we need to handle that.
+
+The method uses for loops. For each loop we need loop specifications.
+
+First, we need to decide the requires clause: The method should require that a * b is within int bounds, and also that b != Integer.MIN_VALUE when b < 0 (since -b would overflow). Actually, if b == Integer.MIN_VALUE, -b is also Integer.MIN_VALUE (still negative) but the loop condition i < -b will be i < Integer.MAX_VALUE + 1? Actually -b when b = Integer.MIN_VALUE is -Integer.MIN_VALUE = Integer.MIN_VALUE (since overflow? In Java, unary minus on int may overflow but it's allowed; the result is Integer.MIN_VALUE). So -b = Integer.MIN_VALUE, which is negative. The loop condition i < -b with i being int and -b being Integer.MIN_VALUE means i < -2147483648? Actually -b = Integer.MIN_VALUE = -2147483648. So i < -2147483648 is always false for i >= 0, so loop never runs. So the code would not cause overflow. However, the loop condition i < -b uses -b which is overflow for b = Integer.MIN_VALUE. But in Java, -b when b = Integer.MIN_VALUE yields Integer.MIN_VALUE (no overflow? Actually integer overflow is defined to wrap around in two's complement, but Java spec says integer overflow wraps around? Let's recall: The unary minus operator on int returns the negation of the operand; if the operand is the minimum value (Integer.MIN_VALUE), the result is the same value (i.e., Integer.MIN_VALUE). So -b yields Integer.MIN_VALUE, which is negative. So the loop condition i < -b will be i < Integer.MIN_VALUE, which is false for i >= 0. So the loop won't execute. So the code is safe for b = Integer.MIN_VALUE. However, the result res = 0, but expected a * b would be negative overflow? Actually a * b for b = Integer.MIN_VALUE is negative overflow for many a values. But the method returns 0, which is not correct for typical multiplication. But the spec may not require overflow handling; we can just specify that the method returns a * b if within int range, else undefined. But typical JML spec would require that a * b is within int range and b != Integer.MIN_VALUE? Let's see typical approach: For multiplication, we can require that a * b does not overflow. That is, require that (a >= 0 ? a * b <= Integer.MAX_VALUE : a * b >= Integer.MIN_VALUE). But we also need to handle b = Integer.MIN_VALUE case: a * b may overflow for any a != 0 and a != 1? Actually a * Integer.MIN_VALUE overflows for all a except a = 0 and a = -1? Let's check: 1 * Integer.MIN_VALUE = Integer.MIN_VALUE (fits). -1 * Integer.MIN_VALUE = Integer.MAX_VALUE + 1? Actually -1 * Integer.MIN_VALUE = Integer.MIN_VALUE (since -1 * -2^31 = 2^31, which overflows to Integer.MIN_VALUE? Let's compute: In two's complement, -1 * Integer.MIN_VALUE = Integer.MIN_VALUE (since -1 * -2^31 = 2^31, which is overflow, but Java wraps to Integer.MIN_VALUE). So overflow occurs for any a except 0 and maybe 1? Actually 0 * Integer.MIN_VALUE = 0, fits. 1 * Integer.MIN_VALUE = Integer.MIN_VALUE, fits. So only a = 0 or 1 produce result within int range. So we could restrict a to be 0 or 1? But typical spec for multiplication is to require that the multiplication does not overflow. However, the code uses repeated addition/subtraction, which also overflows similarly. So we can specify that the method returns a * b if a * b is within int range, else undefined. But we can also require that b != Integer.MIN_VALUE to avoid overflow in -b. But the code uses -b only when b < 0, and for b = Integer.MIN_VALUE, -b = Integer.MIN_VALUE, which is negative, but loop condition i < -b will be false, so loop never runs, resulting in res = 0, which is not correct for multiplication. So maybe we should require b != Integer.MIN_VALUE. However, the code may be intended to handle b negative but not extreme negative. The spec may not need to handle that edge case. The problem statement does not mention overflow handling, but we should add appropriate requires to ensure correctness. The example for AddLoop includes a requires clause: "requires Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && y != Integer.MIN_VALUE". That ensures no overflow for addition and also ensures y != Integer.MIN_VALUE because they use -y in second branch. So we should follow similar pattern: require that a * b does not overflow and also that b != Integer.MIN_VALUE? Actually for multiplication, we need to ensure that the repeated addition/subtraction does not overflow. The loop adds a each iteration for b times. If b is large positive, adding a each time may overflow. So we need to require that a * b fits in int range. Also if b is negative, we subtract a each iteration for -b times, which also may overflow. So we need to require that -a * b fits? Actually if b negative, we do res = res - a for -b times, which is equivalent to adding -a each iteration for -b times, resulting in -a * (-b) = a * b. So same condition: a * b must be within int range. Also need to ensure that b != Integer.MIN_VALUE because -b would overflow? But we can handle that by requiring b != Integer.MIN_VALUE. However, the code uses -b only when b < 0, and if b = Integer.MIN_VALUE, -b = Integer.MIN_VALUE, which is negative, but loop runs zero times, so result is 0, which is not correct for multiplication. So we should exclude that case. So we can require b != Integer.MIN_VALUE. Also need to ensure that a * b does not overflow. But we can also require that a * b is within int range, which automatically excludes b = Integer.MIN_VALUE for most a values? Actually a * b may be within int range for b = Integer.MIN_VALUE only for a = 0 or 1. But we can just require b != Integer.MIN_VALUE for simplicity.
+
+Thus we can write:
+
+//@ requires b != Integer.MIN_VALUE;
+//@ requires Integer.MIN_VALUE <= a * b && a * b <= Integer.MAX_VALUE;
+
+But we need to be careful: a * b may overflow during the requires expression if we compute a * b directly. In JML, we can use something like "a * b" is allowed? In JML, integer arithmetic is unbounded in spec, but we may need to ensure no overflow in spec. However, typical approach is to use "a * b" in requires, but if a and b are ints, the multiplication in Java may overflow. But JML uses arbitrary precision integers for spec? Actually JML spec uses Java's integer arithmetic but with overflow? In JML, integer literals are of type long? Not sure. But typical examples use "x + y" in requires and ensures, and they assume no overflow in spec. In the AddLoop example, they used "Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && y != Integer.MIN_VALUE". They computed x + y in the requires, which could overflow if x + y > Integer.MAX_VALUE, but they check the condition, so they ensure it's within range. But they also used y != Integer.MIN_VALUE to avoid overflow when negating y. So they used same approach. So we can follow that.
+
+Thus we can have:
+
+//@ requires b != Integer.MIN_VALUE;
+//@ requires Integer.MIN_VALUE <= a * b && a * b <= Integer.MAX_VALUE;
+
+But we also need to ensure that a * b does not overflow in the loop. However, the loop adds a each iteration b times, which is a * b. If a * b fits in int range, then no overflow. So we can just require that.
+
+Now ensures: The method returns a * b. So we can write:
+
+//@ ensures \result == a * b;
+
+Now loop specifications: For each for loop, we need maintaining and decreases.
+
+First loop: for(int i = 0; i < b; i++) { res = res + a; }
+
+We need to maintain invariants: At each iteration, res == a * i (since res starts at 0 and each iteration adds a). Also we need to maintain i is within bounds: 0 <= i && i <= b. Also we need to maintain that res does not overflow? But we already require a * b fits, so res will be within range. Also we need to maintain that res == a * i. Also we need to maintain that i <= b. Also we need to maintain that res == a * i and i <= b. Also we need to maintain that res is within int range. But we can just maintain res == a * i and i <= b. Also we need to maintain that i is non-negative. So we can have:
+
+//@ maintaining 0 <= i && i <= b;
+//@ maintaining res == a * i;
+//@ decreases b - i;
+
+But we also need to ensure that i is increased each iteration. The loop condition is i < b, so i runs from 0 to b-1. At loop termination, i == b. So we can maintain i <= b. At each iteration, i increments by 1. So we can have decreases clause: decreases b - i. At start, i = 0, so b - i = b, which is non-negative if b >= 0. Since we only enter this loop when b >= 0, it's fine. At each iteration, i increments, so b - i decreases.
+
+But we also need to maintain that i is integer and loop variable. The loop variable is int i. So we can use i in invariants. However, we need to ensure that we refer to the loop variable i in the invariant. In JML, we can refer to the loop variable in invariants. The typical pattern is:
+
+//@ maintaining i >= 0 && i <= b;
+//@ maintaining res == a * i;
+//@ decreases b - i;
+
+But we also need to ensure that i is incremented each iteration. The loop condition is i < b, so i increments each iteration. So we can use decreases b - i.
+
+Now for the second loop: for(int i = 0; i < -b; i++) { res = res - a; }
+
+We need to handle negative b. The loop runs while i < -b, where -b is positive if b negative (except b = Integer.MIN_VALUE case). We have required b != Integer.MIN_VALUE, so -b is positive and fits in int? Actually -b for b = Integer.MIN_VALUE is Integer.MIN_VALUE, but we excluded that. For other negative b, -b is positive and within int range (since b >= Integer.MIN_VALUE+1). So -b is safe.
+
+We need invariants: At each iteration, res == -a * i (since res starts at 0 and each iteration subtracts a). Actually after i iterations, res = -a * i. At loop termination, i == -b, so res = -a * (-b) = a * b. So ensures holds.
+
+Thus invariants: 0 <= i && i <= -b; res == -a * i; decreases -b - i.
+
+But we also need to maintain that i is non-negative and i <= -b. Also we need to maintain that res == -a * i. Also we need to maintain that res does not overflow? But we already require a * b fits.
+
+Thus we can have:
+
+//@ maintaining 0 <= i && i <= -b;
+//@ maintaining res == -a * i;
+//@ decreases -b - i;
+
+But we also need to ensure that -b is positive. Since b < 0, -b > 0. So -b - i is non-negative and decreases.
+
+Now we also need to consider that the method uses int res = 0; and then loops. We need to ensure that res is spec_public? Not needed because it's local variable. But we may need to add spec_public for fields? There are no fields. So we don't need spec_public.
+
+We also need to ensure that we add JML comments only for the loops and method. The code must not be changed. We need to output the full Java file with JML comments.
+
+Thus final code:
+
+```java
+public class MulLoop {
+
+    //@ requires b != Integer.MIN_VALUE;
+    //@ requires Integer.MIN_VALUE <= a * b && a * b <= Integer.MAX_VALUE;
+    //@ ensures \result == a * b;
+    public static int mulLoop(int a, int b) {
+        int res = 0;
+        if (b >= 0) {
+            for(int i = 0; i < b; i++) {
+                //@ maintaining 0 <= i && i <= b;
+                //@ maintaining res == a * i;
+                //@ decreases b - i;
+                res = res + a;
+            }
+        } else {
+            for(int i = 0; i < -b; i++) {
+                //@ maintaining 0 <= i && i <= -b;
+                //@ maintaining res == -a * i;
+                //@ decreases -b - i;
+                res = res - a;
+            }
+        }
+        return res;
+    }
+
+}
+```
+
+But we need to check the placement of JML comments: They should be placed before the loop, inside the loop? In the example for AddLoop, they placed the maintaining and decreases before the while loop, not inside the loop body. Actually they placed them before the while loop, like:
+
+//@ decreases n;
+//@ maintaining sum == x + y - n && 0 <= n;
+while (n > 0) {
+    sum = sum + 1;
+    n = n - 1;
+}
+
+Similarly for for loops, we can place the invariants before the for loop. In the example for Smallest, they placed the invariants before the while loop. So we should place them before the for loop, not inside the loop body. However, we can also place them inside the loop body as a comment, but typical JML is to place them before the loop. The example for AddLoop shows they placed them before the while loop. For for loops, we can also place them before the for loop. But we need to ensure that the JML comment is placed before the loop statement, not inside the loop body. The code we wrote placed them inside the loop body (after the opening brace). That might be okay but not typical. The requirement says "Add JML directly into the given Java source code." It doesn't specify where to place them, but we should follow typical pattern: before the loop. However, we need to be careful: The JML comment must be placed before the loop statement, not after the opening brace. The code we wrote placed them inside the loop body, but we can also place them before the for statement. Let's see typical JML for for loops: Usually they write:
+
+//@ loop_invariant 0 <= i && i <= n;
+//@ decreases n - i;
+for (int i = 0; i < n; i++) {
+    // do something
+}
+
+But sometimes they also put the invariant inside the loop body after the for line. But the spec says "Add JML directly into the given Java source code." The example for AddLoop shows they placed the invariants before the while loop, not inside the while body. So we should follow that pattern: place the invariants before the for loop.
+
+Thus we should write:
+
+if (b >= 0) {
+    //@ maintaining 0 <= i && i <= b;
+    //@ maintaining res == a * i;
+    //@ decreases b - i;
+    for(int i = 0; i < b; i++) {
+        res = res + a;
+    }
+} else {
+    //@ maintaining 0 <= i && i <= -b;
+    //@ maintaining res == -a * i;
+    //@ decreases -b - i;
+    for(int i = 0; i < -b; i++) {
+        res = res - a;
+    }
+}
+
+But we need to ensure that the JML comment is placed before the for statement, but after the opening brace of the if block. That is fine.
+
+Now we also need to consider that the JML comment may need to be placed inside the loop body for the maintaining and decreases to be in scope? Actually the invariants are considered at each iteration, and they should be placed before the loop. In JML, the loop invariant is placed before the loop, and the decreases clause is also placed before the loop. So we should place them before the for statement. The example for AddLoop shows they placed them before the while loop, not inside the while body. So we should do the same.
+
+Thus final code:
+
+```java
+public class MulLoop {
+
+    //@ requires b != Integer.MIN_VALUE;
+    //@ requires Integer.MIN_VALUE <= a * b && a * b <= Integer.MAX_VALUE;
+    //@ ensures \result == a * b;
+    public static int mulLoop(int a, int b) {
+        int res = 0;
+        if (b >= 0) {
+            //@ maintaining 0 <= i && i <= b;
+            //@ maintaining res == a * i;
+            //@ decreases b - i;
+            for(int i = 0; i < b; i++) {
+                res = res + a;
+            }
+        } else {
+            //@ maintaining 0 <= i && i <= -b;
+            //@ maintaining res == -a * i;
+            //@ decreases -b - i;
+            for(int i = 0; i < -b; i++) {
+                res = res - a;
+            }
+        }
+        return res;
+    }
+
+}
+```
+
+But we need to check the ensures clause: \result == a * b. However, if a * b overflows, the ensures may be false, but we have required that a * b fits. So it's fine

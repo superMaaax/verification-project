@@ -1,0 +1,183 @@
+We need to generate JML specifications for the Java program ChangeCase. The program has a method changeCase that takes a char c and returns a char result. The logic:
+
+- Initialize result = ' ' (space). Then if c > 'z', result = c (i.e., characters beyond 'z' unchanged). else if c >= 'a', then convert to uppercase: result = (char)(c - 'a' + 'A'). else if c > 'Z', result = c (i.e., characters between 'Z' and 'a' (i.e., '[' etc) unchanged). else if c >= 'A', convert to lowercase: result = (char)(c - 'A' + 'a'). else result = c (i.e., other characters like punctuation, digits, etc unchanged). Actually the else case covers c < 'A', but also includes c <= 'Z'? Wait: The conditions are:
+
+1. if (c > 'z') result = c; // c > 'z' means c > 'z' (i.e., after 'z')
+2. else if (c >= 'a') result = (char)(c - 'a' + 'A'); // lowercase letters
+3. else if (c > 'Z') result = c; // c > 'Z' but not >= 'a', i.e., characters between 'Z' and 'a' (i.e., '[' through '^' etc)
+4. else if (c >= 'A') result = (char)(c - 'A' + 'a'); // uppercase letters
+5. else result = c; // everything else (including control chars, digits, punctuation, etc)
+
+Thus the method changes case for alphabetic letters (ASCII letters) and leaves other characters unchanged.
+
+We need to add JML requires and ensures clauses for the method. Also we need to consider loop specifications if any loops exist. There are no loops in this method. So just requires and ensures.
+
+We need to consider the behavior: For any char c, the result is:
+
+- If c is between 'A' and 'Z' inclusive, result = lowercase version of c.
+- If c is between 'a' and 'z' inclusive, result = uppercase version of c.
+- Otherwise, result = c unchanged.
+
+Thus we can write ensures clause accordingly.
+
+Potential requires: The method can accept any char, so no requires needed. But we can add a requires clause that is true (e.g., \true). But typical JML spec includes requires clause only if there are constraints. We can add "requires true;" but not necessary. The example for AddLoop includes a requires clause about overflow. For changeCase, there is no overflow. So we can just add ensures.
+
+Ensures: We can express:
+
+//@ ensures (\forall char c; ... )? Actually we need to specify for the given input c, the result is either:
+
+- If 'A' <= c <= 'Z', then result = (char)(c - 'A' + 'a')
+- If 'a' <= c <= 'z', then result = (char)(c - 'a' + 'A')
+- Otherwise result = c
+
+We can write ensures as a conditional expression: \result == (('A' <= c && c <= 'Z') ? (char)(c - 'A' + 'a') : (('a' <= c && c <= 'z') ? (char)(c - 'a' + 'A') : c))
+
+But JML uses \result and we can use conditional operator "?:" in JML? Yes, JML supports "?" and ":" in expressions. However, we need to be careful about type conversions. In JML, we can use "char" type and integer arithmetic. The expression (char)(c - 'A' + 'a') is fine.
+
+Alternatively, we can break ensures into multiple ensures clauses: one for uppercase conversion, one for lowercase conversion, one for other characters. But JML doesn't allow multiple ensures for same method? Actually we can have multiple ensures clauses, they are all conjoined. So we can have:
+
+//@ ensures ('A' <= c && c <= 'Z') ==> \result == (char)(c - 'A' + 'a');
+//@ ensures ('a' <= c && c <= 'z') ==> \result == (char)(c - 'a' + 'A');
+//@ ensures (c < 'A' || c > 'z' || ('Z' < c && c < 'a')) ==> \result == c;
+
+But the third condition covers characters not in alphabetic range. Actually we can combine: ensures (c < 'A' || c > 'z' || ('Z' < c && c < 'a')) ==> \result == c; But we can also just say ensures (c < 'A' || c > 'z' || ('Z' < c && c < 'a')) ==> \result == c; However, we need to ensure that for characters between 'Z' and 'a', they remain unchanged. The condition 'Z' < c && c < 'a' covers those characters. But also characters less than 'A' (like digits, punctuation) remain unchanged. And characters greater than 'z' remain unchanged. So we can combine.
+
+But we might also want to ensure that for characters that are letters, the result is the opposite case. So we can also have ensures that for letters, result is opposite case. But we need to ensure that the result is correct for both uppercase and lowercase letters. We can also have ensures that for uppercase letters, result is lowercase and for lowercase letters, result is uppercase. And for other characters, result is unchanged.
+
+Thus we can write:
+
+//@ ensures ('A' <= c && c <= 'Z') ==> \result == (char)(c - 'A' + 'a');
+//@ ensures ('a' <= c && c <= 'z') ==> \result == (char)(c - 'a' + 'A');
+//@ ensures (c < 'A' || c > 'z' || ('Z' < c && c < 'a')) ==> \result == c;
+
+But we need to ensure that the condition for other characters is correct. Actually we can also use "c < 'A' || c > 'z' || ('Z' < c && c < 'a')" which covers all characters not in 'A'-'Z' or 'a'-'z'. However, note that the condition 'Z' < c && c < 'a' includes characters between 'Z' and 'a' (i.e., '[' to '^' and maybe some others). But we also need to include characters between 'Z' and 'a' that are not letters. Actually we can just say ensures (c < 'A' || c > 'z' || ('Z' < c && c < 'a')) ==> \result == c. But we also need to ensure that for characters between 'Z' and 'a', they remain unchanged. That condition covers them. However, we also need to ensure that for characters between 'A' and 'Z' and 'a' and 'z', the result is correct. So we can have separate ensures.
+
+But we also need to consider that the condition c > 'z' includes characters beyond 'z', but also includes characters between 'z' and maybe extended ASCII? Actually char is unsigned 16-bit, but we only consider ASCII. The condition c > 'z' includes all characters after 'z' in Unicode. But we want to treat them as unchanged. So we can keep that.
+
+But we also need to consider that the condition c > 'Z' in original code is used to check if c > 'Z' but not >= 'a'. That includes characters between 'Z' and 'a'. So we can incorporate that.
+
+Thus we can write ensures clauses accordingly.
+
+But we also need to consider that the method returns a char, and we might want to specify that the result is a char. But JML automatically infers that.
+
+We also need to consider that the method may be called with any char, so we can add a requires clause that is true. But we can also omit requires. The problem statement says "Generate `requires` and `ensures` clauses for each method where appropriate." So we can add a requires clause that is true (or just omit if not needed). But we might want to include a requires clause to specify that the input is a char. But we can just add "requires true;" but it's not necessary. However, we might want to include a requires clause to indicate that c is a char (which is always true). But we can also just leave it out. The example for AddLoop includes a requires clause about overflow. For changeCase, there is no overflow. So we can just add ensures.
+
+But we also need to consider that the method is not static. It is a public method. So we need to add JML comments before the method.
+
+Thus we will produce:
+
+public class ChangeCase {
+
+  //@ requires true;
+  //@ ensures ('A' <= c && c <= 'Z') ==> \result == (char)(c - 'A' + 'a');
+  //@ ensures ('a' <= c && c <= 'z') ==> \result == (char)(c - 'a' + 'A');
+  //@ ensures (c < 'A' || c > 'z' || ('Z' < c && c < 'a')) ==> \result == c;
+  public char changeCase(char c) {
+    char result = ' ';    
+    if (c > 'z') {
+      result = c;
+    } else if (c >= 'a') {
+      result =  (char)(c - 'a' + 'A');
+    } else if (c > 'Z') {
+      result =  c;
+    } else if (c >= 'A') {
+      result =  (char)(c - 'A' + 'a');
+    } else {
+      result = c;
+    }
+    return result;
+  }
+
+}
+
+But we need to check the condition for other characters: The original code uses:
+
+if (c > 'z') {
+  result = c;
+} else if (c >= 'a') {
+  result = (char)(c - 'a' + 'A');
+} else if (c > 'Z') {
+  result = c;
+} else if (c >= 'A') {
+  result = (char)(c - 'A' + 'a');
+} else {
+  result = c;
+}
+
+Thus the condition for unchanged characters includes:
+
+- c > 'z' (i.e., after 'z')
+- c > 'Z' && c < 'a' (i.e., between 'Z' and 'a')
+- c < 'A' (i.e., before 'A')
+
+Thus we can combine as: (c > 'z' || (c > 'Z' && c < 'a') || c < 'A').
+
+But note that c > 'z' includes all characters after 'z', but also includes characters after 'z' that are beyond ASCII, but also includes characters between 'z' and maybe some other characters? Actually 'z' is the last lowercase letter. So c > 'z' includes all characters after 'z', including other uppercase letters beyond 'Z'? Actually uppercase letters are before 'a' in ASCII. So c > 'z' includes characters after 'z', which includes some punctuation? Actually in ASCII, after 'z' there are '{', '|', '}', '~', and then extended ASCII. So those are unchanged.
+
+Thus we can use condition: (c > 'z' || (c > 'Z' && c < 'a') || c < 'A').
+
+But note that c > 'Z' && c < 'a' is equivalent to c > 'Z' && c < 'a'. However, we need to be careful: In ASCII, 'Z' < 'a' is true. So we can use that.
+
+Thus we can write ensures: (c > 'z' || (c > 'Z' && c < 'a') || c < 'A') ==> \result == c.
+
+But we also need to ensure that for uppercase letters, result is lowercase, and for lowercase letters, result is uppercase.
+
+Thus we can write ensures for uppercase: ('A' <= c && c <= 'Z') ==> \result == (char)(c - 'A' + 'a').
+
+Ensures for lowercase: ('a' <= c && c <= 'z') ==> \result == (char)(c - 'a' + 'A').
+
+But note that the condition c >= 'a' includes lowercase letters, but also includes characters after 'a'? Actually c >= 'a' includes all characters from 'a' onward, but we only want to convert when c is between 'a' and 'z'. So we need to restrict to 'a' <= c && c <= 'z'.
+
+Similarly for uppercase.
+
+Thus we can write ensures accordingly.
+
+But we also need to consider that the original code uses c >= 'a' to check for lowercase letters, but also includes characters after 'z'? Actually c >= 'a' includes all characters from 'a' onward, including '{', etc. But the code only converts when c >= 'a' and also c <= 'z'? Actually the condition is "else if (c >= 'a')" and then inside we set result = (char)(c - 'a' + 'A'). But if c is '{', then c - 'a' + 'A' would be something else, but the code would incorrectly convert it. However, the code's logic is that if c >= 'a', it assumes it's a lowercase letter. But that is not correct for characters beyond 'z'. But the code also has a check for c > 'z' before that, so if c > 'z', it returns c unchanged. So the condition c >= 'a' is only executed when c <= 'z'. So we can assume that the code only converts when c is between 'a' and 'z'. So we can specify that the conversion only occurs when c is a lowercase letter.
+
+Thus we can write ensures that for c in 'a'..'z', result is uppercase, and for c in 'A'..'Z', result is lowercase, and otherwise unchanged.
+
+Thus we can write ensures as:
+
+//@ ensures ('A' <= c && c <= 'Z') ==> \result == (char)(c - 'A' + 'a');
+//@ ensures ('a' <= c && c <= 'z') ==> \result == (char)(c - 'a' + 'A');
+//@ ensures (c < 'A' || c > 'z' || ('Z' < c && c < 'a')) ==> \result == c;
+
+But note that the condition ('Z' < c && c < 'a') is true for characters between 'Z' and 'a'. However, we also need to include characters between 'Z' and 'a' that are not letters. But we also need to include characters less than 'A' and greater than 'z'. So we can combine as (c < 'A' || c > 'z' || ('Z' < c && c < 'a')). But note that c > 'z' includes characters after 'z', but also includes characters after 'z' that might be uppercase? Actually uppercase letters are before 'a', so they are not > 'z'. So we can just use c > 'z' to cover those after 'z'.
+
+But we also need to consider that characters between 'Z' and 'a' are covered by 'Z' < c && c < 'a'. However, note that c > 'z' also includes characters after 'z', but also includes characters after 'z' that might be uppercase? Actually uppercase letters are before 'a', so they are not > 'z'. So we can just use c > 'z'.
+
+Thus we can write ensures as:
+
+//@ ensures (c < 'A' || c > 'z' || ('Z' < c && c < 'a')) ==> \result == c;
+
+But note that c < 'A' includes digits, punctuation, etc. c > 'z' includes characters after 'z'. 'Z' < c && c < 'a' includes characters between 'Z' and 'a'.
+
+But we also need to consider that characters between 'Z' and 'a' are not letters, and they should remain unchanged. So we can combine.
+
+Alternatively, we can write ensures in a simpler way: ensures \result == (char)((c >= 'a' && c <= 'z') ? (c - 'a' + 'A') : ((c >= 'A' && c <= 'Z') ? (c - 'A' + 'a') : c));
+
+But note that the condition in the original code is: if c > 'z' then unchanged; else if c >= 'a' then convert to uppercase; else if c > 'Z' then unchanged; else if c >= 'A' then convert to lowercase; else unchanged. So the conversion only occurs for letters. So we can use that.
+
+But we need to be careful about the condition for unchanged characters: The original code returns unchanged for c > 'z', c > 'Z' && c < 'a', and c < 'A'. So we can combine as (c > 'z' || (c > 'Z' && c < 'a') || c < 'A').
+
+Thus we can write ensures as:
+
+//@ ensures (c > 'z' || (c > 'Z' && c < 'a') || c < 'A') ==> \result == c;
+//@ ensures (c >= 'a' && c <= 'z') ==> \result == (char)(c - 'a' + 'A');
+//@ ensures (c >= 'A' && c <= 'Z') ==> \result == (char)(c - 'A' + 'a');
+
+But note that the condition c >= 'a' && c <= 'z' is equivalent to c >= 'a' && c <= 'z'. However, the original code uses c >= 'a' to check for lowercase letters, but also includes characters beyond 'z'? Actually the code checks c > 'z' first, so when c >= 'a', it must be that c <= 'z'. So we can use that.
+
+But we also need to consider that the condition c >= 'A' && c <= 'Z' is correct.
+
+Thus we can write ensures accordingly.
+
+But we also need to consider that the method returns a char, and we might want to specify that the result is a char. But JML automatically infers that.
+
+Thus the final code will have JML comments before the method.
+
+We also need to consider that the method is public, so we might want to add "requires true;" but it's optional. However, the problem says "Generate `requires` and `ensures` clauses for each method where appropriate." So we can add a requires clause if there are any constraints. There are none, so we can omit requires. But we might want to add a requires clause that is true to indicate that any char is allowed. But it's not necessary. The example for AddLoop includes a requires clause because of overflow. For changeCase, we can just add ensures.
+
+Thus we will output the code with JML comments.
+
+But we need to be careful about the formatting: The JML comments should be placed before

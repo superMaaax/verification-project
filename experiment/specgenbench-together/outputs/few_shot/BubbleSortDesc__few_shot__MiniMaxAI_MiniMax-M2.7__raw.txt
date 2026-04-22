@@ -1,0 +1,208 @@
+We need to generate JML specifications for the given Java program. The program is:
+
+```java
+public class BubbleSortDesc { 
+    
+    void swap(int x, int y,  int array[]) {
+        int temp;     
+        temp = array[x];
+        array[x] = array[y];
+        array[y] = temp;
+    }
+
+    int[] bubbleSort(int arr[]) {
+        int n = arr.length;
+
+        for (int i = 0; i < n-1; i++) {	
+
+            for (int j = 0; j < n-i-1; j++) {
+                if (arr[j+1] > arr[j]) {  
+		     swap(j, j + 1, arr); 
+                } 
+	    }
+	} 
+	return arr;
+    } 
+}
+```
+
+We need to add JML comments: requires and ensures for each method, loop specifications (maintaining, decreases) for each loop. Also spec_public only when needed for specification visibility. We must not change executable Java code. Must output the full Java file with JML annotations.
+
+We need to consider the semantics: swap method swaps elements at indices x and y in array. It modifies array. It doesn't return anything. We need to specify that after swap, array[x] == old array[y] and array[y] == old array[x], and all other elements unchanged. Also we need requires that x and y are valid indices (0 <= x < array.length and same for y). Also requires array != null. Also spec_public for fields? There's no fields. The swap method uses local variables. We need to add spec_public maybe for array? But array is a parameter; we need to specify its modification. In JML, we can use //@ modifies array[\] to indicate that the method modifies the array elements at indices x and y. Actually modifies array[x], array[y]; but we can also use array[\] to indicate entire array. But we need to ensure that only those indices are changed. However, we can just say //@ modifies array[x], array[y]; but JML expects modifies clause to list location sets. We can also use //@ ensures (\forall int k; k != x && k != y; array[k] == \old(array[k])); and ensures array[x] == \old(array[y]) && array[y] == \old(array[x]).
+
+Better to use ensures.
+
+Similarly for bubbleSort method: It sorts the array in descending order (largest to smallest). We need to specify that after bubbleSort, the array is sorted descending: for all i, j such that 0 <= i < j < n, arr[i] >= arr[j] (assuming arr is sorted descending). Actually typical bubble sort yields ascending order; here they compare arr[j+1] > arr[j] and swap, so after sorting, array will be in descending order (largest first). So we need ensures that arr is permutation of original (i.e., same elements) and sorted descending: (\forall int i; 0 <= i < n-1; arr[i] >= arr[i+1]).
+
+Also we need requires arr != null. Also ensures arr != null (the same reference). Also ensures \result == arr (the method returns arr). Also we need modifies arr[\] (the array content). Also we need loop specifications for both loops.
+
+We also need to consider that the method bubbleSort returns int[]; we need ensures \result == arr.
+
+We also need to consider that the method swap returns void, but we can also ensure that after swap, array is modified accordingly.
+
+We also need to consider that the method swap has parameters x, y, array. We need to ensure that x and y are within bounds. Also we need to ensure that array is not null. Also we need to ensure that x != y? Not necessary but we can include ensures that if x == y, no change. But not required.
+
+We also need to consider that the method bubbleSort uses nested loops. We need to add loop specifications for each loop: maintaining and decreases.
+
+We also need to consider that we need to add spec_public only when needed for specification visibility. Usually spec_public is used to expose private fields to specifications. In this case, there are no fields. So we may not need spec_public.
+
+But we might need to add spec_public for array parameters? Actually JML by default treats parameters as non-public for specification visibility; but we need to refer to them in ensures and requires. Usually we can just refer to them; no need for spec_public. However, if we need to refer to them in the context of static fields? Not needed.
+
+Thus we can just add JML comments.
+
+We also need to ensure that we do not rename anything. So we keep method names and variable names.
+
+We also need to ensure that we output the full Java file and nothing else. So we need to output the entire code with JML comments inserted.
+
+We need to consider the proper placement of JML comments: They should be placed before the method signature, as //@ lines. Usually JML comments start with //@ for single-line annotations, or /*@ ... @*/ for block comments. In the examples, they used //@ for requires, ensures, maintaining, decreases. They used them inside the method for loop invariants and decreases. They also used //@ for spec_public when needed. They used //@ for modifications? They didn't include modifies in examples. But we can include modifies clause for swap and bubbleSort.
+
+Better to follow examples: They used //@ ensures ... ; and //@ requires ... ; They used //@ maintaining ... ; //@ decreases ... ; They used //@ modifies ... ; maybe not needed but we can include.
+
+We need to ensure that we include proper syntax: JML uses \old, \result, \forall, etc.
+
+We need to ensure that we include proper parentheses and semicolons.
+
+We need to ensure that we include proper line breaks.
+
+We need to ensure that we include proper indentation.
+
+We need to ensure that we include proper comments for each method.
+
+We also need to ensure that we include loop specifications for each loop: for i loop and for j loop.
+
+We also need to ensure that we include a decreases clause for each loop: Usually we use decreases for loop variant. For nested loops, we need to specify decreases for each loop. In the examples, they used decreases n; for while loops. For for loops, we can also use decreases for the loop variable. But JML supports decreases for for loops as well. However, we need to ensure that we use the correct syntax: //@ decreases i; but i is a loop variable that changes each iteration. Usually we can use decreases i; but we need to ensure that i is decreasing. In bubbleSort, i increments from 0 to n-2, not decreasing. So we cannot use decreases i because it's not decreasing. However, we can use decreases n-i-1 for the inner loop. Actually typical loop variant for outer loop is n-i-1? But that is decreasing as i increases. But we can also use decreases n-i-1 for inner loop. But we need to specify loop variant for each loop. In JML, we can use decreases for loops that have a variant function that decreases each iteration and is bounded below. For outer loop, we can use decreases n-i-1? But that is not monotonic for outer loop because i increases, n-i-1 decreases. But we need a variant for each loop individually. Usually we can use decreases for inner loop: decreases n-i-j-1? Actually we can treat each loop separately: For outer loop, we can use decreases n-1-i; for inner loop, we can use decreases n-i-1-j. But we need to ensure that the variant is integer and decreases each iteration and is bounded below (>=0). However, we can also use decreases for outer loop: decreases n-1-i; but i increments, so n-1-i decreases. That works. For inner loop, we can use decreases n-i-1-j; but j increments, so n-i-1-j decreases. That works.
+
+But we also need maintaining invariants for each loop. For outer loop, we need to maintain that the suffix of the array after i is sorted descending? Actually bubble sort works by bubbling largest elements to the front. At each iteration i, the last i elements are sorted and are the largest elements. So we can maintain that after each outer iteration, the last i elements are sorted and are the largest. But we can also maintain that the prefix (0..n-i-1) is not fully sorted. But we can keep it simple: maintain that after each iteration of outer loop, the suffix from i to n-1 is sorted descending and contains the largest i elements. But we can also maintain that all elements in the suffix are >= all elements in the prefix. But we can also maintain that the array is a permutation of original. But we can keep invariants simple.
+
+Better to follow typical JML invariants for bubble sort: For outer loop (i from 0 to n-2), maintain that after each iteration i, the subarray arr[n-i..n-1] is sorted descending and each element in that subarray is >= any element in arr[0..n-i-1]. Also maintain that the subarray arr[0..n-i-1] is a permutation of the original elements minus those in the sorted suffix.
+
+But we can also keep simpler: maintain that arr is a permutation of original and that arr is sorted descending for the suffix. But we need to ensure that we can prove the ensures clause.
+
+We also need to ensure that we include ensures clause for bubbleSort: after method, arr is sorted descending and is a permutation of original. Also returns arr.
+
+We also need to ensure that we include ensures clause for swap: after swap, arr[x] == old arr[y] and arr[y] == old arr[x] and all other elements unchanged.
+
+We also need to include requires clause for swap: array != null, 0 <= x < array.length, 0 <= y < array.length.
+
+We also need to include requires clause for bubbleSort: arr != null.
+
+We also need to include modifies clause for bubbleSort: modifies arr[\].
+
+We also need to include modifies clause for swap: modifies array[x], array[y].
+
+We also need to include ensures clause for swap: ensures array[x] == \old(array[y]) && array[y] == \old(array[x]) && (\forall int k; k != x && k != y; array[k] == \old(array[k])).
+
+We also need to include ensures clause for bubbleSort: ensures \result == arr && (\forall int i; 0 <= i < arr.length-1; arr[i] >= arr[i+1]) && (\forall int i; 0 <= i < arr.length; (\exists int j; 0 <= j < arr.length; arr[i] == \old(arr[j]))) (i.e., permutation). But we can also use more straightforward: ensures (\forall int i; 0 <= i < arr.length; (\exists int j; 0 <= j < arr.length; arr[i] == \old(arr[j]))) && (\forall int i; 0 <= i < arr.length-1; arr[i] >= arr[i+1]).
+
+But we can also use \perm(arr, \old(arr))? Actually JML has a built-in predicate for permutations: \perm(arr, \old(arr)). But I'm not sure. We can use \distinct? Not exactly. We can use \forall to check each element appears same number of times. But easier: ensures (\forall int i; 0 <= i < arr.length; arr[i] == \old(arr[i]))? That would require no change. Not correct. So we need to ensure it's a permutation. We can use \exists but we need to ensure each element appears same count. But we can also use \perm(arr, \old(arr)). However, JML does not have built-in permutation predicate; we can define manually. But we can keep it simple: ensures arr is a permutation of the original array. But we can also just ensure that the sorted order is descending and that the array contains the same elements (maybe using \forall int i; 0 <= i < arr.length; (\exists int j; 0 <= j < arr.length; arr[i] == \old(arr[j]))) and also that each element appears same number of times. But we can also use \forall int i; 0 <= i < arr.length; (\exists int j; 0 <= j < arr.length; arr[i] == \old(arr[j])) && (\forall int i; 0 <= i < arr.length; (\forall int j; j != i; arr[i] != arr[j] || \old(arr[i]) == \old(arr[j])))... That's too complex.
+
+Better to use \perm(arr, \old(arr)). But I'm not sure if JML supports that. Actually JML has a built-in predicate \perm(array, oldArray) that checks that the two arrays have the same elements (same multiset). But I'm not fully sure. According to JML documentation, \perm(a, b) returns true if a is a permutation of b. But it's not part of the core JML; it's in the JML library. However, we can use it. But we might want to avoid using it if not sure. But we can still include it.
+
+Better to use ensures that arr is sorted descending and that the method returns arr. The permutation property may be implied by the algorithm (swap only moves elements). But we might want to include ensures that the array is a permutation of the original. But we can also just ensure that the array is sorted descending and that the method returns arr. The spec may be considered sufficient.
+
+Given the examples, they only included ensures for result and for property. They didn't include permutation. So we can just include ensures that arr is sorted descending. But we also need to ensure that the method returns arr. So ensures \result == arr.
+
+We also need to ensure that the method modifies arr. So we include //@ modifies arr[\]; but we also need to ensure that the method does not modify anything else. But we can just include modifies arr[\].
+
+We also need to ensure that the method does not throw exceptions. But we can ignore.
+
+We also need to ensure that we include requires for arr != null.
+
+We also need to ensure that we include requires for swap: array != null, x and y within bounds.
+
+We also need to ensure that we include ensures for swap: after swap, array[x] == old array[y] && array[y] == old array[x] && other elements unchanged.
+
+We also need to ensure that we include loop invariants for both loops.
+
+We also need to ensure that we include decreases for each loop.
+
+We also need to ensure that we include spec_public only when needed. Not needed.
+
+Thus we need to produce final Java file with JML comments.
+
+We need to decide where to place JML comments: Usually they are placed before method signature, and also inside method for loop invariants. In the examples, they placed //@ requires ... ; before method, and //@ ensures ... ; before method. Then inside method they placed //@ maintaining ... ; //@ decreases ... ; before the while loops. For for loops, they placed //@ maintaining ... ; //@ decreases ... ; before the for loop? In the examples, they placed them inside the method before the while loop. For for loops, they might also place them before the for loop. But we can place them after the for loop header? Actually JML supports loop invariants for for loops as well: we can write //@ maintaining ... ; //@ decreases ... ; before the for loop, but after the for loop header? In the examples, they used while loops. But we can also use for loops. In JML, we can place invariants after the for loop header, like:
+
+for (int i = 0; i < n; i++) {
+    //@ maintaining ...
+    //@ decreases ...
+    ...
+}
+
+But we can also place them before the for loop, but then they apply to the loop. Usually we can place them after the for loop header, like:
+
+for (int i = 0; i < n; i++) {
+    //@ maintaining ...
+    //@ decreases ...
+    ...
+}
+
+But we need to ensure that the syntax is correct: In JML, we can put loop invariants inside the loop body, but they must be placed before the loop statement? Actually typical usage is:
+
+//@ maintaining invariant;
+//@ decreases variant;
+for (int i = 0; i < n; i++) {
+    // loop body
+}
+
+But we can also place them after the for loop header, like:
+
+for (int i = 0; i < n; i++) {
+    //@ maintaining invariant;
+    //@ decreases variant;
+    // loop body
+}
+
+But we need to check typical JML syntax: In JML, loop invariants are placed before the loop statement, not inside. But we can also place them after the for loop header? Actually typical JML syntax is:
+
+//@ loop_invariant invariant;
+//@ decreases variant;
+for (int i = 0; i < n; i++) {
+    // loop body
+}
+
+But we can also place them inside the loop body as a comment. However, the examples show they placed //@ maintaining ... ; and //@ decreases ... ; before the while loop, inside the method, after the variable declarations. They also placed them before the while loop, not after. So we should follow that pattern: place them before the loop.
+
+Thus for the outer for loop, we should place //@ maintaining ... ; //@ decreases ... ; before the for loop. Then we can also place them for inner loop similarly.
+
+But we also need to ensure that we include the correct invariants.
+
+We also need to ensure that we include the correct decreases variant for each loop.
+
+We also need to ensure that we include the correct modifies clause for swap.
+
+We also need to ensure that we include the correct ensures clause for swap.
+
+We also need to ensure that we include the correct ensures clause for bubbleSort.
+
+We also need to ensure that we include the correct requires clause for swap and bubbleSort.
+
+We also need to ensure that we include the correct spec_public if needed. Not needed.
+
+We also need to ensure that we include the correct JML comment style: //@ for single line, /*@ ... @*/ for block. In the examples, they used //@ for all. So we will use //@.
+
+We also need to ensure that we include proper semicolons at end of each JML statement.
+
+We also need to ensure that we include proper parentheses.
+
+We also need to ensure that we include proper line breaks.
+
+We also need to ensure that we include proper indentation for JML comments? Not required but we can indent with spaces.
+
+We also need to ensure that we do not change any executable code. So we must keep the code exactly as is, only add JML comments.
+
+Thus we need to produce something like:
+
+public class BubbleSortDesc {
+
+    //@ requires array != null;
+    //@ requires 0 <= x && x < array.length;
+    //@ requires 0 <= y && y < array.length;
+    //@ modifies array[x], array[y];
+    //@ ensures array[x] == \old(array[y]);
+    //@ ensures array[y] == \old(array[x]);
+    //@ ensures (\forall int k; k != x && k != y; array[k] == \old(array[k]));
+    void swap(int x, int y, int array[]) {
+        int temp;
+        temp = array[x];
+        array[x] = array[y];
+        array[y

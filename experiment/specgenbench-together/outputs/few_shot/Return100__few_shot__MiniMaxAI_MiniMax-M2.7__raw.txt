@@ -1,0 +1,188 @@
+We need to generate JML specifications for the given Java program:
+
+```java
+public class Return100 {
+    public static int return100 () {
+        int res = 0;
+        for(int i = 0; i < 100; i++) {
+            res = res + 1;
+        }
+        return res;
+    }
+}
+```
+
+We need to add JML comments: requires and ensures clauses for the method, loop specifications for the for loop: maintaining and decreases. Also spec_public if needed.
+
+The method is static, no parameters, so requires clause is trivial: maybe no precondition needed. But we can add `//@ requires true;` but not needed. However JML may allow no requires. The ensures clause: the method returns 100. So `ensures \result == 100;`. Also we can add a loop specification: maintain that res == i and i is between 0 and 100 inclusive, and decreases remaining loop count: 100 - i. So we need to annotate the for loop.
+
+In JML, a for loop can be annotated similarly to while loops: we can use `//@ maintaining ...; //@ decreases ...;` before the loop body. The for loop header is `for(int i = 0; i < 100; i++)`. We can annotate before the loop: `//@ maintaining 0 <= i && i <= 100; //@ maintaining res == i; //@ decreases 100 - i;`. But we need to be careful: the loop condition is i < 100, so i runs from 0 to 99 inclusive. At termination, i == 100, res == 100. So we can maintain that after each iteration, res == i and i is incremented. The decreases clause: `decreases 100 - i`. At start i=0, decreases 100; each iteration i increments, decreasing remaining. At termination i == 100, loop condition fails, but we don't need to maintain after loop. The loop invariant should hold at start of each iteration: 0 <= i && i <= 100 and res == i. Actually at start i=0, res=0, holds. At each iteration, before body, i < 100, so i <= 99. After body, i increments due to i++. But the invariant after iteration should hold for new i. However typical approach: maintain invariant before condition check. JML loop invariant is something like:
+
+```java
+//@ invariant 0 <= i && i <= 100;
+//@ invariant res == i;
+for (int i = 0; i < 100; i++) {
+    res = res + 1;
+}
+```
+
+But we can also use maintaining clause. The example for AddLoop used maintaining and decreases inside while loops. For for loops, we can also use maintaining and decreases. The spec may be:
+
+```java
+//@ ensures \result == 100;
+public static int return100 () {
+    int res = 0;
+    //@ maintaining res == i && 0 <= i && i <= 100;
+    //@ decreases 100 - i;
+    for(int i = 0; i < 100; i++) {
+        res = res + 1;
+    }
+    return res;
+}
+```
+
+But we need to ensure that the maintaining clause is correct: At start i=0, res=0, holds. At each iteration, before body, i < 100, and after body, i increments, but we need to ensure that after the body, res == i (where i is the value after increment). Actually the loop increments i after each iteration, but the body increments res before i increments. So after body, i is still the same as before increment? Wait, the for loop's increment expression is executed after the body. The order: initialization (i=0) -> condition check (i<100) -> body -> increment (i++) -> condition check again. So in the body, i is still the old value. After body, i increments. So we need to maintain that after each iteration (including after increment), res == i. But the invariant we wrote is "maintaining res == i && 0 <= i && i <= 100". However at the start of each iteration (before body), i is the current value, and res is equal to i (since we set res=0 initially, and each iteration increments res by 1, but i hasn't incremented yet). Actually after each iteration, i increments, and res increments. So after increment, res == i holds. So we can maintain that at each point after the increment, res == i. But JML's maintaining clause is typically used to describe the state at each iteration, maybe before the loop body or after each iteration? The example for AddLoop used maintaining after while condition, but they wrote maintaining sum == x + y - n && 0 <= n before loop body. Actually they wrote:
+
+```java
+while (n > 0) {
+    sum = sum + 1;
+    n = n - 1;
+}
+```
+
+And they annotated:
+
+```java
+//@ maintaining sum == x + y - n && 0 <= n;
+//@ decreases n;
+while (n > 0) {
+```
+
+So they placed the maintaining and decreases before the while loop, not inside the loop. That is the JML syntax: you can put loop specifications before the loop as a comment block. The maintaining clause describes the invariant that holds at the beginning of each iteration (i.e., before the loop condition is checked). The decreases clause also before the loop. So for a for loop, we can similarly place the loop specifications before the for loop. The invariant should hold at the start of each iteration (i.e., before the condition check). So we can write:
+
+```java
+//@ maintaining 0 <= i && i <= 100;
+//@ maintaining res == i;
+//@ decreases 100 - i;
+for (int i = 0; i < 100; i++) {
+    res = res + 1;
+}
+```
+
+But note that the invariant must hold at the start of each iteration, including the first iteration. At the start, i=0, res=0, so res == i holds. At each iteration, before the body, i is the current loop variable, and after the body, i increments, but the invariant for the next iteration is that res == i (the new i). However the invariant we wrote is res == i, which holds before each iteration. At the start of the loop, i=0, res=0, holds. After the body, i increments, res increments, so before the next iteration, i=1, res=1, holds. So it's correct.
+
+Thus we can add these loop specifications.
+
+We also need to consider the method's ensures clause: \result == 100. Also maybe we can add a requires clause: no precondition needed, but we can add `//@ requires true;` but not necessary. The problem statement says "Generate `requires` and `ensures` clauses for each method where appropriate." Since there are no parameters, we can either omit requires or add `//@ requires true;`. Usually JML allows no requires. But we might add a requires clause to specify that there are no constraints on parameters. However it's optional. The example for AddLoop had a requires clause: they wrote `//@ requires Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && y != Integer.MIN_VALUE;`. That was because they needed to ensure no overflow. For return100, there is no parameter, so no requires needed. But we might add `//@ requires true;` but it's not needed. The problem says "Add JML directly into the given Java source code." So we should add the ensures clause.
+
+We also need to consider spec_public: The problem says "Add `/*@ spec_public @*/` only when needed for specification visibility." In this code, there are no fields, only local variables. The method is static, no fields. So we don't need spec_public.
+
+Thus final annotated code:
+
+```java
+public class Return100 {
+    //@ ensures \result == 100;
+    public static int return100 () {
+        int res = 0;
+        //@ maintaining 0 <= i && i <= 100;
+        //@ maintaining res == i;
+        //@ decreases 100 - i;
+        for(int i = 0; i < 100; i++) {
+            res = res + 1;
+        }
+        return res;
+    }
+}
+```
+
+But we need to ensure that the loop specification is placed correctly. The comment lines should be placed before the for loop. The JML comment format is `//@ ...`. Usually you can put multiple clauses in one comment line or separate lines. In the example, they used separate lines for each clause. So we can do:
+
+```java
+//@ maintaining 0 <= i && i <= 100;
+//@ maintaining res == i;
+//@ decreases 100 - i;
+for(int i = 0; i < 100; i++) {
+    res = res + 1;
+}
+```
+
+But note that the loop variable i is declared in the for loop. The maintaining clause refers to i, but i is not yet declared at that point. In JML, you can refer to the loop variable in the loop specification, but you must ensure that the variable is in scope. In the example for AddLoop, they used n which was declared before the while loop. In our case, i is declared in the for loop header. The loop specification is placed before the for loop, but i is not yet in scope. However JML allows referencing the loop variable in the loop specification if you place the specification after the loop variable is declared? Actually typical usage: you can put the loop invariant after the for loop header, but you can also put it before the loop if you refer to the variable. Let's check typical JML syntax: For a for loop, you can write:
+
+```java
+//@ loop invariant 0 <= i && i <= 100;
+for (int i = 0; i < 100; i++) {
+    //@ maintaining res == i;
+    res = res + 1;
+}
+```
+
+But the standard is to put the loop invariant before the loop, but you need to declare the variable before the loop. However here the variable is declared in the for loop header. In JML, you can place the loop invariant after the for loop header but before the body, like:
+
+```java
+for (int i = 0; i < 100; /*@ loop invariant 0 <= i && i <= 100; @*/ i++) {
+    res = res + 1;
+}
+```
+
+But the example for AddLoop used while loops and placed the invariant before the while loop. For for loops, it's more common to use the loop invariant in the for loop header. However the problem statement gave example for while loops, but we can adapt.
+
+We need to decide the best approach. The problem statement says "Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate." It doesn't specify where to place them. In the example, they placed them before the while loop. So we can place them before the for loop as well. However we need to ensure that the variable i is in scope. In JML, you can refer to the loop variable if it's declared before the loop. But here it's declared in the for loop header. However we can also move the declaration of i before the loop, but that would change the code. The problem says "Do not change executable Java code." So we cannot change the code. However we can still refer to i in the loop specification if we place the specification after the for loop header? Actually we can place the specification inside the for loop header using JML comment inside the header. For example:
+
+```java
+for (int i = 0; i < 100; /*@ loop invariant 0 <= i && i <= 100; @*/ i++) {
+    res = res + 1;
+}
+```
+
+But the problem says "Add JML directly into the given Java source code." So we can add JML comments anywhere. However we need to be careful: The example for AddLoop used `maintaining` and `decreases` before the while loop. For for loops, we might need to use `loop invariant` and `decreases`. However the problem says "Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate." So we can use `maintaining` and `decreases` for for loops as well. But we need to ensure correct syntax.
+
+Let's recall JML syntax: The loop invariant is introduced by `//@ loop invariant <expression>;`. The loop variant (decreases) is introduced by `//@ loop variant <expression>;`. However the problem uses "maintaining" and "decreases". In the example, they used "maintaining" and "decreases". Actually JML uses "loop invariant" and "loop variant". But the example used "maintaining" and "decreases". That might be a simplified syntax for the assignment. In JML, you can also use "maintaining" as a comment? Let's check the example: They wrote:
+
+```java
+//@ maintaining sum == x + y - n && 0 <= n;
+//@ decreases n;
+while (n > 0) {
+```
+
+In JML, the correct keywords are "loop invariant" and "loop variant". However the example used "maintaining" and "decreases". That might be a shorthand used in this assignment. The problem statement says "Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate." So we should follow the style of the example: use "maintaining" and "decreases". So we will use "maintaining" for invariants and "decreases" for variant.
+
+Thus we will write:
+
+```java
+//@ maintaining 0 <= i && i <= 100;
+//@ maintaining res == i;
+//@ decreases 100 - i;
+for(int i = 0; i < 100; i++) {
+    res = res + 1;
+}
+```
+
+But we need to ensure that i is declared before the specification. Since i is declared in the for loop header, we cannot refer to it before it's declared. However we can move the specification to after the for loop header but before the body. In JML, you can place the loop specification inside the for loop header as a comment. But the example used a separate comment line before the loop. However they used a while loop, where the variable is declared before the loop. In our case, we cannot change the code, but we can place the specification after the for loop header but before the body, like:
+
+```java
+for(int i = 0; i < 100; i++) {
+    //@ maintaining 0 <= i && i <= 100;
+    //@ maintaining res == i;
+    //@ decreases 100 - i;
+    res = res + 1;
+}
+```
+
+But the problem says "Add JML directly into the given Java source code." It doesn't specify that the JML comment must be before the loop. However the example placed the specification before the loop. But we can also place it inside the loop body. However we need to be careful: The "maintaining" clause is typically used to describe the invariant that holds at each iteration, and it's usually placed before the loop (or as a comment inside the loop header). But we can also place it inside the loop body as a comment at the start of each iteration. However the example placed it before the loop. So we should try to follow that pattern: place the loop specifications before the for loop. However we need to ensure that i is in scope. Since i is declared in the for loop header, we cannot refer to it before it's declared. But we can refer to it if we use the "old" value? Actually we can refer to the loop variable in the loop invariant if we place the invariant after the loop variable is declared. In a for loop, the loop variable is declared in the header, so it's in scope for the entire loop. However we cannot refer to it before the header. So we need to place the specification after the header but before the body. In JML, you can place the loop invariant in the header using a comment inside the header. But the example used separate lines before the loop. However we can also place them inside the loop body. The problem does not specify the exact location, only to add loop specifications. So we can place them inside the loop body as a comment at the start of each iteration. However the example used "maintaining" and "decreases" before the while loop, not inside the while body. So we need to decide.
+
+Given the constraints, we can place the loop specifications before the for loop, but we need to refer to i. However we can refer to i if we declare it before the loop. But we cannot change the code. However we can declare a new variable i before the loop and then use it in the for loop? That would change the code. So we cannot.
+
+Thus we need to place the loop specifications after the for loop header. In JML, you can place the loop invariant as a comment inside the for loop header. For example:
+
+```java
+for (int i = 0; i < 100; /*@ loop invariant 0 <= i && i <= 100; @*/ i++) {
+    //@ maintaining res == i;
+    res = res + 1;
+}
+```
+
+But the problem wants us to use "maintaining" and "decreases". We can use "maintaining" inside the loop body. However the example used "maintaining" before the loop. But we can adapt.
+
+Given the instructions, we should generate JML specifications that are consistent with the example. The example used "maintaining" and "decreases" before the loop. However they also used "maintaining" for the while loop, which had the variable n declared before the loop. So we can follow that pattern: we can declare the loop variable before the loop, but we cannot change the code. However we can add a JML comment before the for loop that refers to i, but i is not yet declared. That would cause a syntax error. So we must adjust.
+
+Thus we need to place the loop specifications after the for loop header. In JML, you can place the loop invariant inside the loop body as a comment at the beginning of each iteration. However the example used "maintaining" and "decreases" as separate lines before the loop. But we can also use them inside the loop body. However the problem says "Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate." It doesn't specify that they must be placed before the loop. So we can place them inside the loop body. However we need to ensure that the loop invariant is correctly expressed. In JML, the loop invariant must hold at the start of each iteration. If we place a comment inside the loop body, it will be checked at that point. But we also need to ensure that the invariant holds before the condition is evaluated. Usually you put the invariant before the loop. But we can also put it inside the loop body, but then it will be checked after the body? Actually JML's loop invariant is checked at the start of each iteration, before the loop condition. If we put a comment inside the loop body, it's not automatically a loop invariant. We need to use the proper

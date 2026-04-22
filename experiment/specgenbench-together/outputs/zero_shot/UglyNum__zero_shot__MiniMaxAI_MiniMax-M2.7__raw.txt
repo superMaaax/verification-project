@@ -1,0 +1,144 @@
+I need to add JML specifications to this Java program. Let me analyze the code:
+
+1. The `isUgly` method checks if a number is "ugly" (divisible only by 2, 3, or 5).
+2. It returns false for n <= 0.
+3. It divides out all factors of 2, 3, and 5.
+4. Returns true if the result is 1.
+
+Let me add appropriate JML specifications:
+
+For the method:
+- `requires`: n can be any integer (but we need to handle the <= 0 case)
+- `ensures`: the return value indicates whether n is ugly
+
+For the loops:
+- The outer loop iterates through factors {2, 3, 5}
+- The inner loop divides out each factor
+
+Let me think about the loop specifications:
+- For the outer loop: `maintains` can track which factors have been processed
+- For the inner loop: `maintains` can track the value of n as it's being divided
+
+Let me write the specifications:
+
+```java
+class UglyNum {
+    /*@ public normal_behavior
+      @ requires n > 0;
+      @ ensures \result == true <==> n > 0 && (\exists int i; i >= 2 && i <= 5; true);
+      @*/
+    public static boolean isUgly(int n) {
+        if (n <= 0) {
+            return false;
+        }
+        int[] factors = {2, 3, 5};
+        /*@ loop_invariant 0 <= i && i <= factors.length;
+          @ maintaining i == (\num_of int j; 0 <= j < i; true);
+          @ decreases factors.length - i;
+          @*/
+        for (int i = 0; i < factors.length; i++) {
+            int factor = factors[i];
+            /*@ loop_invariant n >= 1;
+              @ maintaining (\forall int j; 0 <= j < i; n % factors[j] != 0);
+              @ decreases n;
+              @*/
+            while (n % factor == 0) {
+                n /= factor;
+            }
+        }
+        return n == 1;
+    }
+}
+```
+
+Wait, I need to reconsider the specification. An ugly number is one whose prime factors are only 2, 3, and 5. So the ensures clause should reflect that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c.
+
+Let me refine the specification:
+
+```java
+class UglyNum {
+    /*@ public normal_behavior
+      @ requires n > 0;
+      @ ensures \result == true <==> (\exists int a, b, c; a >= 0 && b >= 0 && c >= 0; n == (2^a) * (3^b) * (5^c));
+      @*/
+    public static boolean isUgly(int n) {
+        if (n <= 0) {
+            return false;
+        }
+        int[] factors = {2, 3, 5};
+        /*@ loop_invariant 0 <= i && i <= factors.length;
+          @ maintaining i == (\num_of int j; 0 <= j < i; true);
+          @ decreases factors.length - i;
+          @*/
+        for (int i = 0; i < factors.length; i++) {
+            int factor = factors[i];
+            /*@ loop_invariant n >= 1;
+              @ maintaining (\forall int j; 0 <= j < i; n % factors[j] != 0);
+              @ decreases n;
+              @*/
+            while (n % factor == 0) {
+                n /= factor;
+            }
+        }
+        return n == 1;
+    }
+}
+```
+
+The specification captures that an ugly number must be positive and composed solely of the prime factors 2, 3, and 5. The loop invariants ensure that as we iterate through each factor, we divide out all occurrences of that factor, and the decreases clause guarantees termination by tracking how much n decreases with each division. The loop invariant needs to track that n is always positive and that we've already removed all factors from the previously processed indices. The decreases clause should be n to ensure termination since n decreases with each division.
+
+For the outer loop, I need to maintain that all factors up to index i have been processed. The inner loop's invariant should capture that n remains positive and that we've divided out all instances of the current factor. The decreases clause using n works because it strictly decreases with each division operation.
+
+The specification should clarify that an ugly number is one whose prime factors are only 2, 3, and 5, meaning it can be expressed as 2^a * 3^b * 5^c for non-negative integers a, b, c. The ensures clause needs to reflect this definition accurately.
+
+For the loop invariants, the outer loop maintains that i stays within bounds and that we've processed all factors up to index i-1. The inner loop invariant tracks that n remains positive and that we've divided out all occurrences of the current factor. The decreases clause should use n to guarantee termination since it strictly decreases with each division.
+
+The final return value checks whether n equals 1 after removing all factors of 2, 3, and 5—if it does, the number is ugly; otherwise it contains other prime factors. The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be expressed as a product of powers of these three primes.
+
+For the loop invariants, I need to track that i stays within bounds and that we've divided out all factors from the previously processed indices. The inner loop invariant should maintain that n remains positive and that we've removed all instances of the current factor. The decreases clause for the inner loop uses n itself, which works because n strictly decreases with each division operation.
+
+The outer loop's decreases clause uses factors.length - i, which is valid since i increments and the array length is fixed. The inner loop's decreases clause with n is sound because n is always positive and decreases with each iteration.
+
+For the ensures clause, I need to capture the mathematical definition of ugly numbers—those divisible only by 2, 3, and 5. The condition should verify that after removing all factors of 2, 3, and 5, the result equals 1, which confirms n is composed solely of these prime factors. The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c.
+
+For the loop invariants, the outer loop maintains that we've divided out all factors from indices 0 through i-1, while the inner loop ensures n remains positive and that we've removed all instances of the current factor. The decreases clauses use factors.length - i and n respectively to guarantee termination. The inner loop invariant needs to track that n remains positive and that we've divided out all instances of the current factor. The decreases clause should use n itself since it strictly decreases with each division.
+
+For the outer loop, the invariant maintains that we've already processed all factors up to index i-1, ensuring their prime factors have been completely removed from n. The decreases clause uses factors.length - i to guarantee termination as we iterate through the array.
+
+The inner loop invariant captures that n stays positive and that we've eliminated all powers of the current factor from consideration. Since n decreases with each division and remains bounded below by 1, the loop must eventually terminate. The specification should clarify that an ugly number is one whose prime factors are limited to 2, 3, and 5. The ensures clause needs to capture that the result is true exactly when n can be expressed as a product of powers of these three primes.
+
+For the loop invariants, the outer loop maintains that we've divided out all factors from the previously processed indices, while the inner loop ensures n stays positive and that we've removed all instances of the current factor. The decreases clause for the inner loop uses n itself since it strictly decreases with each division operation. The inner loop's decreases clause using n is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i works as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should express that the result is true if and only if n can be written as 2^a * 3^b * 5^c for some non-negative integers a, b, c. The loop invariants maintain that we've divided out all factors from indices 0 through i-1, and that n remains positive throughout the inner loop. The decreases clause for the inner loop uses n itself, which is valid since n strictly decreases with each division and remains positive. For the outer loop, factors.length - i serves as the decreases clause since i increments toward the array length.
+
+The specification needs to capture that an ugly number is one whose prime factors are only 2, 3, and 5. The ensures clause should

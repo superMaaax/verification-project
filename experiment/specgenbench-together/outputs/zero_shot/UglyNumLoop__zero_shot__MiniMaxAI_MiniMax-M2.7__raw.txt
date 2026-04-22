@@ -1,0 +1,432 @@
+I need to add JML specifications to this Java program. Let me analyze the code:
+
+1. The class `UglyNumLoop` has a static method `isUgly(int n)` that checks if a number is "ugly" (only divisible by 2, 3, and 5).
+
+2. The method:
+   - Returns false if n <= 0
+   - Divides by 2 as long as n is divisible by 2
+   - Divides by 3 as long as n is divisible by 3
+   - Divides by 5 as long as n is divisible by 5
+   - Returns true if n == 1, false otherwise
+
+Let me add JML specifications:
+
+For the class, I should add a class-level specification if needed.
+
+For the method `isUgly`:
+- Requires: n should be valid (typically n != Integer.MIN_VALUE for operations, but since we're checking n <= 0, we just need to ensure n is within reasonable bounds)
+- Ensures: returns true if and only if n is an ugly number (can be expressed as 2^i * 3^j * 5^k for some non-negative integers i, j, k)
+
+For the loops:
+- First loop: divides by 2 repeatedly. Need to maintain that the product of all divisions so far equals the original n divided by current n.
+- Second loop: divides by 3 repeatedly.
+- Third loop: divides by 5 repeatedly.
+
+Let me think about the loop specifications more carefully:
+
+For the first while loop (n % 2 == 0):
+- We need to maintain that the original value is preserved in some form
+- Actually, a better approach: maintain that n * (2^count) equals the original n
+- Or maintain that n after the loop has no factor of 2
+
+Let me think about this differently. The loops are removing factors. So:
+
+Loop 1 (divide by 2):
+- Maintaining: \old(n) == n * (2^k) where k is the number of iterations
+- Decreases: n
+
+Loop 2 (divide by 3):
+- Maintaining: \old(n) == n * (3^k) where k is the number of iterations
+- Decreases: n
+
+Loop 3 (divide by 5):
+- Maintaining: \old(n) == n * (5^k) where k is the number of iterations
+- Decreases: n
+
+Actually, let me reconsider. The standard way to specify these loops in JML:
+
+For a loop that divides n by 2 repeatedly:
+```
+/*@
+  maintaining n > 0;
+  maintaining \old(n) == n * (2^loop_count);
+  decreases n;
+@*/
+while (n % 2 == 0) {
+    n /= 2;
+}
+```
+
+But we need to be careful with the loop_count. In JML, we can use a variable to track this, or we can express it differently.
+
+Actually, a cleaner specification:
+- maintaining: the invariant that n is still a valid integer and that the original value divided by current value is a power of 2 (for first loop)
+
+Let me think about this more carefully. The loops are independent in the sense that they each handle one prime factor.
+
+For the first loop:
+```
+/*@
+  maintaining n > 0;
+  maintaining \old(n) == n * (2^count);
+  decreases n;
+@*/
+while (n % 2 == 0) {
+    n /= 2;
+}
+```
+
+But we need to declare count. We can use a ghost variable or express it differently.
+
+Actually, the simplest way is:
+- maintaining: \old(n) == n * (2^k) for some integer k >= 0
+- But JML doesn't have "for some" in maintaining clauses easily.
+
+Let me use a different approach. We can maintain that n is still divisible by the original value in a multiplicative sense, but that's not right.
+
+Actually, the best approach is to track the product of what we've divided out:
+
+For loop 1:
+```
+/*@
+  maintaining n > 0;
+  maintaining \old(n) == n * (2^k) where k is the number of iterations;
+  decreases n;
+@*/
+```
+
+But we need to express k. We can use a helper or just express it as:
+```
+maintaining \old(n) % n == 0;
+maintaining (\old(n) / n) % 2 != 0;  // or something similar
+```
+
+Actually, a simpler invariant:
+- After the first loop, n is not divisible by 2
+- The product of all divisions equals the original value divided by current value
+
+Let me use:
+```
+maintaining n > 0;
+maintaining \old(n) == n * (2^loop_count);
+decreases n;
+```
+
+But we need to declare loop_count as a ghost variable or express it differently.
+
+In JML, we can use:
+```
+/*@
+  ghost int loop_count = 0;
+  maintaining \old(n) == n * (2^loop_count);
+  decreases n;
+@*/
+while (n % 2 == 0) {
+    n /= 2;
+    //@ loop_count++;
+}
+```
+
+But the problem says "Do not rename classes, methods, fields, or variables" and "Do not change executable Java code". Adding ghost variables might be considered changing the code? But ghost variables are specification-only, so they shouldn't change the executable code.
+
+Actually, looking at the requirements again: "Do not change executable Java code" - ghost variables are not executable, so they should be fine.
+
+But let me see if I can express it without ghost variables. 
+
+Actually, a common pattern is:
+```
+maintaining \old(n) == n * (2^k) for some integer k;
+```
+
+But JML doesn't have "for some" in maintaining clauses. We need to use \exists or express it differently.
+
+Wait, JML does have \exists. But maintaining clauses typically need to be true at every iteration.
+
+Let me think about this differently. The invariant should be that the original n equals current n times some power of 2. We can express this as:
+```
+maintaining \old(n) == n * (2^k) && k >= 0;
+```
+
+But we need k. We can use a ghost variable.
+
+Actually, looking at standard JML loop specifications, the typical pattern is:
+```
+/*@
+  maintaining \old(n) == n * (2^loop_count);
+  decreases n;
+@*/
+while (n % 2 == 0) {
+    n /= 2;
+}
+```
+
+Where loop_count is a ghost variable.
+
+But wait, I need to be careful. The \old(n) refers to the value at the beginning of the loop, not the beginning of the method. So for the first loop, \old(n) is the parameter n. For subsequent loops, \old(n) would be the value at the start of that loop.
+
+Actually, for the second loop, \old(n) would be the value after the first loop. So we need to be careful.
+
+Let me reconsider the specification approach.
+
+The method checks if n is an ugly number. An ugly number is a number whose only prime factors are 2, 3, and 5.
+
+So the ensures clause should be:
+```
+ensures \result == true <==> (\exists int i, j, k; i >= 0 && j >= 0 && k >= 0; n == 2^i * 3^j * 5^k);
+```
+
+But wait, the method also returns false for n <= 0. So:
+```
+ensures \result == false <==> (n <= 0 || (\exists int i, j, k; i >= 0 && j >= 0 && k >= 0; n != 2^i * 3^j * 5^k));
+```
+
+Actually, simpler:
+```
+ensures \result == (n > 0 && (\exists int i, j, k; i >= 0 && j >= 0 && k >= 0; n == 2^i * 3^j * 5^k));
+```
+
+Or we can break it down:
+```
+ensures \result == false <==> n <= 0;
+ensures \result == true <==> n > 0 && (\exists int i, j, k; i >= 0 && j >= 0 && k >= 0; n == 2^i * 3^j * 5^k);
+```
+
+For the requires clause:
+```
+requires n != Integer.MIN_VALUE;  // to avoid overflow issues, though in this case we're just dividing
+```
+
+Actually, since we're only doing division by positive divisors (2, 3, 5) and checking remainders, we don't really have overflow issues. But if n is Integer.MIN_VALUE, n % 2 == 0 might behave differently? Actually, no, modulo with positive divisor is fine.
+
+But to be safe, we might want to require n > Integer.MIN_VALUE or just n != Integer.MIN_VALUE.
+
+Actually, looking at the code, if n is Integer.MIN_VALUE, then n % 2 == 0 (since it's even), so we enter the loop. Then n /= 2 would give a negative number. But that's fine, it won't cause an exception.
+
+Wait, Integer.MIN_VALUE / 2 = -1073741824, which is fine.
+
+So I think we can just require n to be within reasonable bounds, or we can just not specify requires if any integer is valid.
+
+Actually, the method works for any integer n. If n <= 0, it returns false. So technically requires is just true, or we can specify n != Integer.MIN_VALUE if we want to be pedantic about division, but since we're only dividing by small positive numbers, it's fine.
+
+Let me just use:
+```
+requires true;
+```
+or just omit requires if not needed. But typically we should specify.
+
+Actually, looking at the code again, if n is 0, it returns false. If n is negative, it returns false. So the method handles all integers.
+
+For the requires clause, I'll use:
+```
+requires n != Integer.MIN_VALUE;
+```
+to be safe, or just leave it as default (true).
+
+Actually, let me check: if n = Integer.MIN_VALUE, then n % 2 == 0, so we enter the first loop. n /= 2 gives -1073741824. Then n % 2 == 0 again? -1073741824 % 2 == 0. So we keep dividing until n becomes odd or 1.
+
+Actually, Integer.MIN_VALUE = -2147483648.
+Divided by 2: -1073741824
+Divided by 2: -536870912
+Divided by 2: -268435456
+Divided by 2: -134217728
+Divided by 2: -67108864
+Divided by 2: -33554432
+Divided by 2: -16777216
+Divided by 2: -8388608
+Divided by 2: -4194304
+Divided by 2: -2097152
+Divided by 2: -1048576
+Divided by 2: -524288
+Divided by 2: -262144
+Divided by 2: -131072
+Divided by 2: -65536
+Divided by 2: -32768
+Divided by 2: -16384
+Divided by 2: -8192
+Divided by 2: -4096
+Divided by 2: -2048
+Divided by 2: -1024
+Divided by 2: -512
+Divided by 2: -256
+Divided by 2: -128
+Divided by 2: -64
+Divided by 2: -32
+Divided by 2: -16
+Divided by 2: -8
+Divided by 2: -4
+Divided by 2: -2
+Divided by 2: -1
+
+Then n % 3 == 0? -1 % 3 == -1 != 0
+Then n % 5 == 0? -1 % 5 == -1 != 0
+Return n == 1? -1 == 1 is false.
+
+So it returns false, which is correct (negative numbers are not ugly).
+
+So the method works for all integers.
+
+For the requires clause, I'll just use the default (no requires) or specify `requires true`. But typically we should add one.
+
+Now for the loop specifications:
+
+Loop 1: while (n % 2 == 0)
+- We want to maintain that n is still a positive integer (or non-negative, but since we divide, it stays positive if started positive)
+- Actually, if n starts negative, it stays negative. But the first check is n <= 0 returning false, so we don't need to handle that in the loop.
+- Wait, the method checks n <= 0 at the start and returns false. So if we reach the loops, n > 0.
+- So we can maintain n > 0.
+- We also want to maintain that the original n equals current n times some power of 2.
+- Decreases: n (since we're dividing by 2, n strictly decreases in absolute value, but actually if n is positive, it decreases)
+
+Actually, if n is positive and we divide by 2, n decreases. If n is negative and we divide by 2, the absolute value decreases but n becomes less negative (closer to 0). But since the method returns false for n <= 0, we only care about n > 0.
+
+So for the first loop:
+```
+/*@
+  maintaining n > 0;
+  maintaining \old(n) == n * (2^k) for some integer k >= 0;
+  decreases n;
+@*/
+while (n % 2 == 0) {
+    n /= 2;
+}
+```
+
+But we need to express "for some integer k >= 0". In JML, we can use \exists:
+```
+maintaining \exists int k; k >= 0 && \old(n) == n * (2^k);
+```
+
+But 2^k is problematic. We can use a ghost variable or express it differently.
+
+Actually, a cleaner way: maintain that n is still an integer and that the ratio is a power of 2. But we can't easily express power in JML without ghost variables.
+
+Let me use ghost variables. I'll add a ghost variable for the loop count.
+
+Actually, looking at the code structure, the loops are sequential. After the first loop, n has no factor of 2. After the second, no factor of 3. After the third, no factor of 5.
+
+So after all three loops, n should be 1 if it's only composed of 2, 3, 5 factors.
+
+For the first loop, the invariant is that n is still divisible by the original value in a way that removes powers of 2. Actually, we can express it as:
+
+```
+maintaining n > 0;
+maintaining \old(n) % n == 0;
+maintaining (\old(n) / n) % 2 != 0 || \old(n) == n;
+decreases n;
+```
+
+Wait, that doesn't work. If n = 12, \old(n) = 12.
+Iteration 1: n = 6. \old(n) / n = 2. 2 % 2 != 0 is false.
+But we want to allow \old(n) / n to be a power of 2.
+
+Actually, a better invariant:
+```
+maintaining n > 0;
+maintaining \old(n) == n * (2^p) for some integer p >= 0;
+decreases n;
+```
+
+But we need p. We can use:
+```
+maintaining \exists int p; p >= 0 && \old(n) == n * (2^p);
+```
+
+But 2^p is not easy to express in JML without a function.
+
+We can use a helper function or just use a ghost variable.
+
+Let me use ghost variables. I'll declare them inside the loop specification.
+
+Actually, looking at standard JML examples, the typical pattern for this is:
+
+```
+/*@
+  maintaining n > 0;
+  maintaining \old(n) == n * (2^loop_count);
+  decreases n;
+@*/
+while (n % 2 == 0) {
+    n /= 2;
+}
+```
+
+Where loop_count is a ghost variable initialized to 0 and incremented each iteration.
+
+But wait, in JML, we need to declare the ghost variable before the loop. We can do:
+
+```
+/*@
+  ghost int loop_count = 0;
+  maintaining \old(n) == n * (2^loop_count);
+  decreases n;
+@*/
+while (n % 2 == 0) {
+    n /= 2;
+    //@ loop_count++;
+}
+```
+
+But the problem says "Do not change executable Java code". Adding `//@ loop_count++;` is adding code inside the loop, which changes the executable code (adds a statement).
+
+So I cannot add that.
+
+Let me think of another way.
+
+We can express the invariant as:
+```
+maintaining n > 0;
+maintaining \old(n) == n * (2^k) && k >= 0;
+decreases n;
+```
+
+But we need k. We can use \exists:
+
+```
+maintaining \exists int k; k >= 0 && \old(n) == n * (2^k);
+```
+
+But 2^k is the problem. We can use a helper function or just express it as: the quotient is a power of 2.
+
+Actually, we can use:
+```
+maintaining n > 0;
+maintaining isPowerOfTwo(\old(n) / n) || \old(n) == n;
+decreases n;
+```
+
+But we don't have a helper function.
+
+We can define a helper function in the class, but that might be overkill.
+
+Actually, for the purpose of this exercise, I think the simplest is to use ghost variables but put the increment in the ghost code. But if I put `loop_count++` inside the loop, that's changing the loop body.
+
+Wait, JML comments are not executable. So `//@ loop_count++;` is not executable code, it's a JML statement. So it should be fine.
+
+But the problem says "Do not change executable Java code". JML comments are not executable Java code. So adding ghost variable increments should be fine.
+
+Let me reconsider. The increment `//@ loop_count++;` is inside a JML comment, so it's not executable. So it should be allowed.
+
+So I'll use ghost variables for the loop counts.
+
+Actually, wait. Let me check the exact wording: "Do not change executable Java code."
+
+JML comments are not executable Java code. So adding ghost variables and their increments inside JML comments is fine.
+
+So for the first loop:
+```
+/*@
+  ghost int count2 = 0;
+  maintaining n > 0;
+  maintaining \old(n) == n * (2^count2);
+  decreases n;
+@*/
+while (n % 2 == 0) {
+    n /= 2;
+    //@ count2++;
+}
+```
+
+But wait, \old(n) refers to the value at the start of the loop, not the method. So for the first loop, \old(n) is the parameter n. That's correct.
+
+For the second loop:
+- \old(n)

@@ -1,0 +1,168 @@
+We need to generate JML specifications for the given Java program. The program is:
+
+```java
+public class ReverseArray {
+    public static int[] reverse(int[] original) {
+        int n = original.length;
+        int[] res = new int[n];
+        for(int i = 0; i < n ; i++) {
+            res[i] = original[n - i - 1];
+        }
+        return res;
+    }
+}
+```
+
+We need to add JML comments: requires and ensures clauses for each method where appropriate, loop specifications (maintaining, decreases) for each loop, and spec_public only when needed for specification visibility.
+
+We need to output the full Java file with JML annotations, without changing executable Java code.
+
+We need to consider the method signature: public static int[] reverse(int[] original). The method takes an array original and returns a new array that is the reversed version.
+
+We need to generate requires and ensures clauses. Typically, we require original != null? Possibly we can allow null but then ensures would be something like \result != null && \result.length == original.length && (\forall int i; 0 <= i && i < original.length; \result[i] == original[original.length - i - 1]). However, we might also want to specify that if original is null, then the behavior is unspecified. Usually in JML we can specify requires original != null; but we can also allow null and specify behavior for null. The problem statement does not specify any constraints. In typical JML examples, they often assume non-null references unless specified. The method returns a new array, so we need to ensure that the result is not null and has same length and reversed order.
+
+We also need to add loop specifications for the for loop. The loop is:
+
+for(int i = 0; i < n ; i++) {
+    res[i] = original[n - i - 1];
+}
+
+We need to add maintaining and decreases clauses. The loop iterates i from 0 to n-1. We can maintain that at each iteration, the elements res[0..i-1] are correctly reversed (i.e., res[j] == original[n - j - 1] for j < i). Also we need to maintain that i is within bounds. The decreases clause can be n - i (or something like that). Since i increases, we need a measure that decreases. Typically we can use n - i, which starts at n and decreases to 0. Or we can use n - i, but note that i is increasing, so n - i is decreasing. So we can write //@ decreases n - i; but note that n - i is not monotonic? Actually as i increases, n - i decreases, so it's fine. However, we need to ensure that the decreases clause is a non-negative integer expression that strictly decreases each iteration. So we can use n - i, but note that at the start of each iteration, we need to check the condition. Usually we put the decreases clause before the loop or inside the loop? In JML, we can annotate the loop with //@ maintaining and //@ decreases after the loop? Actually typical pattern is:
+
+//@ maintaining invariant;
+//@ decreases bound;
+while (condition) {
+    //@ maintaining invariant;
+    //@ decreases bound;
+    statements;
+}
+
+But in the examples given, they put the maintaining and decreases before the loop (or after?). Let's examine Example 1: They have:
+
+if (y > 0) {
+    int n = y;
+    //@ decreases n;
+    //@ maintaining sum == x + y - n && 0 <= n;
+    while (n > 0) {
+        sum = sum + 1;
+        n = n - 1;
+    }
+} else {
+    int n = -y;
+    //@ maintaining sum == x + y + n && 0 <= n;
+    //@ decreases n;
+    while (n > 0) {
+        sum = sum - 1;
+        n = n - 1;
+    }
+}
+
+In the first branch, they put decreases before maintaining, but order can be any. In the second branch, they put maintaining before decreases. So we can put them in any order.
+
+In Example 2, they have:
+
+//@ maintaining 0 <= index && index <= a.length;
+//@ maintaining 0 <= smallest && smallest < a.length;
+//@ maintaining (\forall int i; 0 <= i && i < index; a[smallest] <= a[i]);
+//@ decreases a.length - index;
+while (a.length - index > 0) {
+    if (a[index] < a[smallest]) {
+        smallest = index;
+    }
+    index = index + 1;
+}
+
+So they put maintaining and decreases before the loop. So we can follow that pattern.
+
+Thus for the for loop, we can add:
+
+//@ maintaining 0 <= i && i <= n;
+//@ maintaining (\forall int j; 0 <= j && j < i; res[j] == original[n - j - 1]);
+//@ decreases n - i;
+for (int i = 0; i < n; i++) {
+    res[i] = original[n - i - 1];
+}
+
+But note that the loop variable i is declared in the for loop. In JML, we can refer to i in the specification, but we need to be careful: the spec_public might be needed if we want to refer to i in the ensures clause? Actually we only need to refer to i in the loop invariants. Since i is a local variable, we can refer to it in the loop invariants. However, we need to ensure that the invariants are well-formed. The JML syntax for quantifiers: (\forall int i; 0 <= i && i < i; ...) but note that we cannot reuse i as the quantifier variable because i is already used in the loop. In JML, we can use a different variable for the quantifier, but we can also use the same name? Typically we can use a different variable to avoid confusion. In the example, they used a different variable in the quantifier: (\forall int i; 0 <= i && i < index; a[smallest] <= a[i]); Here index is the loop variable, and they used i as the quantifier variable. So we can do similarly: (\forall int j; 0 <= j && j < i; res[j] == original[n - j - 1]).
+
+We also need to ensure that the loop invariant includes that i is within bounds. Since i is the loop variable, we can maintain that i is between 0 and n. But note that the loop condition is i < n, so at the start of each iteration, i is 0, and after each iteration, i increments. The invariant should hold at the beginning of each iteration. Typically we maintain that 0 <= i && i <= n. But after the loop terminates, i == n. So we can maintain that i is between 0 and n inclusive. However, we also need to maintain that the elements assigned so far are correct. So we can have:
+
+//@ maintaining 0 <= i && i <= n;
+//@ maintaining (\forall int j; 0 <= j && j < i; res[j] == original[n - j - 1]);
+
+But note that the loop condition is i < n, so when the loop body is about to execute, i is in [0, n). After the loop body, i increments to i+1, and then the condition is checked again. At the point after the loop terminates, i == n. So the invariant should hold at each iteration. We can also include that the length of res is n, but that is already known from the allocation. However, we might want to include that res is not null. But we can assume that.
+
+We also need to add a decreases clause. Since i increases, we need a bound that decreases. Typically we can use n - i. But note that at the start of the loop, i=0, bound = n. At each iteration, i increments, so bound decreases. So we can write //@ decreases n - i; but note that n - i is non-negative. However, when i reaches n, the loop terminates, so we don't need to consider the bound at termination. So it's fine.
+
+Alternatively, we could use a different bound like n - i, but note that if i is an int, then n - i might overflow if n is Integer.MAX_VALUE? But we can ignore that for now.
+
+Thus we can add:
+
+//@ maintaining 0 <= i && i <= n;
+//@ maintaining (\forall int j; 0 <= j && j < i; res[j] == original[n - j - 1]);
+//@ decreases n - i;
+for (int i = 0; i < n; i++) {
+    res[i] = original[n - i - 1];
+}
+
+But note: the loop variable i is declared in the for loop. In JML, we cannot refer to i in the specification before it's declared? Actually we can refer to i in the loop invariants because it's in scope. However, we need to be careful: the spec_public is not needed because i is a local variable. But we might need to use spec_public if we want to refer to i in the ensures clause? Actually we don't need to refer to i in the ensures clause, but we might want to refer to the array contents. So we can just use the quantifier.
+
+Now, we also need to add requires and ensures for the method. The method reverse takes an array original and returns a new array that is the reversal. We can write:
+
+//@ requires original != null;
+//@ ensures \result != null && \result.length == original.length && (\forall int i; 0 <= i && i < original.length; \result[i] == original[original.length - i - 1]);
+
+But note: we also need to ensure that the elements are correctly reversed. However, we also need to consider the case when original is null. The problem does not specify, but we can assume non-null. However, to be safe, we can require original != null. But note that in the example, they didn't require non-null for the AddLoop because they didn't have arrays. In Example 2, they didn't require non-null for the array a? Actually they didn't add a requires clause for Smallest. They only added ensures. But they didn't have any requires. So maybe we don't need to add a requires clause if we don't want to restrict. However, the method does not handle null gracefully: if original is null, then n = original.length will throw NullPointerException. So we might want to specify that original must be non-null. But the problem statement does not specify any constraints. In typical JML usage, we often specify requires for non-null. But the problem says "Generate `requires` and `ensures` clauses for each method where appropriate." So we should add requires if appropriate. Since the method uses original.length and original[n - i - 1], it will throw NullPointerException if original is null. So we should add requires original != null. However, we might also want to allow null and specify behavior? But then we would need to specify that the result is null? But the method creates a new array, so it won't return null. So we can require original != null.
+
+But note: the problem does not specify any particular constraints, so we can choose. However, we must be consistent with the examples: they didn't require non-null for arrays in the examples. In Example 2, they didn't require non-null for the array a. They only added ensures. But note that the method Smallest does not throw NullPointerException if a is null? Actually if a is null, then a.length will throw NullPointerException. So they didn't require non-null. But they also didn't specify any behavior for null. So maybe we don't need to add requires for null. However, the problem says "where appropriate". So we can decide.
+
+Given that the method does not handle null, we might want to add requires original != null to specify that the caller must provide a non-null array. But note that in JML, if we don't specify requires, then the method may be called with any value, and the specification will not hold for null. But the method may throw an exception, which is not specified. Usually we want to specify the exceptional behavior. But the problem does not ask for exceptional behavior. So we can just add requires original != null.
+
+Alternatively, we can add a requires clause that specifies the length is non-negative? But that is always true.
+
+Given the examples, they didn't add requires for the array method. But in Example 2, they didn't have any requires. So maybe we don't need to add requires. However, the problem says "Generate `requires` and `ensures` clauses for each method where appropriate." So we should consider whether to add requires. Since the method does not have any preconditions beyond the input being an array, we might not need a requires clause. But we can add one for clarity. However, note that if we add requires original != null, then we are restricting the domain. The problem does not specify any restrictions, so we might want to not add a requires clause. But the problem says "where appropriate", so we can decide.
+
+Given that the method is similar to the examples, we can follow the pattern: they didn't add requires for the array method in Example 2. So we might not add a requires clause. But note that in Example 2, they didn't have any requires, but they did have ensures. So we can add ensures without requires. However, the ensures clause will then assume that original is not null? Actually the ensures clause may refer to original.length, which would be undefined if original is null. But in JML, if the precondition is not specified, then the method may be called with null, and the ensures clause will be evaluated in a state where original is null, which would cause an error. But typically we would specify requires if we want to guarantee the ensures. However, the problem does not specify that we must have both. So we can choose.
+
+Given the ambiguity, I think it's safer to add a requires clause to avoid null. But note that in the example for AddLoop, they didn't have any requires for the parameters. They only added ensures. But they did have a requires for the sum condition? Actually they added:
+
+//@ requires Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && y != Integer.MIN_VALUE;
+
+So they did add a requires clause for the AddLoop method. So they do add requires when necessary. In that case, they needed to ensure that the addition does not overflow. So they added a requires clause. For our method, we might need to ensure that the array indexing does not go out of bounds. But the loop condition ensures that i < n, and we access original[n - i - 1], which is within bounds because i < n, so n - i - 1 is between 0 and n-1. So we don't need to worry about overflow. However, we might want to ensure that the array is not null to avoid NullPointerException. So we can add requires original != null. But note that if original is null, then the method will throw a NullPointerException at the first line. So we might want to specify that original must be non-null. However, the problem does not specify any particular constraints, so we can choose.
+
+Given that the problem does not specify any particular constraints, and the examples did not require non-null for arrays, we might not add a requires clause. But note that in the example for Smallest, they didn't require non-null, but they did have ensures that includes a quantifier over a.length, which would be undefined if a is null. However, they also have an ensures that says \result == -1 if a.length == 0. But if a is null, then a.length would throw an exception. So they didn't handle null. So maybe we don't need to handle null either. So we can omit the requires clause.
+
+Thus we can just add ensures clause.
+
+Now, we also need to consider the loop invariants. We need to add maintaining and decreases for the for loop.
+
+We also need to consider whether we need to add spec_public for any fields. There are no fields in the class, so we don't need to add spec_public.
+
+Thus the annotated code would be:
+
+```java
+public class ReverseArray {
+    //@ ensures \result != null && \result.length == original.length && (\forall int i; 0 <= i && i < original.length; \result[i] == original[original.length - i - 1]);
+    public static int[] reverse(int[] original) {
+        int n = original.length;
+        int[] res = new int[n];
+        //@ maintaining 0 <= i && i <= n;
+        //@ maintaining (\forall int j; 0 <= j && j < i; res[j] == original[n - j - 1]);
+        //@ decreases n - i;
+        for(int i = 0; i < n ; i++) {
+            res[i] = original[n - i - 1];
+        }
+        return res;
+    }
+}
+```
+
+But note: we need to ensure that the loop invariants are placed correctly. In the example, they placed the loop invariants before the for loop. However, we need to be careful: the loop variable i is declared in the for loop, so we cannot refer to i in the loop invariants before it's declared? Actually we can refer to i in the loop invariants because it's in scope. However, in JML, we cannot refer to the loop variable in the invariant before the loop? Actually we can, because the invariant is evaluated at the start of each iteration. But we need to place the invariant after the for loop? In the example, they placed the invariant before the while loop. So we can place the invariant before the for loop.
+
+But note: the for loop in Java has the initialization part. We can place the invariant after the initialization? Actually we can place the invariant before the for loop, but we need to ensure that the invariant is well-formed. The invariant can refer to i, but i is not yet declared. So we need to declare i in the for loop, but we can refer to i in the invariant if we declare i in the for loop and then place the invariant after the for loop? Actually in the example, they have:
+
+while (a.length - index > 0) {
+    ...
+}
+
+And they placed the invariant before the while loop. In the while loop, the variable index is declared before the loop. So they could refer to index in the invariant. In our case, the loop variable i is declared in the for loop. So we cannot refer to i in the invariant before it's declared. So we need to either declare i before the loop, or place the invariant inside the loop? But in the example, they placed the invariant before the loop, but they referred to index which was declared before the loop. So we need to declare i before the loop. However, in the for loop, we can move the declaration of i to before the loop. But the problem says "Do not rename classes, methods, fields, or variables." So we cannot rename i, but we can declare i before the loop? Actually we can change the declaration of i from the for loop to a separate declaration before the loop, and then use i in the for loop. But that would change the executable code? The problem says "Do not change executable Java code." So we cannot change the code. However, we can add JML annotations without changing

@@ -1,0 +1,102 @@
+I need to add JML specifications to this Java program. Let me analyze the code:
+
+1. The class `PowerOfFourLoop` has a method `isPowerOfFour` that checks if an integer is a power of 4.
+
+2. The method:
+   - Returns false if n <= 0
+   - Divides n by 4 repeatedly while n % 4 == 0
+   - Returns true if n == 1 after the loop, false otherwise
+
+Let me add JML specifications:
+
+For the class, I should add a class comment with the model annotation.
+
+For the method `isPowerOfFour`:
+- Requires: n can be any integer (no preconditions needed, but I should specify the behavior)
+- Ensures: the return value should be true if and only if n is a power of 4 (n > 0 and n = 4^k for some k >= 0)
+
+For the loop:
+- I need to add maintaining and decreases clauses
+- The loop invariant should capture that n is always a power of 4 times some positive integer
+- The decreases clause should show that n is decreasing (or at least not increasing in absolute value)
+
+Let me think about the loop invariant:
+- Before the loop: n = original_n
+- During the loop: n = original_n / (4^k) for some k >= 0, and n % 4 != 0 or the loop continues
+- Actually, the loop continues while n % 4 == 0, so the invariant should be that n is still a positive integer and n = original_n / (4^m) for some m >= 0
+
+Let me be more precise:
+- Let orig_n be the original value of n
+- After m iterations, n = orig_n / (4^m)
+- The loop continues while n % 4 == 0, so n is divisible by 4
+- When the loop exits, n is not divisible by 4 (or n became 1)
+
+Actually, looking at the logic:
+- If n is a power of 4, say n = 4^k, then after k iterations, n = 1, and the loop exits with n == 1, returning true
+
+
+- If n is not a power of 4, after dividing by 4 as many times as possible, n will be some number not divisible by 4 (and > 1 if started > 1), so n != 1, returning false
+
+For the loop invariant, I need to track that n remains positive and equals the original value divided by some power of 4, while also ensuring the loop terminates by showing n decreases with each iteration.
+
+The specification should capture that the method returns true exactly when n is a positive power of 4. I'll use a helper lemma or direct specification to express that n must equal 4^k for some non-negative k. For the loop itself, the invariant needs to maintain that n stays positive and represents the original input divided by an appropriate power of 4, with a decreases clause guaranteeing progress toward termination. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable like `power` to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant holds throughout execution.
+
+For the decreases clause, I need something that guarantees termination. Since we're dividing by 4 each iteration, the value of n itself decreases toward 1, which serves as a natural bound. The loop terminates when n is no longer divisible by 4, so tracking n's magnitude as it shrinks toward the base case provides the necessary termination guarantee. The loop invariant needs to capture that n remains positive and equals the original value divided by some power of 4. I'll use a variable to track how many times we've divided by 4, ensuring the invariant

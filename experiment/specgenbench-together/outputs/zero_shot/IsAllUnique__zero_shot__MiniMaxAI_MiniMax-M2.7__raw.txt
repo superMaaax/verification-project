@@ -1,0 +1,323 @@
+The user wants me to generate JML specifications for the given Java program. I need to:
+
+1. Add JML comments directly into the Java source code
+2. Generate `requires` and `ensures` clauses for each method where appropriate
+3. Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate
+4. Add `/*@ spec_public @*/` only when needed for specification visibility
+5. Do not change executable Java code
+6. Do not rename classes, methods, fields, or variables
+7. Output the full Java file and nothing else
+8. Do not omit any original code
+
+Let me analyze the Java program:
+
+```java
+class IsAllUnique {
+    boolean isAllUnique(String str) {
+        int len = str.length();
+        if (len > 26) {
+            return false;
+        }
+        int num = 0;
+        for (int i = 0; i < len; i++) {
+            char c = str.charAt(i);
+            int index = c - 'a';
+            if ((num & (1 << index)) != 0) {
+                return false;
+            } else {
+                num |= (1 << index);
+            }
+        }
+        return true;
+    }
+}
+```
+
+This method checks if all characters in a string are unique (assuming lowercase letters 'a' to 'z'). It uses a bit vector to track which characters have been seen.
+
+Let me add JML specifications:
+
+1. For the class, I can add class-level specifications, but usually, we focus on method-level specs.
+
+2. For the `isAllUnique` method:
+   - `requires`: The method should work with any String, but if we want to be precise about the logic, we might want to specify that it only works correctly for lowercase letters. However, the problem says to add specs where appropriate. Since the method can handle any string (though it might give incorrect results for non-lowercase letters), I'll add a basic requires clause.
+   
+   Actually, looking at the logic, it assumes 'a' to 'z' characters. If the string contains uppercase letters or other characters, the behavior might be unexpected (negative indices or indices beyond 26). But the method doesn't explicitly restrict input, so I'll add a basic requires that the string is not null (standard for Java).
+   
+   Wait, actually, if `c` is 'A' (65), then `index = 65 - 97 = -32`, which is negative. If `c` is '{' (123), then `index = 123 - 97 = 26`, which is out of bounds for a 26-bit integer. So the method is designed for lowercase 'a' to 'z'. I should add a requires clause to document this assumption.
+
+3. `ensures`: The method ensures that the return value is true if and only if all characters in the string are unique (and within the valid range).
+
+4. Loop specifications:
+   - The loop iterates through the string
+   - I need to add `maintaining` and `decreases` clauses
+   - The loop invariant should capture that `num` represents the set of characters seen so far
+
+Let me draft the specifications:
+
+```java
+/*@ class IsAllUnique {
+        @ // No class-level invariants needed
+        @ }
+        @*/
+class IsAllUnique {
+    /*@
+        @ requires str != null;
+        @ ensures \result == true ==> 
+        @            (\forall int i, j; 0 <= i < j < str.length(); str.charAt(i) != str.charAt(j));
+        @*/
+    boolean isAllUnique(String str) {
+        int len = str.length();
+        if (len > 26) {
+            return false;
+        }
+        int num = 0;
+        /*@
+            @ maintaining 0 <= i <= len;
+            @ maintaining (\forall int j; 0 <= j < i; 
+            @                 (\forall int k; j < k < i; str.charAt(j) != str.charAt(k)));
+            @ maintaining (\forall int j; 0 <= j < i; 
+            @                 ((\num & (1 << (str.charAt(j) - 'a'))) != 0));
+            @ decreases len - i;
+            @*/
+        for (int i = 0; i < len; i++) {
+            char c = str.charAt(i);
+            int index = c - 'a';
+            if ((num & (1 << index)) != 0) {
+                return false;
+            } else {
+                num |= (1 << index);
+            }
+        }
+        return true;
+    }
+}
+```
+
+Wait, I need to be careful about the loop invariant. The variable `num` is used to track seen characters. Let me think about what the loop invariant should be:
+
+- `maintaining 0 <= i <= len`: This is the basic loop bound
+- The loop checks for uniqueness, so the invariant should express that all characters seen so far are unique
+- Also, `num` should correctly represent the set of characters seen
+
+Actually, looking at the code more carefully:
+- `num` is a bit vector where bit `j` (where j = c - 'a') is set if character 'a'+j has been seen
+- The loop invariant should express that for all indices `k` where 0 <= k < i, the bit corresponding to str.charAt(k) is set in `num`
+
+But there's a problem: the code assumes that `c - 'a'` is between 0 and 25. If the string contains non-lowercase letters, this could fail. So I should add a requires clause that the string only contains lowercase letters 'a' to 'z'.
+
+Let me reconsider the specification:
+
+```java
+/*@
+    @ requires str != null;
+    @ requires \forall int i; 0 <= i < str.length() ==> 'a' <= str.charAt(i) <= 'z';
+    @ ensures \result == true ==> 
+    @            (\forall int i, j; 0 <= i < j < str.length(); str.charAt(i) != str.charAt(j));
+    @*/
+boolean isAllUnique(String str) {
+    int len = str.length();
+    if (len > 26) {
+        return false;
+    }
+    int num = 0;
+    /*@
+        @ maintaining 0 <= i <= len;
+        @ maintaining \forall int j; 0 <= j < i; 
+        @                 \forall int k; j < k < i; str.charAt(j) != str.charAt(k);
+        @ maintaining \forall int j; 0 <= j < i; 
+        @                 ((num & (1 << (str.charAt(j) - 'a'))) != 0);
+        @ decreases len - i;
+        @*/
+    for (int i = 0; i < len; i++) {
+        char c = str.charAt(i);
+        int index = c - 'a';
+        if ((num & (1 << index)) != 0) {
+            return false;
+        } else {
+            num |= (1 << index);
+        }
+    }
+    return true;
+}
+```
+
+Actually, the ensures clause can be simplified. The method returns true if all characters are unique. The logic is: if the length is > 26, return false; otherwise, check for duplicates.
+
+The ensures clause should express: if the result is true, then all characters in the string are unique.
+
+Also, I need to think about the `num` variable. It's not used after the method returns, so it doesn't need to be in the ensures clause. But for the loop invariant, I need to track what `num` represents.
+
+Let me refine the loop invariant:
+
+The loop invariant should be:
+1. `0 <= i <= len`
+2. All characters in the prefix [0, i) are unique
+3. For all j in [0, i), the bit corresponding to str.charAt(j) is set in `num`
+
+But wait, condition 2 is actually implied by condition 3 if we assume that the bit is set only when we encounter a character for the first time. But actually, the code sets the bit in `num` only when it's not already set. So condition 3 should be: for all j in [0, i), the bit corresponding to str.charAt(j) is set in `num` AND there are no duplicates in [0, i).
+
+Actually, the loop invariant needs to be strong enough to prove that when we exit the loop (i == len), all characters are unique.
+
+Let me think about the loop invariant more carefully:
+
+- Before the loop: i = 0, num = 0. No characters seen, so vacuously unique.
+- During the loop: when we are at iteration i, we have processed characters 0 to i-1. The invariant should state that these are all unique and that `num` represents the set of these characters.
+
+The invariant:
+1. `0 <= i <= len`
+2. `(\forall int j; 0 <= j < i; (\forall int k; j < k < i; str.charAt(j) != str.charAt(k)))` - all characters in [0, i) are unique
+3. `(\forall int j; 0 <= j < i; ((num & (1 << (str.charAt(j) - 'a'))) != 0))` - for all characters in [0, i), the corresponding bit is set in num
+
+The decreases clause: `len - i` (since i increases towards len)
+
+Now, for the ensures clause:
+- If the method returns true, it means either len > 26 is false (so len <= 26) and no duplicates were found in the loop.
+- Actually, the ensures clause should just say that if it returns true, then all characters are unique.
+
+But there's a subtlety: the method returns false if len > 26 OR if a duplicate is found. So the ensures clause should be:
+`ensures \result == true ==> (\forall int i, j; 0 <= i < j < str.length(); str.charAt(i) != str.charAt(j))`
+
+This is correct.
+
+Now, about the `num` variable: it's a local variable, so it doesn't need to be `spec_public`. But for the loop invariant to refer to it, it needs to be visible. Since it's a local variable, it's automatically visible within the method.
+
+Wait, I need to check: in JML, local variables are by default not visible in specifications. But within the same method, they should be visible. Let me check the JML syntax.
+
+Actually, in JML, when we write loop invariants, we can refer to local variables of the method. So `num` should be accessible in the loop invariant.
+
+But there's a catch: `num` is assigned in the loop, so we need to make sure the invariant is well-formed.
+
+Let me also consider: should I add `/*@ spec_public @*/` to `num`? Since `num` is a local variable, it doesn't need to be `spec_public`. `spec_public` is used for fields that need to be visible in specifications but are private. Local variables are already visible in their scope.
+
+So I don't think I need to add `/*@ spec_public @*/` to `num`.
+
+Let me write the final specification:
+
+```java
+class IsAllUnique {
+    /*@
+        @ requires str != null;
+        @ requires \forall int i; 0 <= i < str.length() ==> 'a' <= str.charAt(i) && str.charAt(i) <= 'z';
+        @ ensures \result == true ==> 
+        @            (\forall int i, j; 0 <= i < j < str.length(); str.charAt(i) != str.charAt(j));
+        @*/
+    boolean isAllUnique(String str) {
+        int len = str.length();
+        if (len > 26) {
+            return false;
+        }
+        int num = 0;
+        /*@
+            @ maintaining 0 <= i && i <= len;
+            @ maintaining \forall int j; 0 <= j < i; 
+            @                 \forall int k; j < k < i; str.charAt(j) != str.charAt(k);
+            @ maintaining \forall int j; 0 <= j < i; 
+            @                 ((num & (1 << (str.charAt(j) - 'a'))) != 0);
+            @ decreases len - i;
+            @*/
+        for (int i = 0; i < len; i++) {
+            char c = str.charAt(i);
+            int index = c - 'a';
+            if ((num & (1 << index)) != 0) {
+                return false;
+            } else {
+                num |= (1 << index);
+            }
+        }
+        return true;
+    }
+}
+```
+
+Wait, I should double-check the requires clause. The original code doesn't explicitly check that characters are lowercase. If a non-lowercase character is passed, the behavior is undefined (or incorrect). So it's good practice to specify that the input should be lowercase letters.
+
+Actually, looking at the code again: if `c` is not between 'a' and 'z', then `index` could be negative or >= 26, which would cause issues in the bit manipulation. So the requires clause is appropriate.
+
+However, I should also consider: is it better to specify the requires clause as I did, or should I leave it more general? The task says "Generate `requires` and `ensures` clauses for each method where appropriate." Since the method's logic assumes lowercase input, it is appropriate to add this requires clause.
+
+One more thing: the variable `num` is used in the loop invariant. In JML, when we have a loop invariant, we need to make sure that the variables used in the invariant are in scope. Since `num` is declared before the loop, it's in scope.
+
+Also, I need to make sure about the syntax of the loop invariant. The `maintaining` clause should use `&&` instead of `&` for logical conjunction in JML? Actually, in JML, `&&` is used for conjunction in specifications. But looking at my draft, I used `&&` in the maintaining clause. Let me check:
+
+```java
+/*@
+    @ maintaining 0 <= i && i <= len;
+    @*/
+```
+
+Yes, this is correct JML syntax.
+
+Also, I need to make sure about the `\forall` syntax. In JML, it's `\forall` or `\forall TYPE var; range; predicate`. Let me check my syntax:
+
+```java
+\forall int j; 0 <= j < i; \forall int k; j < k < i; str.charAt(j) != str.charAt(k)
+```
+
+This means: for all j in [0, i), for all k in (j, i), str.charAt(j) != str.charAt(k). This is correct for expressing uniqueness.
+
+Actually, I can simplify the uniqueness condition. Instead of `\forall j, k`, I can say that each character in the prefix appears exactly once. But the current form is fine.
+
+Let me reconsider the loop invariant one more time. The third condition:
+```java
+\forall int j; 0 <= j < i; ((num & (1 << (str.charAt(j) - 'a'))) != 0)
+```
+This says: for all j in [0, i), the bit corresponding to str.charAt(j) is set in num.
+
+But wait, this condition is actually not strong enough on its own to prove uniqueness, because it's possible that two different characters map to the same bit position? No, in this case, each character 'a'+k maps to bit k, so different characters map to different bits. So if all bits are set for the characters seen, and there are no duplicates, then the characters are unique.
+
+Actually, the condition `((num & (1 << (str.charAt(j) - 'a'))) != 0)` means that the bit for str.charAt(j) is set. If we have this for all j in [0, i), it means that all characters seen so far have their bits set. But this doesn't guarantee uniqueness by itself. However, combined with the logic of the loop (which checks if the bit is already set before setting it), it works.
+
+Actually, the loop logic is:
+1. Get character c at position i
+2. Compute index = c - 'a'
+3. If (num & (1 << index)) != 0, return false (duplicate found)
+4. Else, set num |= (1 << index)
+
+So the loop invariant should capture that:
+- The bits set in num correspond exactly to the characters in the prefix [0, i)
+- The characters in [0, i) are unique
+
+The third condition I wrote captures the first part. The second condition captures the second part.
+
+But actually, the second condition `\forall int j; 0 <= j < i; \forall int k; j < k < i; str.charAt(j) != str.charAt(k)` is the standard way to express that all elements in a range are unique.
+
+One more check: is the variable `i` in the loop invariant the same as the loop variable? Yes, in JML loop invariants, we refer to the loop variables.
+
+Also, I need to make sure about the `decreases` clause. The loop variable is `i`, which goes from 0 to len. So `decreases len - i` is correct, as it decreases from len to 0.
+
+Now, let me write the final code. I should output the complete Java file with JML annotations.
+
+One final check: should I add `/*@ spec_public @*/` to any fields? There are no fields in this class, so I don't need to add any.
+
+Also, the variable `num` is a local variable. In JML, local variables are not automatically visible in specifications unless they are declared in the specification part. But since we are referring to them in the loop invariant within the method body, they should be visible. Actually, in JML, local variables of a method are visible in the method's specification and loop invariants.
+
+Wait, I just realized: in JML, when we write `maintaining`, we are inside the method, so we have access to the local variables. So `num` and `i` are accessible.
+
+Actually, I should double-check: is `i` accessible in the loop invariant? Yes, because `i` is the loop variable.
+
+So my specification should be correct.
+
+Let me write the final output:
+
+```java
+/*@ class IsAllUnique {
+        @ public invariant \nothing;
+        @ }
+        @*/
+class IsAllUnique {
+    /*@
+        @ requires str != null;
+        @ requires \forall int i; 0 <= i < str.length() ==> 'a' <= str.charAt(i) && str.charAt(i) <= 'z';
+        @ ensures \result == true ==> 
+        @            (\forall int i, j; 0 <= i < j < str.length(); str.charAt(i) != str.charAt(j));
+        @*/
+    boolean isAllUnique(String str) {
+        int len = str.length();
+        if (len > 26) {
+            return false;
+        }
+        int num = 0;
+        /*@
+            @ maintaining 0 <= i && i <= len;
+            @ maintaining \forall int j; 0 <= j

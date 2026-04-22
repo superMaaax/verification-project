@@ -1,0 +1,165 @@
+We need to generate JML specifications for the given Java program. The program is:
+
+```java
+class FindClosestNum {
+    
+    public int findClosestNumber(int[] nums) {
+        int ans = Integer.MAX_VALUE;
+
+        for(int i = 0; i < nums.length; i++) {
+            int num = nums[i];
+            int absNum = (num<0?-num:num);
+            int absAns = (ans<0?-ans:ans);
+            if(absNum < absAns || (absNum == absAns && num > ans)) {
+                ans = num;
+            }
+        }
+
+        return ans;
+    }
+}
+```
+
+We need to add JML comments: requires and ensures clauses for the method, and loop specifications for the for loop (maintaining, decreases). Also we need to consider spec_public if needed for visibility. The method is public, so its parameters and return type are visible. The ans variable is local, but we might need spec_public for ans if used in specifications. However, we can use local variables in loop invariants/maintaining clauses without spec_public. The spec_public is needed for fields that are not visible. Here there are no fields. So we probably don't need spec_public.
+
+We need to generate requires and ensures. The method takes an int[] nums. The precondition: maybe we need to require nums != null. In JML, we can specify //@ requires nums != null; Also we might want to require nums.length >= 0 (always true). The ensures clause: The method returns the number in the array with the smallest absolute value, and in case of ties, the positive one (largest numeric value). Actually the algorithm: ans starts as Integer.MAX_VALUE. Then for each element, compute absolute values, compare. If absNum < absAns, or absNum == absAns and num > ans, then ans = num. At the end, ans is the number with minimal absolute value; if multiple with same absolute value, picks the largest numeric value (i.e., the positive one if present). Edge case: if nums is empty? The loop will not execute, ans remains Integer.MAX_VALUE, returns that. But is that intended? The problem statement doesn't specify handling empty array. Usually findClosestNumber expects non-empty array. But we can specify that if nums is empty, result is Integer.MAX_VALUE. But better to require non-empty. However, we can generate a general ensures: \result is in nums or equals Integer.MAX_VALUE if nums empty. Let's see typical JML spec: ensures \result == (\min int x; x in nums; something). But we can express as: \result is the element of nums with minimal absolute value; if multiple, the maximal numeric value among those. We can use JML quantifiers.
+
+We need to produce a JML spec that is correct and not too complex. Let's propose:
+
+```java
+//@ requires nums != null;
+//@ ensures (\forall int i; 0 <= i && i < nums.length; \result != null ==> \result == nums[i]);
+//@ ensures nums.length > 0 ==> (\exists int i; 0 <= i && i < nums.length; \result == nums[i] && (\forall int j; 0 <= j && j < nums.length; Math.abs(\result) <= Math.abs(nums[j])));
+```
+
+But we need to be careful: we cannot call Math.abs in JML? Actually we can use Math.abs, but JML might not support static methods? In JML, we can use pure Java methods, but they must be marked as pure. Math.abs is pure. So we can use it. However, we can also express absolute value manually: (x < 0 ? -x : x). But we can use Math.abs.
+
+Better to express ensures as:
+
+```
+ensures (\forall int i; 0 <= i && i < nums.length; Math.abs(\result) <= Math.abs(nums[i]));
+ensures (\exists int i; 0 <= i && i < nums.length; Math.abs(\result) == Math.abs(nums[i]) && (\forall int j; 0 <= j && j < nums.length; (Math.abs(nums[i]) == Math.abs(nums[j]) ==> \result >= nums[j])));
+```
+
+But we need to ensure that \result is from the array. Actually we can combine:
+
+```
+ensures (\exists int i; 0 <= i && i < nums.length; \result == nums[i] && (\forall int j; 0 <= j && j < nums.length; Math.abs(\result) <= Math.abs(nums[j])));
+```
+
+But we also need tie-breaking: if there are multiple with same absolute value, choose the largest numeric value. So we can add:
+
+```
+ensures (\forall int i; 0 <= i && i < nums.length; (Math.abs(nums[i]) == Math.abs(\result) ==> \result >= nums[i]));
+```
+
+Thus ensures: \result is element of nums with minimal absolute value, and among those, maximal numeric value.
+
+But we also need to handle empty array case: if nums.length == 0, then ans remains Integer.MAX_VALUE, so \result == Integer.MAX_VALUE. But we can just require nums != null && nums.length > 0. The problem didn't specify empty array handling, but we can add precondition that array is non-empty. Let's decide: we can add precondition: //@ requires nums != null && nums.length > 0; This ensures method works as expected. However, the original code does not handle empty array, but we can still specify that if empty, result is Integer.MAX_VALUE. But typical JML spec for such method would require non-empty. Let's see typical tasks: Usually they want to add JML spec for method that finds closest number (to zero?). Actually findClosestNumber returns the number with smallest absolute value, and if tie, the larger numeric value. The algorithm picks ans = Integer.MAX_VALUE initially, which is the largest positive integer. If array is empty, ans stays that. But that is not a meaningful result. Usually they'd require non-empty. But we can add precondition: //@ requires nums != null && nums.length > 0; That ensures correct behavior. However, we might want to keep the code unchanged, so we cannot add validation. But we can add precondition that expects non-empty. The code will still work if empty, but spec will be violated. That's okay.
+
+Thus we can add:
+
+```
+//@ requires nums != null && nums.length > 0;
+//@ ensures (\forall int i; 0 <= i && i < nums.length; Math.abs(\result) <= Math.abs(nums[i]));
+//@ ensures (\forall int i; 0 <= i && i < nums.length; (Math.abs(nums[i]) == Math.abs(\result) ==> \result >= nums[i]));
+```
+
+But we also need to ensure \result is from the array. Actually the first ensures ensures that \result's absolute value is less than or equal to all others, but does not guarantee \result is one of the elements. However, if we have that condition, it implies that \result is one of them because if \result is not in array, we cannot guarantee it's less or equal. But we can add an existence clause:
+
+```
+ensures (\exists int i; 0 <= i && i < nums.length; \result == nums[i]);
+```
+
+But we can combine: The first ensures can be changed to: (\forall int i; 0 <= i && i < nums.length; Math.abs(\result) <= Math.abs(nums[i])) && (\exists int i; 0 <= i && i < nums.length; \result == nums[i]).
+
+But we can also separate ensures.
+
+Better to have:
+
+```
+ensures (\exists int i; 0 <= i && i < nums.length; \result == nums[i] && (\forall int j; 0 <= j && j < nums.length; Math.abs(\result) <= Math.abs(nums[j])));
+```
+
+But we also need tie-breaking: Among those with same absolute value, choose larger numeric value. So we can add:
+
+```
+ensures (\forall int i; 0 <= i && i < nums.length; (Math.abs(nums[i]) == Math.abs(\result) ==> \result >= nums[i]));
+```
+
+Thus final ensures:
+
+```
+ensures (\exists int i; 0 <= i && i < nums.length; \result == nums[i] && (\forall int j; 0 <= j && j < nums.length; Math.abs(\result) <= Math.abs(nums[j])));
+ensures (\forall int i; 0 <= i && i < nums.length; (Math.abs(nums[i]) == Math.abs(\result) ==> \result >= nums[i]));
+```
+
+But we also need to ensure that if there are multiple with same absolute value, \result is the maximum numeric value. The second ensures ensures that.
+
+Now loop specifications: The for loop iterates over each element, updating ans. We need to add maintaining and decreases. The loop is:
+
+```
+for(int i = 0; i < nums.length; i++) {
+    int num = nums[i];
+    int absNum = (num<0?-num:num);
+    int absAns = (ans<0?-ans:ans);
+    if(absNum < absAns || (absNum == absAns && num > ans)) {
+        ans = num;
+    }
+}
+```
+
+We need to add loop annotations before the for loop: //@ maintaining ... //@ decreases ... The loop variable i goes from 0 to nums.length. The loop condition is i < nums.length, so we can use decreases nums.length - i. The maintaining clause should describe the relationship between ans and the elements processed so far: ans is the best candidate among nums[0..i). That is, after each iteration, ans should be the element among nums[0..i) that satisfies the criteria (minimum absolute value, tie-breaking). So we can maintain:
+
+```
+//@ maintaining 0 <= i && i <= nums.length;
+//@ maintaining (\exists int j; 0 <= j && j < i; ans == nums[j] && (\forall int k; 0 <= k && k < i; Math.abs(ans) <= Math.abs(nums[k])));
+//@ maintaining (\forall int j; 0 <= j && j < i; (Math.abs(nums[j]) == Math.abs(ans) ==> ans >= nums[j]));
+```
+
+But we also need to ensure ans is always defined: initially ans = Integer.MAX_VALUE, which is not in array. However, we can treat ans as candidate. But we might want to maintain that ans is either Integer.MAX_VALUE (if no elements processed) or a value from processed elements. But we can also maintain that ans is always the best candidate among processed elements, and if i == 0, ans is Integer.MAX_VALUE, which is okay. But we can also maintain that ans is either Integer.MAX_VALUE or an element of processed part. However, we can also adjust the maintaining to reflect that ans is the best among processed elements, but if i == 0, ans is Integer.MAX_VALUE, which is not in array, but it's okay because we haven't processed any elements. However, the ensures we wrote expects ans to be an element of array if array non-empty. But the loop invariant should reflect that after processing some elements, ans is the best among them. At the end of loop (i == nums.length), we need ans to satisfy the ensures. So we can maintain that ans is the best among processed elements (including the case when i == 0). The condition for best is as described. So we can maintain:
+
+```
+maintaining (\forall int j; 0 <= j && j < i; Math.abs(ans) <= Math.abs(nums[j]));
+maintaining (\forall int j; 0 <= j && j < i; (Math.abs(nums[j]) == Math.abs(ans) ==> ans >= nums[j]));
+maintaining (i == 0 ==> ans == Integer.MAX_VALUE);
+maintaining (i > 0 ==> (\exists int j; 0 <= j && j < i; ans == nums[j]));
+```
+
+But we can also simplify: we can maintain that ans is the best candidate among nums[0..i). The best candidate is defined as the element with minimal absolute value, and among ties, the largest numeric value. If i == 0, ans is Integer.MAX_VALUE, which is not in array, but we can treat it as best candidate because there are no elements. However, the condition that ans must be in array for i>0 is needed. But we can also maintain that ans is either Integer.MAX_VALUE (if no elements processed) or an element of processed part. But we can also maintain that ans is always the best candidate among processed part, which is defined as above. The condition for i>0 ensures ans is in array. But we can also incorporate that ans is always the best candidate, which includes the case i==0. However, the ensures we wrote expects ans to be an element of array if array length > 0. So we need to ensure that after loop ends (i == nums.length), ans is in array. So we need to maintain that after each iteration, ans is the best candidate among processed elements, and if i > 0, ans is in array. At the end, i == nums.length, which is >0 if array non-empty, so ans will be in array. That works.
+
+Thus we can add loop annotations:
+
+```
+ //@ maintaining 0 <= i && i <= nums.length;
+ //@ maintaining (\forall int j; 0 <= j && j < i; Math.abs(ans) <= Math.abs(nums[j]));
+ //@ maintaining (\forall int j; 0 <= j && j < i; (Math.abs(nums[j]) == Math.abs(ans) ==> ans >= nums[j]));
+ //@ maintaining (i == 0 ==> ans == Integer.MAX_VALUE);
+ //@ maintaining (i > 0 ==> (\exists int j; 0 <= j && j < i; ans == nums[j]));
+ //@ decreases nums.length - i;
+```
+
+But we also need to consider that ans may be Integer.MAX_VALUE initially, which is not in array, but we can treat it as a sentinel. However, the condition Math.abs(ans) <= Math.abs(nums[j]) for i>0 will hold because ans is large positive, but absolute value is large, but we need to ensure that ans is compared correctly. Actually ans = Integer.MAX_VALUE, its absolute value is Integer.MAX_VALUE (since it's positive). For any element num, absNum <= Integer.MAX_VALUE? Actually Integer.MAX_VALUE is the maximum positive integer, but absolute value of negative numbers can be up to Integer.MAX_VALUE+1? Actually -Integer.MIN_VALUE is out of range, but we assume no overflow. But if num is negative, its absolute value can be up to Integer.MAX_VALUE (if num = -Integer.MAX_VALUE). But ans = Integer.MAX_VALUE, so absAns = Integer.MAX_VALUE. So ans will be replaced by any element with absolute value less than Integer.MAX_VALUE, or equal but larger numeric value. That works. So the loop invariant can hold.
+
+But we need to ensure that the loop invariant is correct for all i. The condition "Math.abs(ans) <= Math.abs(nums[j])" for all j in [0,i) ensures ans has minimal absolute value among processed elements. However, if ans is Integer.MAX_VALUE and i>0, then there might be some element with absolute value less than ans, so the condition holds because ans's absolute value is larger or equal. But we also need to ensure that ans is the best candidate among processed elements, not just that its absolute value is less than or equal to each processed element's absolute value. Actually we need to ensure ans is the element with minimal absolute value among processed elements, and tie-breaking. The condition we wrote ensures ans's absolute value is <= each processed element's absolute value, but does not guarantee ans is one of them (except for i>0). But we also have the existence condition for i>0. So overall it's okay.
+
+But we also need to ensure that ans is the best candidate among processed elements, not just that its absolute value is less than or equal to each processed element's absolute value. Actually if ans is not in processed elements, then the condition "Math.abs(ans) <= Math.abs(nums[j])" could hold for all j, but ans may not be in array. However, we also have existence condition for i>0, which ensures ans is one of the processed elements. So we can combine.
+
+Thus we can have loop invariants:
+
+```
+ //@ maintaining 0 <= i && i <= nums.length;
+ //@ maintaining (\forall int j; 0 <= j && j < i; Math.abs(ans) <= Math.abs(nums[j]));
+ //@ maintaining (\forall int j; 0 <= j && j < i; (Math.abs(nums[j]) == Math.abs(ans) ==> ans >= nums[j]));
+ //@ maintaining (i == 0 ==> ans == Integer.MAX_VALUE);
+ //@ maintaining (i > 0 ==> (\exists int j; 0 <= j && j < i; ans == nums[j]));
+ //@ decreases nums.length - i;
+```
+
+But we also need to consider that ans may be updated to a new value that is not minimal relative to previously processed elements? Actually the algorithm ensures ans is always the best among all processed elements. The loop invariants should reflect that. The condition "Math.abs(ans) <= Math.abs(nums[j])" for all j in [0,i) ensures ans's absolute value is less than or equal to each processed element's absolute value, which is exactly the minimal absolute value condition. However, we also need to ensure tie-breaking: if there are multiple with same absolute value, ans should be the largest numeric value among them. The condition "(Math.abs(nums[j]) == Math.abs(ans) ==> ans >= nums[j])" ensures that for each processed element with same absolute value as ans, ans is >= that element, i.e., ans is the largest numeric value among those with that absolute value. However, we also need to ensure that if there is another element with same absolute value but larger numeric value, ans should be that larger one. The condition ensures ans is >= all those with same absolute value, which ensures ans is the maximum numeric value among those with minimal absolute value. However, we also need to ensure that ans is not smaller than some element with same absolute value but larger numeric value? Actually we need ans >= all elements with same absolute value, which ensures ans is the largest numeric value among those. That is correct.
+
+But we also need to ensure that ans is the element with minimal absolute value among processed elements, not just that its absolute value is less than or equal to each processed element's absolute value. Actually if ans is not in processed elements, then the condition could hold but ans may not be the minimal absolute value element because we haven't considered that ans might be larger than some element's absolute value? Wait, we need to guarantee that ans is the element with minimal absolute value. The condition "Math.abs(ans) <= Math.abs(nums[j])" for all j ensures that ans's absolute value is less than or equal to each processed element's absolute value, which means ans has the minimal absolute value among them. However, we also need to ensure that ans is one of the processed elements (except maybe i==0). The existence condition ensures that.
+
+Thus the invariants are correct.
+
+But we also need to consider the case when i == 0: we have ans = Integer.MAX_VALUE, and we want the invariants to hold. The condition "Math.abs(ans) <= Math.abs(nums[j])" is vacuously true because there are no j in [0,i). The condition "(Math.abs

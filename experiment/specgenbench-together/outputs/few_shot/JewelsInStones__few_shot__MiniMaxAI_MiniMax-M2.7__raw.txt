@@ -1,0 +1,238 @@
+We need to generate JML specifications for the given Java program. The program is:
+
+```java
+class JewelsInStones {
+    public int numJewelsInStones(String jewels, String stones) {
+        int jewelsCount = 0;
+        int jewelsLength = jewels.length(), stonesLength = stones.length();
+        for (int i = 0; i < stonesLength; i++) {
+            char stone = stones.charAt(i);
+            for (int j = 0; j < jewelsLength; j++) {
+                char jewel = jewels.charAt(j);
+                if (stone == jewel) {
+                    jewelsCount++;
+                    break;
+                }
+            }
+        }
+        return jewelsCount;
+    }
+}
+```
+
+We need to add JML comments: requires and ensures clauses for the method, and loop specifications (maintaining, decreases) for each loop. Also, we need to add `/*@ spec_public @*/` only when needed for specification visibility. The problem says: "Add `/*@ spec_public @*/` only when needed for specification visibility." That likely means that if a variable is used in the specification but is not visible (e.g., a local variable that is not final or not annotated), we might need to mark it as spec_public. However, in JML, local variables are by default not visible in specifications. To refer to a local variable in a requires or ensures clause, we need to make it spec_public. But note: the problem says "Add `/*@ spec_public @*/` only when needed for specification visibility." So we should only add it when necessary.
+
+Let's analyze the method:
+
+Method signature: `public int numJewelsInStones(String jewels, String stones)`
+
+We need to add:
+- Precondition (requires): Typically, we require that the arguments are not null. Also, we might want to specify constraints on the lengths? But note: the method works even if jewels or stones are empty. So we can require non-null. Possibly also require that the strings are not null, but JML by default assumes references are non-null unless specified? Actually, in JML, the default for reference types is non-null in the model program? But in the executable code, we might want to specify requires that jewels and stones are not null. However, the problem does not specify that we must add null checks. But for specification, we should add requires clauses that reflect the method's behavior. Since the method does not throw exceptions for null? Actually, if jewels or stones is null, then calling .length() would throw NullPointerException. So we should require them to be non-null. But note: the problem does not explicitly say to add null checks. However, in the example, they did not add null checks. Let's look at the examples:
+
+Example 1: The method AddLoop does not have a requires clause for null because there are no reference types. So they added a requires clause for integer overflow: `requires Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && y != Integer.MIN_VALUE;`. That is interesting because they considered overflow. So we should consider if there are any constraints on the arguments.
+
+Example 2: The method Smallest takes an int[] a. They did not add a requires clause for non-null? Actually, they added ensures clauses only. But note: in the code, if a is null, then a.length would throw NullPointerException. So they might have assumed non-null? But they didn't specify. However, in JML, the default for reference types is that they are non-null in the model program? Actually, in JML, the default for reference types in the executable code is that they may be null unless specified with non_null. But in the specification, we often add requires non_null. But the problem says: "Generate `requires` and `ensures` clauses for each method where appropriate." So we should add requires clauses if the method has implicit assumptions. Since the method does not handle null, we should require jewels and stones to be non-null. But note: the problem does not explicitly say to add null checks. However, in the context of JML, it is common to add requires clauses for non-null if the method does not tolerate null. Let's check the method: it calls jewels.length() and stones.length(), so if either is null, it will throw NullPointerException. So we should add:
+
+```java
+//@ requires jewels != null && stones != null;
+```
+
+But note: the problem says "Add JML directly into the given Java source code." So we should add these as comments.
+
+Also, we need to add ensures clauses. The method returns the count of characters in stones that appear in jewels. So we can specify:
+
+```java
+//@ ensures \result == (\num_of int i; 0 <= i && i < stones.length(); (\exists int j; 0 <= j && j < jewels.length(); stones.charAt(i) == jewels.charAt(j)));
+```
+
+But note: the method counts each stone only once if it matches a jewel. So the ensures clause should express that \result is the number of stones that are jewels. We can use the \num_of operator. However, JML has a specific syntax for \num_of. Alternatively, we can use a more informal specification: ensures \result is the number of stones that are jewels. But the problem expects a formal specification. Looking at the examples, they used mathematical expressions. So we should use \num_of.
+
+But note: the problem says "Generate `requires` and `ensures` clauses for each method where appropriate." So we should add an ensures clause.
+
+Now, for loop specifications: There are two loops: an outer for loop and an inner for loop.
+
+We need to add maintaining and decreases clauses for each loop.
+
+Let's analyze the outer loop:
+
+```java
+for (int i = 0; i < stonesLength; i++) {
+    char stone = stones.charAt(i);
+    for (int j = 0; j < jewelsLength; j++) {
+        char jewel = jewels.charAt(j);
+        if (stone == jewel) {
+            jewelsCount++;
+            break;
+        }
+    }
+}
+```
+
+We need to add loop specifications for the outer loop and the inner loop.
+
+For the outer loop, we can consider:
+
+- The loop iterates over stones. We want to maintain that jewelsCount is the number of stones processed so far that are jewels. But note: the inner loop breaks when a match is found, so for each stone, we either increment or not. So we can maintain:
+
+  ```java
+  //@ maintaining 0 <= i && i <= stonesLength;
+  //@ maintaining jewelsCount == (\num_of int k; 0 <= k && k < i; (\exists int l; 0 <= l && l < jewels.length(); stones.charAt(k) == jewels.charAt(l)));
+  //@ decreases stonesLength - i;
+  ```
+
+But note: the variable i is a local variable. In JML, to refer to a local variable in a specification, we must make it spec_public. However, the problem says "Add `/*@ spec_public @*/` only when needed for specification visibility." So we need to decide if we need to mark i and j as spec_public. Since we are using i and j in the maintaining clauses, we need to mark them as spec_public. But note: the problem says "only when needed for specification visibility." So we should add `/*@ spec_public @*/` before the declaration of i and j if we use them in the specification. However, in the example, they did not have any spec_public annotations. Let's check the examples:
+
+Example 1: They used variables x, y, sum, n. They did not add spec_public. Why? Because in that method, the variables are parameters or local variables, and they used them in the maintaining clause. But they did not mark them as spec_public. So maybe in JML, local variables are visible in the method's specification? Actually, in JML, the method's specification (requires and ensures) does not have access to local variables. But the loop specifications (maintaining, decreases) are part of the method's specification? Actually, loop specifications are also part of the method's specification. But in JML, the loop specifications are written as comments in the method, and they refer to local variables. So I think local variables are accessible in the loop specifications. However, the problem says "Add `/*@ spec_public @*/` only when needed for specification visibility." That might refer to fields that are private but need to be visible in the specification. In this class, there are no fields. So we might not need any spec_public.
+
+But wait: the problem says "Add `/*@ spec_public @*/` only when needed for specification visibility." That might mean that if a field is private and we want to refer to it in the specification, we need to mark it as spec_public. But here there are no fields. So we don't need any.
+
+However, note: the method's ensures clause uses the local variable stones and jewels? Actually, the ensures clause uses the parameters, which are visible. So we don't need spec_public for parameters.
+
+So we might not need any spec_public annotations.
+
+But let's check: the loop specifications use i and j. Are i and j visible in the loop specifications? Yes, because they are declared in the loop. In JML, loop specifications are written as comments in the method, and they can refer to local variables declared in the method. So we don't need to mark them as spec_public.
+
+Therefore, we will not add any spec_public annotations.
+
+Now, let's write the specifications.
+
+First, the method requires clause:
+
+We require jewels and stones to be non-null. But note: the problem does not explicitly say to add null checks. However, in the context of JML, it is good practice. But let's see the examples: they didn't add null checks for arrays. But in Example 2, they didn't add a requires clause for non-null. So maybe we are allowed to omit null checks. However, the method does not handle null, so it would throw an exception. So we should add a requires clause to specify that the arguments are non-null. But note: the problem says "Generate `requires` and `ensures` clauses for each method where appropriate." So we should add requires clauses if the method has implicit assumptions. Since the method does not check for null, we should require non-null.
+
+But let's consider: the problem might expect us to add a requires clause for non-null because otherwise the method would fail. However, in the example, they didn't add a requires clause for the array in Smallest. But note: in Smallest, if a is null, then a.length would throw NullPointerException. So they might have assumed that the method is only called with non-null arrays. But in JML, we usually specify requires non_null. However, the problem does not explicitly say to add null checks. Let's look at the problem statement: "Generate JML specifications for the Java program below." It doesn't say to add null checks. But in the example, they added a requires clause for overflow in AddLoop. So they added constraints on the arguments. So we should add requires clauses for the arguments.
+
+So let's add:
+
+```java
+//@ requires jewels != null && stones != null;
+```
+
+Now, the ensures clause:
+
+We want to say that the result is the number of stones that are jewels. We can use:
+
+```java
+//@ ensures \result == (\num_of int i; 0 <= i && i < stones.length(); (\exists int j; 0 <= j && j < jewels.length(); stones.charAt(i) == jewels.charAt(j)));
+```
+
+But note: the method uses stonesLength and jewelsLength as local variables. However, in the ensures clause, we can use stones.length() and jewels.length(). But note: the method uses stonesLength and jewelsLength to avoid calling length() repeatedly. But in the specification, we can use the string's length method. However, we must be careful: the specification should refer to the original strings. Since we have requires that they are non-null, we can use their length methods.
+
+Alternatively, we can use the local variables stonesLength and jewelsLength in the specification? But note: the ensures clause is part of the method's specification, and local variables are not visible in the ensures clause. So we cannot use stonesLength and jewelsLength in the ensures clause. We must use stones.length() and jewels.length().
+
+So the ensures clause should be:
+
+```java
+//@ ensures \result == (\num_of int i; 0 <= i && i < stones.length(); (\exists int j; 0 <= j && j < jewels.length(); stones.charAt(i) == jewels.charAt(j)));
+```
+
+But note: the method uses stonesLength and jewelsLength. However, in the specification, we can use the string's length method. But note: the method might be called with strings of any length, so we don't need to restrict.
+
+Now, loop specifications:
+
+We have two loops.
+
+First, the outer loop:
+
+We want to maintain that jewelsCount is the number of stones processed so far (from 0 to i) that are jewels. But note: the inner loop breaks when a match is found, so for each stone, we either increment or not. So we can maintain:
+
+```java
+//@ maintaining 0 <= i && i <= stones.length();
+//@ maintaining jewelsCount == (\num_of int k; 0 <= k && k < i; (\exists int l; 0 <= l && l < jewels.length(); stones.charAt(k) == jewels.charAt(l)));
+//@ decreases stones.length() - i;
+```
+
+But note: the variable i is declared in the for loop. We are using i in the maintaining clause. However, in the maintaining clause, we are referring to i. But note: the loop specification is written before the loop, and i is not yet declared. Actually, in the example, they wrote the loop specifications inside the loop? Let's see the example:
+
+In Example 1, they wrote:
+
+```java
+while (n > 0) {
+    //@ maintaining sum == x + y - n && 0 <= n;
+    //@ decreases n;
+    sum = sum + 1;
+    n = n - 1;
+}
+```
+
+They wrote the maintaining and decreases clauses inside the loop, before the loop body? Actually, in the example, they wrote:
+
+```java
+while (n > 0) {
+    //@ maintaining sum == x + y - n && 0 <= n;
+    //@ decreases n;
+    sum = sum + 1;
+    n = n - 1;
+}
+```
+
+So they put the annotations inside the loop, before the loop body. But note: the annotations are comments, so they are inside the loop block. So we can do the same.
+
+Similarly, for the inner loop, we can add maintaining and decreases.
+
+But note: the inner loop is nested. We need to add specifications for both loops.
+
+Let's write the outer loop specifications:
+
+We want to maintain that jewelsCount is the number of stones processed so far that are jewels. But note: the inner loop might break early, so we need to consider that.
+
+Actually, the outer loop does not change jewelsCount directly. The inner loop changes jewelsCount when a match is found. So the maintaining clause for the outer loop should relate jewelsCount to the stones processed so far. However, the inner loop is inside the outer loop, so we need to consider the interaction.
+
+We can break down the specification:
+
+For the outer loop (over stones), we want to maintain that after processing each stone (i.e., after each iteration of the outer loop), jewelsCount equals the number of stones among the first i stones that are jewels. But note: the inner loop might break, so for each stone, we either increment or not. So we can maintain:
+
+```java
+//@ maintaining 0 <= i && i <= stones.length();
+//@ maintaining jewelsCount == (\num_of int k; 0 <= k && k < i; (\exists int l; 0 <= l && l < jewels.length(); stones.charAt(k) == jewels.charAt(l)));
+//@ decreases stones.length() - i;
+```
+
+But note: the variable i is declared in the for loop. We are using i in the maintaining clause. However, in the maintaining clause, we are referring to the current value of i. But note: the maintaining clause is evaluated at the beginning of each iteration? Actually, the maintaining clause is a loop invariant, which must hold at the beginning of each iteration. So we can use i in the invariant.
+
+Now, for the inner loop, we want to maintain that the inner loop is searching for a match for the current stone. But note: the inner loop iterates over jewels. We can add a maintaining clause for the inner loop. However, the inner loop might break when a match is found. So we can maintain that the inner loop has not found a match yet, or something.
+
+Alternatively, we can specify the inner loop's behavior: it iterates over jewels to check if the current stone is a jewel. We can maintain that after each iteration of the inner loop, we have checked the first j jewels and not found a match yet. But note: if a match is found, we break. So we can maintain:
+
+```java
+//@ maintaining 0 <= j && j <= jewels.length();
+//@ maintaining (\forall int k; 0 <= k && k < j; stones.charAt(i) != jewels.charAt(k));
+//@ decreases jewels.length() - j;
+```
+
+But note: when we break, we have found a match, so we increment jewelsCount. So the inner loop's maintaining clause should hold until the break. However, the break is inside the inner loop. So we can add the maintaining clause for the inner loop.
+
+But note: the inner loop is inside the outer loop, so we need to consider the outer loop's i.
+
+Let's write the code with annotations.
+
+We'll write the method with the annotations inside the loops.
+
+But note: the problem says "Add JML directly into the given Java source code." So we should write the annotations as comments.
+
+Let's write:
+
+```java
+class JewelsInStones {
+    //@ requires jewels != null && stones != null;
+    //@ ensures \result == (\num_of int i; 0 <= i && i < stones.length(); (\exists int j; 0 <= j && j < jewels.length(); stones.charAt(i) == jewels.charAt(j)));
+    public int numJewelsInStones(String jewels, String stones) {
+        int jewelsCount = 0;
+        int jewelsLength = jewels.length(), stonesLength = stones.length();
+        for (int i = 0; i < stonesLength; i++) {
+            //@ maintaining 0 <= i && i <= stonesLength;
+            //@ maintaining jewelsCount == (\num_of int k; 0 <= k && k < i; (\exists int l; 0 <= l && l < jewelsLength; stones.charAt(k) == jewels.charAt(l)));
+            //@ decreases stonesLength - i;
+            char stone = stones.charAt(i);
+            for (int j = 0; j < jewelsLength; j++) {
+                //@ maintaining 0 <= j && j <= jewelsLength;
+                //@ maintaining (\forall int m; 0 <= m && m < j; stone != jewels.charAt(m));
+                //@ decreases jewelsLength - j;
+                char jewel = jewels.charAt(j);
+                if (stone == jewel) {
+                    jewelsCount++;
+                    break;
+                }
+            }
+        }
+        return

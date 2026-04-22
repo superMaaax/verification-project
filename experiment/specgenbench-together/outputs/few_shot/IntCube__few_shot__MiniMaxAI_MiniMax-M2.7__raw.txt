@@ -1,0 +1,127 @@
+We need to generate JML specifications for the given Java program. The program is:
+
+```java
+public class IntCube {
+
+    public static int cubeOf(int x) {
+        boolean neg = false;
+        if(x < 0) {
+            neg = true;
+            x = -x;
+        }
+        int res = 0;
+        for(int i = 0; i < x; i++) {
+            for(int j = 0; j < x; j++) {
+                for(int k = 0; k < x; k++) {
+                    res = res + 1;
+                }
+            }
+        }
+        return (neg ? -res : res);
+    }
+
+}
+```
+
+We need to add JML comments: requires and ensures clauses for the method, and loop specifications for each loop (maintaining, decreases). Also spec_public if needed for specification visibility.
+
+We need to ensure that the JML annotations are correct and follow the style used in examples.
+
+First, we need to consider the method signature: `public static int cubeOf(int x)`. The method computes the cube of x (i.e., x^3). However, note that the implementation uses nested loops to compute x * x * x by incrementing res for each combination of i, j, k from 0 to x-1. So res ends up being x^3. Then if original x was negative, it returns -res, which yields (-x)^3 = -x^3, which is correct for integer cube.
+
+Potential overflow: The method does not check for overflow. For JML we can include a requires clause to ensure that the result fits within Integer range, but it's optional. The examples include requires clause for AddLoop to ensure no overflow. For cubeOf, we could add a requires clause: `requires Integer.MIN_VALUE <= x*x*x && x*x*x <= Integer.MAX_VALUE;` but that might be too complex. However, we can include something like `requires -1290 <= x && x <= 1290` (since 1290^3 ~ 2.147 billion close to Integer.MAX_VALUE). But we don't need to be that precise. The examples didn't include overflow checks for Smallest. They only included ensures. For AddLoop they included a requires clause about overflow. So we might include a requires clause to ensure that the cube fits in int. But we can also omit it. The problem statement says "Generate `requires` and `ensures` clauses for each method where appropriate." So we should decide if it's appropriate. Since the method can overflow for large x, we might want to include a requires clause to guarantee no overflow. However, the problem might not expect that level of detail; they might just want a simple spec: ensures \result == x*x*x. The examples for AddLoop included a requires clause about overflow because the method could overflow. For cubeOf, we could also include a requires clause about overflow. But we need to decide what to include.
+
+Given the typical JML spec for a method that computes cube: `requires -1290 <= x && x <= 1290; ensures \result == x*x*x;` But we can also use `requires Integer.MIN_VALUE <= x*x*x && x*x*x <= Integer.MAX_VALUE;` but that might be too complex for the tool. The problem might expect something like `requires -1290 <= x && x <= 1290;` but we don't know. The example for AddLoop used `requires Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && y != Integer.MIN_VALUE;`. So they used integer bounds. For cube, we could use similar: `requires Integer.MIN_VALUE <= x*x*x && x*x*x <= Integer.MAX_VALUE;`. However, note that x*x*x could overflow during the multiplication check, but we can treat it as a mathematical expression. In JML, you can use arbitrary integer expressions in requires, but they might be checked for overflow at runtime? In JML, the expression is evaluated using Java semantics, but we can also use `x` as a long and cast. But for simplicity, we can use `requires -1290 <= x && x <= 1290;`. But maybe they want a simple ensures: `\result == x*x*x`. The examples for Smallest didn't have a requires clause. They only had ensures. So we could just have ensures. But the problem says "Generate `requires` and `ensures` clauses for each method where appropriate." So we can decide to include a requires clause if we think it's needed. Since the method can overflow for large absolute values, we might include a requires clause to ensure the result fits. However, the problem might not test overflow, but it's safe to include.
+
+Given the typical tasks, they might want a simple spec: ensures \result == x*x*x. The loop specs: we need to add maintaining and decreases for each loop. There are three nested loops: i, j, k. We need to add JML comments for each loop. The loops are for(int i=0; i<x; i++), for(int j=0; j<x; j++), for(int k=0; k<x; k++). We need to add maintaining and decreases for each loop. The typical pattern: for each loop, we add a comment before the loop: `//@ maintaining ...; //@ decreases ...;`. However, we need to consider the loop variables and what they maintain. The loops are nested, so we need to consider the invariants for each loop. The outermost loop: i from 0 to x-1. The loop increments res by x*x each iteration? Actually, each iteration of i, the inner loops j and k will add x*x to res. So after i iterations, res == i * x * x. So we can maintain that res == i * x * x. But we also need to maintain that i is between 0 and x. The decreases clause: decreases x - i. For the inner loops, we need to maintain invariants for j and k. However, we can treat each loop separately: we can add invariants for each loop. The outermost loop: we can add `//@ maintaining 0 <= i && i <= x; //@ maintaining res == i * x * x; //@ decreases x - i;`. But note that x is final? In the method, x is a parameter, but we modify x (if negative). However, after we modify x to be non-negative, we treat x as non-negative. So we can assume x >= 0 for the loops. So we can add invariants accordingly.
+
+But we need to be careful: The loops are for loops, not while loops. In JML, we can add loop specifications for for loops as well. The typical syntax is `//@ maintaining invariant ...; //@ decreasing var;` before the loop. The examples used while loops, but we can also use for loops. The problem says "Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate." So we need to add them for each loop. We can add them as comments before each for loop. However, the typical JML comment for a for loop is `//@ loop_invariant ...; //@ decreasing ...;` but the examples used `maintaining` and `decreases`. Actually, in JML, the keywords are `loop_invariant` and `decreasing`. But the examples used `maintaining` and `decreases`. Wait, in the examples, they used `maintaining` and `decreases`. Let's check the examples:
+
+Example 1 Output:
+```java
+//@ decreases n;
+while (n > 0) {
+    sum = sum + 1;
+    n = n - 1;
+}
+```
+They used `decreases n;` and `maintaining sum == x + y - n && 0 <= n;`. So they used `maintaining` and `decreases`. In JML, the keyword for loop invariant is `loop_invariant`, but they used `maintaining`. Actually, in JML, the keyword for loop invariant is `loop_invariant`. However, the examples used `maintaining` which is a synonym? In JML, `maintaining` is not a standard keyword; the standard is `loop_invariant`. But the problem statement says "Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate." So they want us to use `maintaining` and `decreases`. So we should follow the examples: use `maintaining` and `decreases`. Also note that they used them as comments with `//@`. So we should use `//@ maintaining ...;` and `//@ decreases ...;`.
+
+Thus, for each loop, we need to add a comment line with `//@ maintaining ...;` and `//@ decreases ...;` before the loop. However, we might need multiple maintaining clauses. In the examples, they used multiple maintaining clauses in a single comment: `//@ maintaining sum == x + y - n && 0 <= n;`. They also used `decreases n;`. So we can combine multiple invariants in one comment line. But we can also separate them. The problem says "Generate loop specifications such as `maintaining` and `decreases` for each loop where appropriate." So we need to decide what invariants to maintain.
+
+We need to consider the loops:
+
+- Outer loop: `for(int i = 0; i < x; i++)`. We need to maintain that i is within bounds and that res equals i * x * x. But note that x is the value after making it non-negative. So we can assume x >= 0. The loop condition is `i < x`, so i goes from 0 to x-1. At the start of each iteration, i is the number of completed iterations. So we can maintain that `0 <= i && i <= x` and `res == i * x * x`. However, note that res is incremented by x*x each iteration. Actually, each iteration of i adds x*x to res (since inner loops run x times for j and x times for k, each adding 1). So after i iterations, res == i * x * x. So we can maintain that.
+
+But we also need to consider the inner loops. The inner loops also need invariants. For the middle loop: `for(int j = 0; j < x; j++)`. We need to maintain that j is within bounds and that the current res includes contributions from i and j. Actually, after each iteration of j, we add x to res (since inner k loop runs x times). So after i iterations of outer loop and j iterations of middle loop, res == (i * x + j) * x? Let's think: The total res after i and j and k loops is (i * x + j) * x + k? Actually, the loops increment res by 1 for each triple (i,j,k). So after completing i iterations of outer loop (i full cycles of j and k), we have res = i * x * x. Then within the i-th iteration of outer loop, we have j loop that runs x times, each j iteration adds x to res (since k loop runs x times). So after j iterations of the middle loop within the i-th outer iteration, we have added j * x to res. So at that point, res = i * x * x + j * x. Then within the k loop, each iteration adds 1, so after k iterations, res = i * x * x + j * x + k. So we can maintain invariants for each loop.
+
+However, we might not need to specify invariants for inner loops if we only care about the final result. But the problem expects loop specifications for each loop. So we should add invariants for each loop. The typical approach is to add invariants that describe the progress of the loop variable and the accumulated value.
+
+We need to decide the invariants for each loop. Let's break down:
+
+We have three loops: i, j, k.
+
+We can treat them as nested loops. We can add invariants for each loop individually. However, because they are nested, the invariants for inner loops may refer to outer loop variables. In JML, we can add invariants for each loop. The typical pattern for nested loops is to have invariants for each loop that involve the loop variables and the accumulated result.
+
+We need to decide what invariants to maintain. The goal is to prove that after all loops, res = x^3. So we can maintain that after each iteration of i, res = i * x * x. Then for the j loop, we can maintain that res = i * x * x + j * x. Then for the k loop, we can maintain that res = i * x * x + j * x + k. Then after the loops, we have i = x, j = x, k = x, so res = x * x * x = x^3.
+
+Thus, we can add the following invariants:
+
+For i loop:
+- `maintaining 0 <= i && i <= x;`
+- `maintaining res == i * x * x;`
+- `decreases x - i;`
+
+For j loop:
+- `maintaining 0 <= j && j <= x;`
+- `maintaining res == i * x * x + j * x;`
+- `decreases x - j;`
+
+For k loop:
+- `maintaining 0 <= k && k <= x;`
+- `maintaining res == i * x * x + j * x + k;`
+- `decreases x - k;`
+
+But note that the loops are for loops, not while loops. The loop condition is checked at the beginning of each iteration. The invariants should hold at the start of each iteration. The decreases clause should be a non-negative integer that decreases each iteration. For i loop, we can use `decreases x - i`. At the start, i=0, so x-i = x. Each iteration increments i, so x-i decreases. For j loop, we can use `decreases x - j`. For k loop, similarly.
+
+However, note that the loops are nested, so the invariants for inner loops may need to assume the outer loop invariant holds. In JML, we can add invariants for each loop, but we need to be careful that the invariants are consistent. The typical approach is to add invariants for each loop that involve only the loop variable and the accumulated result. However, the inner loops may also need to know the outer loop variable i. So we can include i in the invariant for j and k. That's fine.
+
+Thus, we can add the following loop specifications:
+
+Before the i loop:
+```java
+//@ maintaining 0 <= i && i <= x;
+//@ maintaining res == i * x * x;
+//@ decreases x - i;
+for(int i = 0; i < x; i++) {
+    //@ maintaining 0 <= j && j <= x;
+    //@ maintaining res == i * x * x + j * x;
+    //@ decreases x - j;
+    for(int j = 0; j < x; j++) {
+        //@ maintaining 0 <= k && k <= x;
+        //@ maintaining res == i * x * x + j * x + k;
+        //@ decreases x - k;
+        for(int k = 0; k < x; k++) {
+            res = res + 1;
+        }
+    }
+}
+```
+
+But note that the comments need to be placed before the loop. In the code, we have:
+
+```java
+for(int i = 0; i < x; i++) {
+    for(int j = 0; j < x; j++) {
+        for(int k = 0; k < x; k++) {
+            res = res + 1;
+        }
+    }
+}
+```
+
+We need to insert the JML comments before each for loop. However, we need to place them in the correct location: before the loop, as a comment line. But note that the for loop header is on the same line as the for keyword. In the examples, they placed the comment on a line before the while loop. For for loops, we can do the same: place the comment on a line before the for statement. However, we need to be careful about indentation and formatting. The problem says "Output the full Java file and nothing else." So we need to output the entire file with JML comments inserted. We should not change the executable code, but we can add comments. We need to ensure that the code compiles? The JML comments are not executable, but they are ignored by the Java compiler. So it's fine.
+
+Thus, we need to insert the JML comments before each for loop. However, we also need to consider the initial modification of x and the neg flag. We might need to add a requires clause for the method and an ensures clause.
+
+Let's think about the ensures clause: The method returns either -res or res depending on neg. Since we set neg true if original x was negative, and we set x to -x, then the final res is the cube of the absolute value of the original x. Then we return -res if original x was negative, so the result is the cube of the original x. So we can state: `ensures \result == x*x*x;`. However, note that x is the parameter, but we modify x. In JML, we can refer to the original parameter value. Usually, we can use the parameter name as in the method signature. But after we modify x, the original value is lost. However, we can use a ghost variable or we can express the result in terms of the original x. But in the ensures clause, we can use the parameter x as it appears in the method. However, note that the method body modifies x, so the post-condition should refer to the original value. In JML, we can use `x` to refer to the original value, but we need to be careful. Actually, in JML, the parameter values are immutable for the duration of the method, even if the variable is reassigned. But in Java, the parameter variable can be reassigned. However, in JML, we can treat the parameter as a constant for specification purposes. But the method body reassigns x, so the JML semantics might treat x as modifiable. However, we can use a ghost variable to store the original value. But the problem does not require that level of detail. The examples for AddLoop used the parameters x and y in the ensures clause, even though they were modified in the method. They used `ensures \result == x + y;`. In that method, they did not modify x or y. Actually, in AddLoop, they did not modify x or y. So it's fine. In our method, we modify x. So we cannot directly use x in the ensures clause if we want to refer to the original value. However, we can use a ghost variable. But the problem does not require ghost variables. We could also note that the ensures clause can be expressed in terms of the final value of x and the neg flag. But the result is either -res or res. And res is x^3 after we made x non-negative. So the result is either (-original_x)^3 or (original_x)^3. But since we set neg flag based on original x, we can say: `ensures \result == (neg ? -res : res);` but that refers to

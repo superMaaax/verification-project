@@ -1,0 +1,41 @@
+We need to generate JML specifications for the given Java program. The program is:
+
+```java
+class UglyNumLoop {
+    public static boolean isUgly(int n) {
+        if (n <= 0) {
+            return false;
+        }
+        while (n % 2 == 0) {
+            n /= 2;
+        }
+        while (n % 3 == 0) {
+            n /= 3;
+        }
+        while (n % 5 == 0) {
+            n /= 5;
+        }
+        return n == 1;
+    }
+}
+```
+
+We need to add JML comments: requires and ensures clauses for each method where appropriate, loop specifications (maintaining, decreases) for each loop, and spec_public only when needed for specification visibility.
+
+We must not change executable Java code. So we need to insert JML comments before the method and before each loop.
+
+First, we need to think about the semantics of isUgly: returns true if n is positive and after dividing by 2, 3, 5 as many times as possible, the result is 1. Equivalent to checking that n's prime factors are only 2,3,5. For n <= 0, returns false.
+
+We need to produce JML spec for the method. The method is static, takes int n, returns boolean.
+
+We need to add requires clause: n can be any int, but we might want to specify that n > 0? Actually the method works for any int: if n <= 0 returns false, else checks. So we can have requires true (no constraints). But we might want to specify that the method's behavior is defined for all integer n. So we can add //@ requires true; or just no requires. But typical JML spec would have //@ requires n > 0; if we want to restrict to positive? But the method also handles n <= 0. So we can have //@ requires true; (or no requires). But we can also have //@ requires true; and ensures clause accordingly.
+
+Ensures clause: The method returns true iff n > 0 and n is an ugly number (i.e., after removing all factors 2,3,5, we get 1). So we can write something like:
+
+//@ ensures \result == (n > 0 && UglyNumLoop.isUgly(n)); but that would be circular. Instead we need to express the condition: \result == true ==> n > 0 && ... Actually we can express: //@ ensures \result == true <==> (n > 0 && ...). But we need to be careful: The method returns false for n <= 0, and returns true for n > 0 and after dividing by 2,3,5 repeatedly we get 1. So we can express:
+
+//@ ensures \result == (n > 0 && UglyNumLoop.isUgly(n)); but that is circular. Instead we can express the condition in terms of n's prime factors: \result == true ==> n > 0 && ... Actually we can express the ensures in terms of the final n after loops. But we can also use a helper definition. However, we can just specify that the method returns true if and only if n is an ugly number (i.e., after removing all factors 2,3,5, we get 1). But we cannot refer to the method itself. We can define a predicate: \result == true ==> n > 0 && ... Actually we can write:
+
+//@ ensures \result == true ==> n > 0 && UglyNumLoop.isUgly(n); but again circular. Better to express the condition directly: after dividing by 2,3,5 as many times as possible, the result is 1. But we cannot express that directly in JML without referencing the loops. However, we can use a lemma or a helper method. But we can approximate: //@ ensures \result == (n > 0 && (n after dividing by all 2,3,5 factors equals 1)). But we can express that as: \result == (n > 0 && UglyNumLoop.isUgly(n)). But that is circular. However, we can use a separate helper method to define ugliness, but we cannot add new methods. The problem only asks to add JML comments, not to add new methods. So we need to specify the behavior in terms of the loops.
+
+We can specify the ensures clause as: //@ ensures \result == (n > 0 && UglyNumLoop.isUgly(n)); but that is circular. However, in JML, we can use the \old construct to refer to the original value of n. But we need to express the condition after loops. Actually we can say: //@ ensures \result == (n > 0 && (n after dividing by all 2,3,5 factors

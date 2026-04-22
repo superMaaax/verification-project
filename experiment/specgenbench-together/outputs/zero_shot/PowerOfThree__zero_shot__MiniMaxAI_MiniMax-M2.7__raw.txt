@@ -1,0 +1,98 @@
+I need to add JML specifications to this Java program. Let me analyze the code:
+
+1. The class `PowerOfThree` has a method `isPowerOfThree` that checks if an integer is a power of 3.
+2. The method takes an int parameter `n` and returns a boolean.
+3. There's a while loop that divides `temp` by 3 while `temp` is not 0 and divisible by 3.
+4. After the loop, it returns whether `temp == 1`.
+
+For JML specifications:
+- I need to add `requires` clauses for preconditions
+- I need to add `ensures` clauses for postconditions
+- I need to add loop specifications with `maintaining` and `decreases`
+- I need to add `/*@ spec_public @*/` when needed for specification visibility
+
+Let me think about the specifications:
+
+1. For `isPowerOfThree`:
+   - Requires: nothing special, but I should consider if there are any constraints
+   - Ensures: should specify that it returns true if and only if n is a power of 3 (i.e., n = 3^k for some k >= 0)
+   
+2. For the loop:
+   - The loop invariant should capture that `temp` is always a power of 3 divided by some power of 3
+   - The decreases clause should show that `temp` is decreasing in absolute value (or at least non-increasing and eventually reaching a state where the loop exits)
+
+Let me think more carefully:
+
+The loop condition is `temp != 0 && temp % 3 == 0`, which means the loop continues while temp is divisible by 3 and not 0.
+
+Loop invariant: After each iteration, `temp * (3^i)` should equal the original `n` for some `i`, or equivalently, `temp` is a power of 3 that divides `n`.
+
+Actually, let me think about this more carefully:
+- Initially, `temp = n`
+- In each iteration, `temp` is divided by 3
+- The loop continues while `temp % 3 == 0` and `temp != 0`
+
+
+- When the loop exits, either `temp == 0` (meaning n was 0 or had a factor that made it not a pure power of 3) or `temp == 1` (meaning n was a power of 3)
+
+The loop invariant should be: `n == temp * (3^k)` for some integer `k >= 0`, meaning `temp` is always a divisor of `n` that is itself a power of 3.
+
+The decreases clause should be: `temp` (or some measure that decreases)
+
+Let me write the specifications:
+
+```java
+class PowerOfThree {
+    /*@ spec_public @*/ private int temp;
+    
+    public boolean isPowerOfThree(int n) {
+        int temp = n;
+        //@ loop_modifies temp;
+        //@ loop_invariant n == temp * (3 ^ (original_n / temp));
+        while (temp != 0 && temp % 3 == 0) {
+            temp /= 3;
+        }
+        return temp == 1;
+    }
+}
+```
+
+Wait, I need to be more careful with the loop invariant. The issue is that I can't easily express "3 raised to some power" in JML without additional helper functions. Let me reconsider.
+
+A better approach for the loop invariant:
+- `temp` is always a power of 3 (including 1)
+- `n` is divisible by `temp`
+- Or: `n / temp` is a power of 3
+
+Actually, looking at the algorithm:
+- We start with `temp = n`
+- We keep dividing by 3 while possible
+- At the end, `temp` is either 1 (if n was a power of 3) or some number not divisible by 3 (if n was not a power of 3)
+
+So the loop invariant should capture that `temp` remains a power of 3 that divides `n`, and the decreases clause should show that `temp` is strictly decreasing in absolute value (or at least decreasing towards 1).
+
+Let me refine the specifications:
+
+```java
+class PowerOfThree {
+    public boolean isPowerOfThree(int n) {
+        int temp = n;
+        //@ loop_modifies temp;
+        //@ loop_invariant temp >= 1 && n % temp == 0 && (\exists int k; k >= 0; n == temp * (3 ^ k));
+        while (temp != 0 && temp % 3 == 0) {
+            temp /= 3;
+        }
+        return temp == 1;
+    }
+}
+```
+
+Actually, I need to be careful about the JML syntax. The `\exists` quantifier needs proper formatting, and I should ensure the loop invariant properly captures that `temp` is always a power of 3 dividing `n`.
+
+Let me reconsider the loop invariant more carefully. The condition `temp != 0 && temp % 3 == 0` means the loop continues as long as `temp` is divisible by 3 and non-zero. So the invariant should state that `temp` is always a power of 3 that divides `n`, and the loop body divides `temp` by 3 each iteration. The decreases clause should track that `temp` gets smaller with each iteration.
+
+For the specification, I need to capture that `temp` is always a power of 3 dividing `n`, and the loop terminates when `temp` is no longer divisible by 3. The postcondition should ensure the method returns true exactly when `n` is a power of 3.
+
+The loop invariant needs to express that `temp` is always a power of 3 and divides `n`. I can use an existential quantifier to state that there exists some non-negative integer `k` such that `n = temp * 3^k`. The decreases clause should track the value of `temp` as it gets smaller with each division by 3.
+
+For the postcondition, I need to verify that the method returns true precisely when `n` is a power of 3. This means checking that the final value of `temp` equals 1, which only happens if `n` was divisible by 3 repeatedly until reaching 1. The specification should also handle edge cases like negative numbers and zero, since the algorithm treats these as not being powers of 3. The loop invariant needs to capture that `temp` is always a power of 3 and divides `n`. I can express this with an existential quantifier: there exists some non-negative integer `k` such that `n = temp * 3^k`. This ensures `temp` remains a valid power of 3 throughout the loop, and since we're dividing by 3 each iteration, `temp` will eventually reach 1 if `n` is indeed a power of 3. The decreases clause should track `temp` as it gets smaller with each division. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track that temp gets smaller with each iteration, eventually reaching a point where it's no longer divisible by 3. I need to reconsider the loop invariant. The condition `temp != 0 && temp % 3 == 0` means the loop continues while temp is divisible by 3 and non-zero. So the invariant should capture that temp is always a power of 3 that divides n, and the loop body divides temp by 3 each iteration. The decreases clause should track

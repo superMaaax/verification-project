@@ -1,0 +1,288 @@
+We need to generate JML specifications for the Java program. The program is a class MulNested with a static method mulNested that multiplies two integers using nested loops to compute the absolute product and then applies sign.
+
+We need to add JML comments directly into the source code. We need to generate requires and ensures clauses for each method where appropriate. Also loop specifications: maintaining and decreases for each loop. Add spec_public only when needed for specification visibility. Do not change executable Java code. Do not rename classes, methods, fields, or variables. Output the full Java file and nothing else. Do not omit any original code.
+
+Thus we need to produce a Java file with JML comments inserted. The JML comments are of the form //@ ... or /*@ ... */. Usually we use /*@ ... @*/ for block comments. For method specifications we use /*@ requires ...; ensures ...; @*/. For loop specifications we use //@ maintaining ...; decreases ...; etc.
+
+We need to ensure that the JML is correct. Let's think about the method mulNested.
+
+Method signature: public static int mulNested(int x, int y). It returns x * y.
+
+We need to specify that the method returns the product of x and y. However, there may be overflow issues. But we can ignore overflow for JML spec. Usually we can specify that the result is x * y, assuming no overflow. But we can also specify that the method returns the product of x and y as defined mathematically.
+
+We need to consider the behavior of sign and absolute values. The method computes sign based on negativity of x and y, then uses loops to compute m * n (where m = absolute value of x, n = absolute value of y). Then returns sign * res.
+
+Thus the method returns x * y.
+
+We need to add requires and ensures clauses. The requires clause can specify that the inputs are any integers. There might be no constraints. However, we might want to specify that the method requires the inputs to be such that the product fits in int? But we can ignore.
+
+We also need to add loop specifications for each for loop. There are two loops: outer loop for i from 0 to m-1, inner loop for j from 0 to n-1. We need to add maintaining and decreases for each loop. Usually we add //@ maintaining ...; //@ decreases ...; for each loop.
+
+We need to decide what invariants to maintain. For the outer loop, we can maintain that res = i * n (or something). Actually after each iteration of outer loop, we add n to res. At the start i=0, res=0. After each iteration i increments, and we add n to res. So we can maintain that res = i * n. But also we need to maintain m and n unchanged. Also sign unchanged. Also i is the loop variable.
+
+We also need to maintain that i <= m. And that the loop will terminate: decreases m - i.
+
+Similarly for inner loop, we need to maintain something about j and res. But we can also specify invariants for inner loop relative to i. However, we can also just specify invariants for each loop individually. Usually we need to specify invariants for loops: maintain that the loop variable is within bounds and that some relation holds.
+
+We can also specify that after the inner loop, res increments by n for each outer iteration.
+
+Better to specify invariants:
+
+For outer loop: //@ maintaining 0 <= i && i <= m; //@ maintaining res == i * n; //@ decreases m - i;
+
+For inner loop: //@ maintaining 0 <= j && j <= n; //@ maintaining res == (i * n) + j; //@ decreases n - j;
+
+But we need to ensure that the invariants are consistent with the code. Let's check the code:
+
+int res = 0, m = x, n = y, sign = 1;
+if(x < 0){
+    m = -x;
+    sign = -sign;
+}
+if(y < 0){
+    n = -y;
+    sign = -sign;
+}
+for(int i = 0; i < m; i++) {
+    for(int j = 0; j < n; j++) {
+        res = res + 1;
+    }
+}
+return sign * res;
+
+Thus after loops, res = m * n. Then sign * res = sign * m * n = x * y.
+
+We need to add JML spec for the method. Usually we add a comment before the method: /*@ requires ...; ensures ...; @*/. But we can also add spec_public for fields if needed. The fields are res, m, n, sign. They are local variables, not fields. So we don't need spec_public.
+
+We need to add loop specifications for each for loop. Use //@ comments.
+
+We also need to add spec_public only when needed for specification visibility. Since we have local variables, we might need to declare them as spec_public? Usually spec_public is used for fields that need to be visible in specifications. Since these are local variables, we might not need spec_public. However, JML may require that variables used in specifications be declared in the scope. Usually we can just refer to them. But we need to ensure that the spec can see them. For loop invariants, we can refer to i, j, res, m, n. They are local variables, so they are in scope. So we don't need spec_public.
+
+Thus we can just add loop invariants.
+
+We also need to add requires and ensures. The ensures clause can be something like ensures \result == x * y; However, we need to be careful: we cannot refer to x and y in ensures? We can refer to them as parameters. Yes.
+
+Thus we can write: /*@ requires true; ensures \result == x * y; @*/. But we might also want to mention overflow, but not needed.
+
+Better to write: /*@ requires true; ensures \result == x * y; @*/.
+
+But we also need to consider that the product may overflow int, but we can ignore.
+
+We also need to add a comment for the class? Usually we can add a class comment: /*@ class \partial @*/? Not needed.
+
+We need to output the full Java file with JML comments inserted. The original code is:
+
+public class MulNested {
+    public static int mulNested(int x, int y) {
+        int res = 0, m = x, n = y, sign = 1;
+        if(x < 0){
+            m = -x;
+            sign = -sign;
+        }
+        if(y < 0){
+            n = -y;
+            sign = -sign;
+        }
+        for(int i = 0; i < m; i++) {
+            for(int j = 0; j < n; j++) {
+                res = res + 1;
+            }
+        }
+        return sign * res;
+    }
+}
+
+We need to insert JML comments. Usually we put the method specification before the method. We can also add block comments for invariants.
+
+We need to ensure that we do not change the code. So we need to insert JML comments in appropriate places without altering the code.
+
+We need to output the full Java file. So we need to produce something like:
+
+/*@ class MulNested @*/
+/*@ ... @*/
+public class MulNested {
+    /*@ requires true;
+        ensures \result == x * y;
+    @*/
+    public static int mulNested(int x, int y) {
+        int res = 0, m = x, n = y, sign = 1;
+        if(x < 0){
+            m = -x;
+            sign = -sign;
+        }
+        if(y < 0){
+            n = -y;
+            sign = -sign;
+        }
+        //@ maintaining 0 <= i && i <= m;
+        //@ maintaining res == i * n;
+        //@ decreases m - i;
+        for(int i = 0; i < m; i++) {
+            //@ maintaining 0 <= j && j <= n;
+            //@ maintaining res == (i * n) + j;
+            //@ decreases n - j;
+            for(int j = 0; j < n; j++) {
+                res = res + 1;
+            }
+        }
+        return sign * res;
+    }
+}
+
+But we need to ensure that the loop invariants are placed correctly. Usually we place them as comments before the for loop. In Java, we can put them as //@ comments after the for loop? Actually we can put them as //@ comments on the line before the for loop, but we need to ensure they are recognized as JML comments. Usually we can put them as //@ or /*@ ... @*/. The spec says "Add JML directly into the given Java source code." Usually we use //@ for line comments and /*@ ... @*/ for block comments. The spec also says "Add `/*@ spec_public @*/` only when needed for specification visibility." So we need to use spec_public for fields that need to be visible. Not needed here.
+
+Thus we can add loop invariants as //@ comments before the loops. However, we need to ensure that the comments are placed correctly. The code after the for loop is a block of statements. We can place the invariants as comments before the for loop, but we need to ensure they are not inside the loop body. Usually we can place them as comments after the for line, but they need to be separate lines. In JML, we can write:
+
+//@ maintaining ...
+//@ decreases ...
+for (int i = 0; i < m; i++) {
+
+But we need to ensure that the comment is recognized as JML. Usually we can put them as //@ comment lines. However, some JML tools require that the comment be a JML comment, i.e., //@ or /*@ ... @*/. The spec says "Add JML directly into the given Java source code." So we can use //@ for line comments. But we need to be careful: //@ is a line comment that starts with //@. That is recognized as JML comment. So we can do:
+
+//@ maintaining 0 <= i && i <= m;
+//@ maintaining res == i * n;
+//@ decreases m - i;
+for(int i = 0; i < m; i++) {
+
+Similarly for inner loop.
+
+But we also need to ensure that the invariants are correct. Let's think about the invariants in more detail.
+
+We have outer loop: for (int i = 0; i < m; i++). At each iteration, we add n to res. At the start i=0, res=0. After each iteration, i increments, and we add n to res. So after i iterations, res = i * n. At the end of loop, i = m, res = m * n. So we can maintain that res == i * n. Also we need to maintain that i <= m. Also we need to maintain that i >= 0. So we can maintain 0 <= i && i <= m && res == i * n. But we can break into multiple maintaining clauses. Usually we can combine them: //@ maintaining 0 <= i && i <= m && res == i * n; but we can also separate.
+
+We also need to ensure that the loop terminates: decreases m - i. Since i increases, m - i decreases.
+
+Similarly for inner loop: for (int j = 0; j < n; j++) { res = res + 1; }. At each iteration, we increment res by 1. At the start of inner loop for a given i, j=0, res = i * n (from outer invariant). Then after each iteration, j increments, res increments by 1. So after j iterations, res = i * n + j. At the end of inner loop, j = n, res = i * n + n = (i+1) * n. Then outer loop increments i. So we can maintain that res == i * n + j. Also maintain 0 <= j && j <= n. Also decreases n - j.
+
+Thus we can write:
+
+//@ maintaining 0 <= j && j <= n;
+//@ maintaining res == i * n + j;
+//@ decreases n - j;
+for(int j = 0; j < n; j++) {
+    res = res + 1;
+}
+
+But we also need to ensure that the invariants hold at the start of the loop. At the start of inner loop, j = 0, res = i * n (from outer invariant). Then res == i * n + 0 holds. Good.
+
+Thus we can add these invariants.
+
+Now, we also need to consider the sign and absolute values. The code sets sign and m, n accordingly. We might want to add invariants for those as well, but not required. The ensures clause will guarantee the result.
+
+We also need to consider that the method may be called with any integers, but we might want to require that the product fits in int? Not needed.
+
+Thus the method specification can be:
+
+/*@ requires true;
+    ensures \result == x * y;
+@*/
+
+But we might also want to specify that the method does not modify any state besides returning result. However, there are no side effects.
+
+We also need to consider that the method is static, so we might want to add a clause like //@ static //? Not needed.
+
+We also need to consider that the method may be called with x and y being any integers, but we might want to specify that the method returns the product. The ensures clause can be \result == x * y.
+
+But we also need to consider overflow. Usually JML does not handle overflow automatically. We can ignore.
+
+Thus we can produce the annotated file.
+
+We need to ensure that we do not rename anything. Also we need to ensure that we include all original code. The code includes the class declaration, method, etc. We need to output the full Java file.
+
+Thus we need to produce something like:
+
+/*@
+    requires true;
+    ensures \result == x * y;
+@*/
+public class MulNested {
+    public static int mulNested(int x, int y) {
+        int res = 0, m = x, n = y, sign = 1;
+        if(x < 0){
+            m = -x;
+            sign = -sign;
+        }
+        if(y < 0){
+            n = -y;
+            sign = -sign;
+        }
+        //@ maintaining 0 <= i && i <= m;
+        //@ maintaining res == i * n;
+        //@ decreases m - i;
+        for(int i = 0; i < m; i++) {
+            //@ maintaining 0 <= j && j <= n;
+            //@ maintaining res == i * n + j;
+            //@ decreases n - j;
+            for(int j = 0; j < n; j++) {
+                res = res + 1;
+            }
+        }
+        return sign * res;
+    }
+}
+
+But we need to ensure that the JML comments are placed correctly. Usually we need to put the method specification before the method, inside a block comment with @. The spec says "Add JML directly into the given Java source code." So we can put the specification as a block comment before the method. The block comment can be /*@ ... @*/. The spec also says "Add `/*@ spec_public @*/` only when needed for specification visibility." So we don't need spec_public.
+
+We also need to ensure that we include the original code exactly, with the same formatting. The original code is:
+
+public class MulNested {
+    public static int mulNested(int x, int y) {
+        int res = 0, m = x, n = y, sign = 1;
+        if(x < 0){
+            m = -x;
+            sign = -sign;
+        }
+        if(y < 0){
+            n = -y;
+            sign = -sign;
+        }
+        for(int i = 0; i < m; i++) {
+            for(int j = 0; j < n; j++) {
+                res = res + 1;
+            }
+        }
+        return sign * res;
+    }
+}
+
+We need to insert JML comments. We need to preserve the original code's line breaks and indentation. The original code uses spaces for indentation (4 spaces). We need to maintain that.
+
+We need to decide where to place the method specification. Usually we place it right before the method declaration, within a block comment. But we need to ensure that the block comment does not interfere with the code. We can place it as:
+
+/*@ requires true; ensures \result == x * y; @*/
+public static int mulNested(int x, int y) {
+
+But we also need to ensure that we include the method's body. The spec says "Add JML directly into the given Java source code." So we can add the spec as a comment line before the method. Usually we can do:
+
+/*@ requires true; ensures \result == x * y; @*/
+public static int mulNested(int x, int y) {
+
+But we also need to consider that we might want to add a spec_public for the method? Not needed.
+
+We also need to add loop invariants. We need to place them before the loops. Usually we can place them as //@ comments on separate lines before the for loops. However, we need to ensure that they are recognized as JML comments. The spec says "Add JML directly into the given Java source code." So we can use //@ comments. But we need to be careful: //@ comments are line comments that start with //@. They are recognized as JML comments. So we can do:
+
+//@ maintaining 0 <= i && i <= m;
+//@ maintaining res == i * n;
+//@ decreases m - i;
+for(int i = 0; i < m; i++) {
+
+Similarly for inner loop.
+
+But we also need to consider that we might want to add a spec_public for local variables? Usually not needed. However, some JML tools require that local variables used in specifications be declared as spec_public? Actually, spec_public is used for fields that need to be visible in specifications. For local variables, they are always visible in the method's scope, but for JML we might need to declare them as //@ spec_public? Not needed.
+
+Thus we can just add invariants.
+
+Now, we need to ensure that we do not change the code. The code is exactly as given, but we will add comments. We need to ensure that we do not add any extra spaces or line breaks that would change the code. However, adding comments does not change the code. But we need to ensure that we do not inadvertently add extra lines that cause compilation issues? Comments are ignored. So it's fine.
+
+We also need to ensure that we do not rename anything. So we keep the class name, method name, variable names.
+
+Thus we produce the annotated file.
+
+But we need to be careful about the format: The spec says "Output only the complete annotated Java file and nothing else." So we need to output the entire file, with JML comments inserted. We should not include any extra text like "Here is the annotated file:" etc.
+
+Thus we need to output something like:
+
+/*@ requires true; ensures \result == x * y; @*/
+public class MulNested {
+    public static int mulNested(int x, int y) {
+        int res = 0, m = x, n = y, sign =

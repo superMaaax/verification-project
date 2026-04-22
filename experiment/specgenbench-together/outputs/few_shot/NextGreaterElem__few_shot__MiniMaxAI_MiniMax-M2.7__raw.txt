@@ -1,0 +1,192 @@
+We need to generate JML specifications for the given Java program. The program is a class NextGreaterElem with a method nextGreaterElement that takes two int arrays nums1 and nums2 and returns an int array. The method finds for each element in nums1 the next greater element in nums2 (the first element to the right in nums2 that is greater than the current element). If none, returns -1.
+
+We need to add JML comments: requires, ensures, loop invariants (maintaining, decreases). Also spec_public if needed.
+
+We must not change executable code. So we need to add JML comments before the method and inside loops.
+
+First, we need to think about the specification.
+
+Method signature: public int[] nextGreaterElement(int[] nums1, int[] nums2)
+
+Precondition: Usually we can require that both arrays are non-null. In JML we can write:
+
+//@ requires nums1 != null && nums2 != null;
+
+Optionally we can also require that arrays elements are within int range? Not needed.
+
+Ensures: The method returns an array of length nums1.length. For each i, the result is either the next greater element in nums2 for nums1[i] or -1 if none exists.
+
+We can express:
+
+//@ ensures \result != null && \result.length == nums1.length;
+//@ ensures (\forall int i; 0 <= i && i < nums1.length; 
+//@   (\exists int j; i < j && j < nums2.length && nums2[j] > nums1[i]; \result[i] == nums2[j])
+//@   || (!(\exists int j; i < j && j < nums2.length && nums2[j] > nums1[i]) && \result[i] == -1));
+
+But we need to be careful: The next greater element is defined as the first element to the right in nums2 that is greater than the current element. The algorithm uses while loops to find j such that nums2[j] == nums1[i], then k = j+1 and while k < n && nums2[k] < nums2[j] increment k. Then if k < n, res[i] = nums2[k]; else -1. This is indeed the next greater element to the right of the matching element in nums2. However note that if there are multiple occurrences of the same value in nums2, it picks the first occurrence that matches nums1[i] (the first j). Then finds the next greater element after that j.
+
+Thus ensures can be expressed as:
+
+For each i, let pos be the smallest index j such that nums2[j] == nums1[i] (the first occurrence). Then find the smallest index k > j such that nums2[k] > nums2[j]; if exists, result[i] = nums2[k]; else -1.
+
+But we can also express more generically: The result for each i is the first element to the right of nums1[i] in nums2 that is greater than nums1[i]; if none, -1.
+
+We can also express using existential quantifiers.
+
+Better to break down ensures into two parts: result length and each element's value.
+
+We can also add a lemma about existence of j: Since algorithm searches for j from start, we assume that each element in nums1 appears somewhere in nums2? Actually algorithm will find j such that nums2[j] == nums1[i]; if not found, j will become n (since while loop stops when j == n). Then k = j+1 = n+1? Actually code sets k = j+1; but if j == n, then k = n+1 which is out of bounds. Then while (k < n && nums2[k] < nums2[j]) will be false because k < n is false. Then res[i] = k < n ? nums2[k] : -1; Since k = n+1 > n, res[i] = -1. So algorithm handles missing elements gracefully: returns -1. But typical problem statement expects each element in nums1 is also in nums2. However we can allow missing; spec can reflect that.
+
+Thus ensures clause can be:
+
+//@ ensures \result != null && \result.length == nums1.length;
+//@ ensures (\forall int i; 0 <= i && i < nums1.length;
+//@   (\exists int j; j >= 0 && j < nums2.length && nums2[j] == nums1[i] &&
+//@     (\forall int k; j < k && k < nums2.length && nums2[k] > nums2[j]; \result[i] == nums2[k])) &&
+//@   (\forall int j; j >= 0 && j < nums2.length && nums2[j] == nums1[i] &&
+//@     (\forall int k; j < k && k < nums2.length && nums2[k] > nums2[j]; \result[i] == nums2[k])) ) );
+
+But we need to be careful: The algorithm picks the first occurrence of nums1[i] in nums2 (lowest j). Then finds the next greater element after that j (the smallest k > j such that nums2[k] > nums2[j]). If none, returns -1. So we can express ensures as:
+
+For each i, let j = smallest index such that nums2[j] == nums1[i]; if such j exists, let k = smallest index > j such that nums2[k] > nums2[j]; then result[i] = (k exists) ? nums2[k] : -1; else result[i] = -1.
+
+But we can also express more simply: result[i] is the first element to the right of nums1[i] in nums2 that is greater; else -1.
+
+Better to use quantifiers:
+
+Let’s define:
+
+/*@ public normal_behavior
+  @ ensures \result != null && \result.length == nums1.length;
+  @ forAll int i; 0 <= i && i < nums1.length;
+  @   (\exists int j; j >= 0 && j < nums2.length && nums2[j] == nums1[i] &&
+  @        (\exists int k; k > j && k < nums2.length && nums2[k] > nums2[j] &&
+  @             (\forall int l; j < l && l < k => nums2[l] <= nums2[j]))) &&
+  @        \result[i] == nums2[k]) ||
+  @   (!(\exists int j; j >= 0 && j < nums2.length && nums2[j] == nums1[i] &&
+  @        (\exists int k; k > j && k < nums2.length && nums2[k] > nums2[j]))) &&
+  @        \result[i] == -1);
+  @*/
+
+But this is complex. However we can break into two ensures clauses: one for length, one for each element.
+
+Better to write:
+
+//@ ensures \result != null && \result.length == nums1.length;
+//@ ensures (\forall int i; 0 <= i && i < nums1.length;
+//@   (\exists int j; 0 <= j && j < nums2.length && nums2[j] == nums1[i] &&
+//@     (\forall int k; j < k && k < nums2.length && nums2[k] > nums2[j] ==> \result[i] == nums2[k])) &&
+//@   (\forall int j; 0 <= j && j < nums2.length && nums2[j] == nums1[i] &&
+//@     (\forall int k; j < k && k < nums2.length && nums2[k] > nums2[j] ==> \result[i] == nums2[k])) ) );
+
+But we need to capture the "first greater" property. Actually we can define result[i] = -1 if no greater element after the first occurrence; else result[i] = the first greater element after that occurrence.
+
+Better to define:
+
+For each i, let j be the smallest index such that nums2[j] == nums1[i] (if any). Then result[i] = (if exists k > j such that nums2[k] > nums2[j] then the smallest such k's value else -1). This can be expressed with quantifiers.
+
+We can also break into two ensures: one for existence case, one for non-existence case.
+
+Better to use JML's \exists and \forall. But we can also use simpler: The algorithm ensures that result[i] is either -1 or some element from nums2 that is greater than nums1[i] and appears after the matching element.
+
+But we need to produce a correct spec that matches algorithm.
+
+We can also add loop invariants for each while loop.
+
+The method has outer for loop: for (int i = 0; i < m; ++i). This loop iterates over each element of nums1. Inside, there are two while loops: first finds j, second finds k.
+
+We need to add loop invariants for each while loop.
+
+We also need to add spec_public for fields that are used in spec but not visible? The class has no fields besides method local variables. The spec may need to refer to local variables in invariants? Usually JML invariants can refer to method parameters and local variables, but we can also use spec_public to expose them. However typical JML spec for loops uses //@ maintaining and //@ decreases. Those are placed inside loops. They can refer to local variables.
+
+We need to ensure we add spec_public only when needed for specification visibility. Since the parameters are visible to method, we don't need spec_public for them. However we might need to expose local variables for spec? Usually spec_public is used to make private fields visible to specs. Here we have no fields. So we may not need any spec_public.
+
+But we might need to add spec_public for the arrays? Actually they are parameters, not fields, so they are visible. So no need.
+
+Thus we just add requires and ensures for method, and loop invariants for loops.
+
+We also need to add decreasing clause for each loop: //@ decreases something.
+
+The outer for loop is not a while loop, but we can still add loop invariants for for loops. In JML we can also annotate for loops with //@ maintaining and //@ decreases. But typical approach is to treat for loops as while loops: we can add invariants after the for line? Usually we can add //@ loop_invariant after for loop header. But the problem statement says "Generate loop specifications such as maintaining and decreases for each loop where appropriate." So we should add invariants for each loop (including for loops). In JML we can add //@ maintaining and //@ decreases for for loops as well. But we need to be careful: The syntax for for loops in JML is similar to while. We can add //@ maintaining after the for line, but we need to place them before the loop? In JML we can add //@ loop_invariant after the for loop header. But the example for AddLoop used while loops, not for loops. However we can still annotate for loops similarly. The typical pattern is:
+
+//@ for (int i = 0; i < m; ++i) {
+//@   maintaining ...;
+//@   decreases ...;
+//@   ...
+//@ }
+
+But we can also use //@ maintaining after the for line. However the problem statement expects to add JML comments inside the code, like in examples. They added //@ maintaining and //@ decreases after the while loops. For for loops, we can also add invariants after the for line. But we need to decide the best placement.
+
+Better to treat for loops as while loops: we can add //@ maintaining and //@ decreases after the for line, before the loop body. But typical JML syntax is:
+
+//@ for (int i = 0; i < m; ++i) {
+//@   //@ maintaining ...;
+//@   //@ decreases ...;
+//@   ...
+//@ }
+
+But we can also place them inside the loop body. However the problem statement says "Add JML directly into the given Java source code." So we should add JML comments before the loops or after them. The typical approach is to place them after the loop header, before the body. For while loops they placed //@ maintaining and //@ decreases after the while line, before the body. In Example 1:
+
+while (n > 0) {
+    //@ maintaining sum == x + y - n && 0 <= n;
+    //@ decreases n;
+    sum = sum + 1;
+    n = n - 1;
+}
+
+Actually they placed the invariants inside the loop body, after the opening brace. But they also placed decreases after maintaining? In the example they placed maintaining and decreases after the while line? Let's check the example output:
+
+```java
+while (n > 0) {
+    //@ maintaining sum == x + y - n && 0 <= n;
+    //@ decreases n;
+    sum = sum + 1;
+    n = n - 1;
+}
+```
+
+Yes, they placed the invariants inside the loop body, after the opening brace. That is typical for while loops. For for loops, we can also place invariants inside the loop body, after the opening brace. However we need to ensure we follow JML syntax: The invariants should be placed before any statements inside the loop. Usually we can place them after the for line but before the body? Actually typical JML annotation for for loops is:
+
+//@ for (int i = 0; i < n; ++i) {
+//@   //@ maintaining invariant;
+//@   //@ decreases something;
+//@   loop body
+//@ }
+
+But we can also place them after the for line, like:
+
+for (int i = 0; i < n; ++i) {
+    //@ maintaining invariant;
+    //@ decreases something;
+    ...
+}
+
+Thus we can follow same pattern as while loops: place invariants inside loop body after opening brace.
+
+Thus we need to add invariants for outer for loop and inner while loops.
+
+We also need to add decreases clause for each loop: For outer for loop, we can set decreases m - i (or something). For inner while loops, we can set decreases n - j and n - k.
+
+We also need to add maintaining invariants for each loop: For outer for loop, we can maintain that i is within bounds and that results for processed indices are correct. But we can also just add invariants for inner loops.
+
+But we need to ensure we produce a correct spec. The spec should be as precise as possible.
+
+Given the algorithm, we can add invariants for each loop:
+
+- Outer for loop: for (int i = 0; i < m; ++i). We can maintain that i is between 0 and m inclusive, and that for all indices processed so far (0 <= j < i) the result array entries are correctly computed. However we can also just maintain that i is the current index being processed and that the loop invariant is that i <= m and that for each processed index, res[i] is set accordingly. But we can also skip invariants for outer for loop because it's simple. However the problem statement says "Generate loop specifications such as maintaining and decreases for each loop where appropriate." So we should add invariants for each loop, but we can also decide not to if not needed. But it's safer to add them.
+
+Better to add invariants for outer for loop: maintain i >= 0 && i <= m, and maybe that for all j < i, res[j] is either -1 or some value. But we can also add a more specific invariant: For each j < i, res[j] is the next greater element for nums1[j] in nums2. However that would be complex. But we can add a simple invariant: i is the loop index and we haven't modified other parts.
+
+But we can also skip invariants for outer for loop because it's trivial. However the problem may expect invariants for each loop. The outer for loop is a loop, so we should add invariants. Let's add invariants for outer for loop.
+
+Similarly for inner while loops: we need invariants for each.
+
+We also need to add decreases for each loop: For outer for loop, we can set decreases m - i (or just m - i). For inner while loops, we can set decreases n - j and n - k.
+
+We also need to add maintaining invariants for inner while loops: For first inner while loop (search for j), we can maintain that j is within [0, n] and that we haven't passed the element we are searching for yet? Actually we need to maintain that we have not yet found the element? Let's think: The while loop increments j until it finds the element equal to nums1[i] or reaches n. So we can maintain that j <= n and that for all indices less than j, nums2[j] != nums1[i] (i.e., we haven't found the element yet). But after the loop, j may be n if not found. So we can maintain that j <= n and that (j < n) implies nums2[j] != nums1[i] (since we haven't found yet). Actually after the loop, we exit when condition fails: either j == n or nums2[j] == nums1[i]. So we can maintain that while the loop is running, j < n && nums2[j] != nums1[i]. That is the condition. So we can add invariant: //@ maintaining j >= 0 && j <= n && (j < n ==> nums2[j] != nums1[i]); But we also need to ensure that j hasn't passed any potential matches? Actually we want to find the first occurrence. The loop increments j until it finds a match. So the invariant can be that we have scanned up to index j-1 and haven't found a match. So we can maintain that for all int k such that 0 <= k && k < j, nums2[k] != nums1[i]. This is also correct. But we can also maintain j <= n and that we haven't found match yet. However we also need to maintain that j is the current index being examined. So we can maintain that j >= 0 && j <= n && (j < n ==> nums2[j] != nums1[i])? Actually if j == n, we have scanned all elements and didn't find match. But we also need to ensure that we haven't found match before. So we can maintain that for all k < j, nums2[k] != nums1[i]. That is a stronger invariant. But we can also maintain that j is the index we are currently checking, and we haven't found match yet. However we also need to maintain that j is the number of steps taken. But we can also just maintain j <= n and that we haven't found match yet. But we also need to maintain that we haven't passed any matches? Actually we haven't scanned beyond j, so we can't guarantee that there is no match after j. So we can maintain that for all k < j, nums2[k] != nums1[i]. That is correct.
+
+Thus we can add invariant: //@ maintaining 0 <= j && j <= n && (\forall int k; 0 <= k && k < j; nums2[k] != nums1[i]);
+
+But we also need to maintain that j is the current index being examined. However we also need to maintain that j is not out of bounds. So we can add that.
+
+Similarly for second inner while loop: while (k < n && nums2[k] < nums2[j]) { ++k; }. This loop increments k until either k == n or nums2[k] >= nums2[j] (i.e., not

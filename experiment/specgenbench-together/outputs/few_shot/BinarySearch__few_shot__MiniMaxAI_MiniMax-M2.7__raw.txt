@@ -1,0 +1,196 @@
+We need to generate JML specifications for the given Java program (BinarySearch). We need to add JML comments directly into the source code. The output should be the full Java file with JML annotations, not just the modifications. We must not change executable Java code. We need to generate requires and ensures clauses for each method where appropriate. Also loop specifications: maintaining and decreases for each loop. Add spec_public only when needed for specification visibility. Output only the complete annotated Java file.
+
+We need to consider the method Binary(int[] arr, int key). It takes an array arr and a key to search. The method returns the index of key in arr if found, else -1. The method uses binary search algorithm.
+
+We need to add JML specifications:
+
+- For method signature: requires clause: arr may be null? Usually binary search requires non-null array. But we can just require arr != null. Also arr may be empty. So we can require arr != null. Optionally require key is within some range? Not needed.
+
+- ensures clause: The method returns -1 if arr does not contain key, or if arr is empty. If returns >=0, then arr[mid] == key. Also ensures that the result is either -1 or a valid index in the array.
+
+- Also ensure that if arr is empty, result is -1. That's covered by the first condition.
+
+- Also ensure that if key is present, the result is an index i such that arr[i] == key.
+
+- Also ensure that if result != -1, then 0 <= result < arr.length.
+
+- Also ensure that result is -1 if and only if key not in arr (or arr empty). But careful: if arr empty, result is -1. So ensures that \result == -1 <==> (arr.length == 0 || (\forall int i; 0 <= i && i < arr.length; arr[i] != key)). But we can also separate.
+
+Better to have ensures:
+
+//@ ensures arr == null ? \result == -1 : true; // maybe not needed.
+
+But typical JML ensures for binary search:
+
+//@ ensures \result == -1 ==> (\forall int i; 0 <= i && i < arr.length; arr[i] != key);
+//@ ensures \result != -1 ==> 0 <= \result && \result < arr.length && arr[\result] == key;
+
+But also ensure that if arr is empty, result is -1.
+
+We also need loop specifications for while loop.
+
+The while loop condition: while (low < high && arr[mid] != key). The loop invariants should capture that low and high are within bounds, that the key, if present, must be in the subarray arr[low..high-1] (or arr[low..high) depending). Actually typical binary search invariants: low <= high, and the segment arr[low..high) (or arr[low..high-1]) is the search range. But we need to be careful: In the code, high is initially arr.length, and low is 0. The loop continues while low < high && arr[mid] != key. At each iteration, if arr[mid] < key, low = mid + 1; else high = mid. Then recompute mid. So invariants: 0 <= low <= high <= arr.length, and key, if present, must be in arr[low..high-1] (or arr[low..high) but we need to be consistent). Actually after updating high = mid, the range is arr[low..mid) (including low, excluding mid). After low = mid + 1, the range is arr[mid+1..high). So invariants: low <= high, and for any i such that i < low or i >= high, arr[i] != key. But we need to be careful: The algorithm ensures that if key is present, it will be in the range [low, high). At start, low = 0, high = arr.length, so range is whole array. At each iteration, we narrow the range. So invariants: 0 <= low && low <= high && high <= arr.length, and (\forall int i; i < low || i >= high; arr[i] != key). But also we need to ensure that mid is computed as low + (high - low) / 2, so mid is within [low, high). But we can also include that mid is computed accordingly.
+
+We also need decreases clause: The loop should terminate because high - low decreases each iteration. So we can have //@ decreases high - low; but also we need to ensure that the loop condition is decreasing. In JML, we can use //@ decreases high - low; but also we can include //@ decreases high - low; inside the while loop. However typical pattern: //@ decreases high - low; after while condition? Actually we can put //@ decreases high - low; inside the while loop as a loop specification. But we need to include both maintaining and decreases.
+
+We also need to consider that the while loop has condition low < high && arr[mid] != key. So we need to maintain invariants that hold at each iteration. The invariants should be something like:
+
+//@ maintaining 0 <= low && low <= high && high <= arr.length;
+//@ maintaining (\forall int i; i < low || i >= high; arr[i] != key);
+//@ decreases high - low;
+
+But also we need to ensure that mid is computed correctly. However we can also include //@ maintaining low <= mid && mid < high; but not necessary.
+
+Better to include invariants that guarantee correctness: At each iteration, the key, if present, must be in the subarray arr[low..high-1] (or arr[low..high) but we need to decide). Actually after each iteration, we adjust low or high. So we can maintain that key, if present, is in the range [low, high). That is, if key exists in arr, then there exists some i such that low <= i < high && arr[i] == key. But we can also maintain that any index i outside [low, high) cannot contain the key. That's what we have.
+
+Thus invariants: //@ maintaining 0 <= low && low <= high && high <= arr.length; //@ maintaining (\forall int i; i < low || i >= high; arr[i] != key); //@ decreases high - low;
+
+But also we need to ensure that mid is computed as low + (high - low) / 2, but we can just trust the code. However we might want to include //@ maintaining low <= mid && mid < high; but not necessary.
+
+Better to include invariants that guarantee that the loop will eventually find the key if present. But we also need to ensure that after loop exit, either low >= high (meaning not found) or arr[mid] == key (found). The code after loop checks if low >= high then return -1 else return mid. So we need to ensure that the invariants guarantee that if key is present, the loop will exit with arr[mid] == key. But we can also include invariants that guarantee that low <= high at all times, and that mid is computed accordingly.
+
+We also need to consider that the while loop condition includes arr[mid] != key, but we also need to ensure that arr[mid] is accessed only when low < high, which is guaranteed by condition low < high. So we need to ensure that mid is valid index: low <= mid && mid < high && high <= arr.length, so mid is valid. So we can include //@ maintaining low <= mid && mid < high; but we also need to ensure that mid is computed each iteration. But we can include that as part of invariants.
+
+Better to include invariants:
+
+//@ maintaining 0 <= low && low <= high && high <= arr.length;
+//@ maintaining low <= mid && mid < high;
+//@ maintaining (\forall int i; i < low || i >= high; arr[i] != key);
+//@ decreases high - low;
+
+But also we need to ensure that mid is computed each iteration based on low and high. However we can also include that mid is computed as low + (high - low) / 2, but we can trust the code.
+
+But we also need to ensure that the loop terminates. The decreases clause is high - low.
+
+Now, we also need to add spec_public only when needed for specification visibility. Usually we need to mark fields as spec_public if they are used in specifications but are private. In this class, there are no fields. The method is static. So we don't need spec_public.
+
+We also need to add requires clause for the method. Usually we require arr != null. But we can also allow arr to be null? Usually binary search expects non-null array. We'll add //@ requires arr != null;.
+
+But also we might want to require that arr is sorted? The algorithm does not assume sorted array; it's just searching for key in arbitrary array. Actually binary search only works if array is sorted. But the code does not assume sorted; it's just linear search? Actually binary search works only if array is sorted. But the code uses binary search algorithm, but if array is not sorted, it may return any index where key appears, but not necessarily correct. However the problem does not mention sortedness. The typical binary search algorithm expects sorted array. But the problem statement does not mention sortedness. We can assume that the array is sorted in ascending order. But we can also ignore that. The JML spec can just specify behavior: returns index of key if present, else -1. It does not require sortedness. However we might want to require that the array is sorted to guarantee correctness, but the problem does not mention sortedness. The typical JML spec for binary search includes a requires clause that arr is sorted (or that the array is partitioned). But we can ignore that for simplicity.
+
+Given the examples, they didn't require sortedness for Smallest. They just required arr != null. So we can just require arr != null.
+
+Thus we can add //@ requires arr != null;.
+
+But also we might want to require that key is not null? But key is int, so no null.
+
+Thus we can add //@ requires arr != null;.
+
+Now ensures clause: we can have:
+
+//@ ensures \result == -1 ==> (\forall int i; 0 <= i && i < arr.length; arr[i] != key);
+//@ ensures \result != -1 ==> 0 <= \result && \result < arr.length && arr[\result] == key;
+
+But also we need to ensure that if arr is empty, result is -1. That is covered by first ensures because for empty array, the condition arr[i] != key is vacuously true for all i, but we also need to ensure that result is -1. Actually the first ensures says if result == -1 then for all i, arr[i] != key. But if arr is empty, then the condition arr[i] != key is vacuously true, but we also need to ensure that result is -1 when arr is empty. However the code returns -1 if arr.length == 0. So we can also add ensures that arr.length == 0 ==> \result == -1. But we can incorporate that in the first ensures because if arr.length == 0, then the condition (\forall int i; 0 <= i && i < arr.length; arr[i] != key) is vacuously true, but we also need to ensure that result is -1. Actually the ensures clause is a post-condition that must hold for all possible inputs. So we need to ensure that if arr.length == 0, then \result == -1. The first ensures clause does not guarantee that; it only says if result == -1 then the condition holds. It does not guarantee that result is -1 when arr is empty. So we need to add a separate ensures clause: //@ ensures arr.length == 0 ==> \result == -1;.
+
+Alternatively, we can combine: //@ ensures arr.length == 0 ==> \result == -1; and //@ ensures arr.length > 0 ==> (\result == -1 ==> (\forall int i; 0 <= i && i < arr.length; arr[i] != key)) && (\result != -1 ==> (0 <= \result && \result < arr.length && arr[\result] == key)); But easier to separate.
+
+Thus we can have:
+
+//@ ensures arr.length == 0 ==> \result == -1;
+//@ ensures arr.length > 0 ==> (\result == -1 ==> (\forall int i; 0 <= i && i < arr.length; arr[i] != key));
+//@ ensures arr.length > 0 ==> (\result != -1 ==> (0 <= \result && \result < arr.length && arr[\result] == key));
+
+But we can also combine the two ensures for arr.length > 0.
+
+Better to have:
+
+//@ ensures \result == -1 ==> (arr.length == 0 || (\forall int i; 0 <= i && i < arr.length; arr[i] != key));
+//@ ensures \result != -1 ==> (0 <= \result && \result < arr.length && arr[\result] == key);
+
+But we also need to ensure that if result != -1, then arr[\result] == key. That's fine.
+
+But also we might want to ensure that result is unique (if key appears multiple times, any index is fine). That's fine.
+
+Thus we can have:
+
+//@ ensures \result != -1 ==> (0 <= \result && \result < arr.length && arr[\result] == key);
+//@ ensures \result == -1 ==> (arr.length == 0 || (\forall int i; 0 <= i && i < arr.length; arr[i] != key));
+
+But we also need to ensure that if arr is empty, result is -1. The second ensures covers arr.length == 0 case because then the condition arr.length == 0 is true, so result must be -1. Actually the second ensures says \result == -1 ==> (arr.length == 0 || (\forall int i; ...)). If arr.length == 0, then the right side is true regardless of result? Wait, it's a logical implication: If result == -1, then the condition holds. But we need the converse: If arr.length == 0, then result must be -1. That is not captured. Actually we want to guarantee that if arr.length == 0, then result == -1. That is a stronger condition: //@ ensures arr.length == 0 ==> \result == -1;.
+
+Thus we need both.
+
+Thus we can have:
+
+//@ ensures arr.length == 0 ==> \result == -1;
+//@ ensures arr.length > 0 ==> (\result == -1 ==> (\forall int i; 0 <= i && i < arr.length; arr[i] != key));
+//@ ensures arr.length > 0 ==> (\result != -1 ==> (0 <= \result && \result < arr.length && arr[\result] == key));
+
+But we can also combine the two for arr.length > 0.
+
+Better to have:
+
+//@ ensures arr.length == 0 ==> \result == -1;
+//@ ensures \result != -1 ==> (0 <= \result && \result < arr.length && arr[\result] == key);
+//@ ensures \result == -1 ==> (arr.length == 0 || (\forall int i; 0 <= i && i < arr.length; arr[i] != key));
+
+But we need to be careful: The third ensures is a condition that if result == -1, then either arr is empty or key not present. That's correct. However we also need to ensure that if key not present, result is -1. That's also captured. So we can have these three ensures.
+
+But we also need to ensure that the method returns -1 only when key not present or arr empty. That's covered.
+
+Thus we can have:
+
+//@ requires arr != null;
+//@ ensures arr.length == 0 ==> \result == -1;
+//@ ensures \result != -1 ==> (0 <= \result && \result < arr.length && arr[\result] == key);
+//@ ensures \result == -1 ==> (arr.length == 0 || (\forall int i; 0 <= i && i < arr.length; arr[i] != key));
+
+But we also need to ensure that if result != -1, then arr[\result] == key, which is already there.
+
+Now loop invariants: We need to add //@ maintaining ... and //@ decreases ... for the while loop.
+
+We also need to consider that the while loop has condition low < high && arr[mid] != key. The loop invariants should hold at each iteration. We need to maintain that low and high are within bounds, that the key, if present, is in the subarray arr[low..high-1], and that any index outside this range cannot contain the key. Also we need to maintain that mid is computed correctly: low <= mid && mid < high. Also we need to maintain that the loop condition is decreasing.
+
+Thus we can add:
+
+//@ maintaining 0 <= low && low <= high && high <= arr.length;
+//@ maintaining low <= mid && mid < high;
+//@ maintaining (\forall int i; i < low || i >= high; arr[i] != key);
+//@ decreases high - low;
+
+But also we need to ensure that the loop condition is decreasing: high - low decreases each iteration. The decreases clause ensures termination.
+
+Now, we also need to consider that after the loop, we have a check if low >= high then return -1. The invariants should guarantee that if key is present, the loop will exit with arr[mid] == key. Actually the loop condition includes arr[mid] != key, so when loop exits, either low >= high (range empty) or arr[mid] == key. So after loop, we need to check that if low >= high, then key not present. But we already have ensures for that.
+
+Thus we can add the loop invariants as described.
+
+Now we need to ensure that we add spec_public only when needed. There are no fields, so none needed.
+
+Thus final code:
+
+public class BinarySearch {
+
+    //@ requires arr != null;
+    //@ ensures arr.length == 0 ==> \result == -1;
+    //@ ensures \result != -1 ==> (0 <= \result && \result < arr.length && arr[\result] == key);
+    //@ ensures \result == -1 ==> (arr.length == 0 || (\forall int i; 0 <= i && i < arr.length; arr[i] != key));
+    public static int Binary(int[] arr, int key) {
+        if (arr.length == 0) {
+            return -1;
+        } else {
+            int low = 0;
+            int high = arr.length;
+            int mid = high / 2;
+
+            //@ maintaining 0 <= low && low <= high && high <= arr.length;
+            //@ maintaining low <= mid && mid < high;
+            //@ maintaining (\forall int i; i < low || i >= high; arr[i] != key);
+            //@ decreases high - low;
+            while (low < high && arr[mid] != key) {
+                if (arr[mid] < key) {
+                    low = mid + 1;
+                } else {
+                    high = mid;
+                }
+                mid = low + (high - low) / 2;
+            }
+            if (low >= high) {
+                return -1;
+            }
+            return mid;
+        }
+    }
+}
+
+But we need to check the loop invariants: The condition

@@ -1,0 +1,204 @@
+We need to generate JML specifications for the Java program. The program is a class ComputeOverlap with a single method computeOverlapArea that takes eight ints: coordinates of two rectangles A and B (ax1, ay1, ax2, ay2, bx1, by1, bx2, by2). It computes the area of overlap between two axis-aligned rectangles.
+
+We need to add JML comments: requires and ensures clauses for each method where appropriate. Also loop specifications: maintaining and decreases for each loop. However, the given method has no loops. So we just need requires and ensures.
+
+We need to add spec_public only when needed for specification visibility. The method is public, so we may need to specify that the parameters are non-null? Actually ints are primitive, no null. We need to specify that the coordinates define rectangles where ax1 <= ax2 and ay1 <= ay2, etc. Typically JML requires constraints like ax1 <= ax2, ay1 <= ay2, etc. But it's not required; we can add preconditions that ensure the rectangles have non-negative area (i.e., ax2 >= ax1, ay2 >= ay1, bx2 >= bx1, by2 >= by1). Also ensure that the result is non-negative and less than or equal to area of each rectangle.
+
+We need to ensure that the method returns the overlap area. The ensures clause can state that the result equals max(0, min(ax2, bx2) - max(ax1, bx1)) * max(0, min(ay2, by2) - max(ay1, by1)). Actually the code uses conditional expressions: overlapWidth = (ax2<bx2?ax2:bx2) - (ax1>bx1?ax1:bx1). This is effectively min(ax2, bx2) - max(ax1, bx1). OverlapHeight similarly. Then overlapArea = (overlapWidth>0?overlapWidth:0) * (overlapHeight>0?overlapHeight:0). This is max(0, overlapWidth) * max(0, overlapHeight). So ensures can be that.
+
+We also need to add spec_public for fields? There are no fields. So we don't need spec_public.
+
+We need to output the full Java file with JML comments inserted. The code is simple. We need to add JML comments before the class and before the method. Usually JML comments are like //@ or /*@ ... @*/. For specifications we can use /*@ ... @*/ for multi-line. The requirement says "Add JML directly into the given Java source code." So we can embed JML comments.
+
+We need to ensure we don't change executable code. So we can only add comments.
+
+We need to output the full Java file and nothing else. So we need to include the class definition with JML comments.
+
+We need to consider that JML uses keywords like requires, ensures, etc. The syntax is like /*@ requires condition; ensures condition; @*/. For loops we would use maintaining and decreases, but there are no loops.
+
+Thus we can produce something like:
+
+/*@
+ @ public class ComputeOverlap {
+ @   public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2)
+ @     requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+ @     ensures \result == Math.max(0, Math.min(ax2, bx2) - Math.max(ax1, bx1)) * Math.max(0, Math.min(ay2, by2) - Math.max(ay1, by1));
+ @ }
+ @*/
+
+But note that JML uses \result for return value. Also we can use \max and \min functions. However, JML does not have Math.max in spec? Actually JML has \max and \min functions for integer arguments. But we can also use Java functions like Math.max. But it's okay to use \max.
+
+Better to use JML pure functions: \max(a,b) and \min(a,b). But we can also use Java's Math.max. However, JML expects pure expressions. Using Math.max is allowed if it's pure. But we can also use conditional expressions.
+
+Simplify: The ensures can be something like:
+
+ensures \result == ((ax2 < bx2 ? ax2 : bx2) > (ax1 > bx1 ? ax1 : bx1) ? (ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) : 0) * ((ay2 < by2 ? ay2 : by2) > (ay1 > by1 ? ay1 : by1) ? (ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) : 0);
+
+But that's too verbose. Better to use \max and \min.
+
+We can also add a comment that the method is pure (no side effects). We can add /*@ pure @*/ before method signature.
+
+Thus final code:
+
+/*@
+ @ public class ComputeOverlap {
+ @   /*@ pure @*/
+ @   public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2)
+ @     requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+ @     ensures \result == \max(0, \min(ax2, bx2) - \max(ax1, bx1)) * \max(0, \min(ay2, by2) - \max(ay1, by1));
+ @ }
+ @*/
+
+But we need to embed inside the class definition. Actually JML comments can be placed before class and before method. The requirement says "Add JML directly into the given Java source code." So we can add JML comment before the class and before the method. But we need to ensure we don't break compilation. Since we only add comments, it's fine.
+
+Better to place JML comment before the method. The class-level JML comment can also be added but not necessary. The method-level JML comment will include requires and ensures.
+
+Thus final code:
+
+class ComputeOverlap {
+    /*@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+      @ ensures \result == \max(0, \min(ax2, bx2) - \max(ax1, bx1)) * \max(0, \min(ay2, by2) - \max(ay1, by1));
+      @*/
+    public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+        int area1 = (ax2 - ax1) * (ay2 - ay1), area2 = (bx2 - bx1) * (by2 - by1);
+        int overlapWidth = (ax2<bx2?ax2:bx2) - (ax1>bx1?ax1:bx1), overlapHeight = (ay2<by2?ay2:by2) - (ay1>by1?ay1:by1);
+        int overlapArea = (overlapWidth>0?overlapWidth:0) * (overlapHeight>0?overlapHeight:0);
+        return overlapArea;
+    }
+}
+
+But note that we used variables area1 and area2 but they are not used. That's okay. The code is unchanged.
+
+We also need to consider that JML expects \max and \min functions. In JML, \max and \min are pure functions that take two arguments and return the max/min. However, we need to check if they are built-in. In JML, \max and \min are indeed built-in for integers. Yes, they are. So we can use them.
+
+We also used \max(0, ...). That's fine.
+
+We also need to ensure that the ensures clause matches the code's behavior. The code calculates overlapWidth = min(ax2, bx2) - max(ax1, bx1). OverlapHeight = min(ay2, by2) - max(ay1, by1). Then overlapArea = max(0, overlapWidth) * max(0, overlapHeight). So the ensures clause should reflect that.
+
+Thus ensures \result == \max(0, \min(ax2, bx2) - \max(ax1, bx1)) * \max(0, \min(ay2, by2) - \max(ay1, by1)). That matches.
+
+We also need to add spec_public only when needed for specification visibility. Since the method is public, we might need to specify that the result is visible. But JML automatically assumes public methods have public results. However, we can add /*@ spec_public @*/ for fields if needed. There are no fields.
+
+Thus final answer is the code with JML comment.
+
+But we need to output the full Java file and nothing else. So we need to include the JML comment and the code.
+
+We need to ensure we don't rename anything. So we keep the class name ComputeOverlap and method name computeOverlapArea.
+
+We also need to ensure we don't change executable code. So we only add comments.
+
+Thus final output:
+
+/*@
+  @ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+  @ ensures \result == \max(0, \min(ax2, bx2) - \max(ax1, bx1)) * \max(0, \min(ay2, by2) - \max(ay1, by1));
+  @*/
+public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+    int area1 = (ax2 - ax1) * (ay2 - ay1), area2 = (bx2 - bx1) * (by2 - by1);
+    int overlapWidth = (ax2<bx2?ax2:bx2) - (ax1>bx1?ax1:bx1), overlapHeight = (ay2<by2?ay2:by2) - (ay1>by1?ay1:by1);
+    int overlapArea = (overlapWidth>0?overlapWidth:0) * (overlapHeight>0?overlapHeight:0);
+    return overlapArea;
+}
+
+But we need to wrap it in class definition. So final code:
+
+class ComputeOverlap {
+    /*@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+      @ ensures \result == \max(0, \min(ax2, bx2) - \max(ax1, bx1)) * \max(0, \min(ay2, by2) - \max(ay1, by1));
+      @*/
+    public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+        int area1 = (ax2 - ax1) * (ay2 - ay1), area2 = (bx2 - bx1) * (by2 - by1);
+        int overlapWidth = (ax2<bx2?ax2:bx2) - (ax1>bx1?ax1:bx1), overlapHeight = (ay2<by2?ay2:by2) - (ay1>by1?ay1:by1);
+        int overlapArea = (overlapWidth>0?overlapWidth:0) * (overlapHeight>0?overlapHeight:0);
+        return overlapArea;
+    }
+}
+
+We might also add a class-level JML comment for completeness, but not required. The requirement says "Add JML directly into the given Java source code." So we can add JML comments for the class and method. But we need to ensure we follow JML syntax. The class-level comment can be /*@ public class ComputeOverlap @*/ but not needed.
+
+Better to add a class-level JML comment to indicate the class is public. But it's optional. However, we might add it for completeness. But the requirement says "Add JML specifications for the Java program." So we should add specifications for the method. The class-level spec is optional but we can include.
+
+But we need to be careful: The class is not declared public in the original code. It is just class ComputeOverlap. So we can keep it as is. We can add a JML comment before the class to specify that it's a public class. But it's not necessary.
+
+Better to just add method-level spec.
+
+Thus final answer is the code with JML comment before the method.
+
+We also need to ensure we include the JML comment in a block comment format: /*@ ... @*/. The comment should be placed before the method.
+
+Thus final answer:
+
+```java
+class ComputeOverlap {
+    /*@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+      @ ensures \result == \max(0, \min(ax2, bx2) - \max(ax1, bx1)) * \max(0, \min(ay2, by2) - \max(ay1, by1));
+      @*/
+    public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+        int area1 = (ax2 - ax1) * (ay2 - ay1), area2 = (bx2 - bx1) * (by2 - by1);
+        int overlapWidth = (ax2<bx2?ax2:bx2) - (ax1>bx1?ax1:bx1), overlapHeight = (ay2<by2?ay2:by2) - (ay1>by1?ay1:by1);
+        int overlapArea = (overlapWidth>0?overlapWidth:0) * (overlapHeight>0?overlapHeight:0);
+        return overlapArea;
+    }
+}
+```
+
+We might also add a pure annotation to indicate the method is pure. But it's not required. However, we can add /*@ pure @*/ before the method signature. But the requirement didn't ask for that. But we can include it.
+
+Better to include pure for completeness: /*@ pure @*/ before method. But we need to ensure we don't break compilation. Adding a JML comment with pure is okay.
+
+Thus we can do:
+
+/*@ requires ...; ensures ...; @*/
+/*@ pure @*/
+public int computeOverlapArea(...)
+
+But we can combine them: /*@ requires ...; ensures ...; @*/ and then a separate line for pure? Actually we can include pure in the same comment: /*@ requires ...; ensures ...; pure @*/. But pure is a method annotation, not a clause. In JML, we can put /*@ pure @*/ before method signature. So we can have two comments: one for requires/ensures and one for pure. But it's optional.
+
+Better to keep simple: just requires and ensures.
+
+Thus final answer is as above.
+
+We need to output only the complete annotated Java file and nothing else. So we need to output the code with JML comments.
+
+Thus final answer is:
+
+```java
+class ComputeOverlap {
+    /*@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+      @ ensures \result == \max(0, \min(ax2, bx2) - \max(ax1, bx1)) * \max(0, \min(ay2, by2) - \max(ay1, by1));
+      @*/
+    public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+        int area1 = (ax2 - ax1) * (ay2 - ay1), area2 = (bx2 - bx1) * (by2 - by1);
+        int overlapWidth = (ax2<bx2?ax2:bx2) - (ax1>bx1?ax1:bx1), overlapHeight = (ay2<by2?ay2:by2) - (ay1>by1?ay1:by1);
+        int overlapArea = (overlapWidth>0?overlapWidth:0) * (overlapHeight>0?overlapHeight:0);
+        return overlapArea;
+    }
+}
+```
+
+We should also consider that the JML comment may need to be placed before the class or before the method. The above is correct.
+
+One more nuance: The JML comment uses backslashes for \max and \min. That's correct. However, we need to ensure that the comment is properly formatted. In JML, we can use \max and \min. But we need to ensure that we use correct syntax: \max(0, expression) is okay. However, JML expects integer arithmetic and pure functions. The expression \max(0, \min(ax2, bx2) - \max(ax1, bx1)) is okay.
+
+Alternatively, we could use Math.max and Math.min, but they are not pure functions in JML? Actually they are considered pure if they are pure Java methods. But it's okay.
+
+Thus final answer is as above.
+
+We should also consider that the code uses area1 and area2 but they are not used. That's fine.
+
+Thus final answer is the code with JML comments.
+
+We need to output only the code, no extra text. So we will output the Java code with JML comments.
+
+Thus final answer is:
+
+```java
+class ComputeOverlap {
+    /*@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+      @ ensures \result == \max(0, \min(ax2, bx2) - \max(ax1, bx1)) * \max(0, \min(ay2, by2) - \max(ay1, by1));
+      @*/
+    public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+        int area1 = (ax2 - ax1) * (ay2 - ay1), area2 = (bx2 - bx1) * (by2 - by1);
+        int overlapWidth = (ax2<bx2?ax2:bx2) - (ax1>bx1?ax1:bx1), overlapHeight = (ay2<by2?ay2:by2) - (ay1>by1?ay1:by1);
+        int overlapArea = (overlapWidth>0?overlapWidth:0) * (overlapHeight>0?overlapHeight:0);
+        return overlapArea;

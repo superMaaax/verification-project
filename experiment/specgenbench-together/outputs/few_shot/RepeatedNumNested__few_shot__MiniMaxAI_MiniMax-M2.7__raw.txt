@@ -1,0 +1,253 @@
+We need to generate JML specifications for the given Java program. The program is:
+
+```java
+public class RepeatedNumNested {
+
+    public static int repeatedNum(int[] arr) {
+        for (int i = 0; i < arr.length; ++i) {
+            for (int j = i + 1; j < arr.length; ++j) {
+                if(arr[i] == arr[j])
+                    return i;
+            }
+        }
+        return -1;
+    }
+    
+}
+```
+
+We need to add JML comments: requires, ensures, loop specifications (maintaining, decreases) for each loop. Also we need to add `/*@ spec_public @*/` only when needed for specification visibility. We must not change executable Java code. We must output the full Java file with JML annotations.
+
+We need to think about the semantics: repeatedNum returns the smallest index i such that there exists j > i with arr[i] == arr[j]; if no duplicate, returns -1.
+
+Thus the ensures clause: If result != -1, then arr[result] is repeated later in the array (i.e., there exists some j > result such that arr[j] == arr[result]). Also result is the smallest index with that property. If result == -1, then no duplicates exist (i.e., all elements are distinct). Also we need to ensure that the method returns an index within bounds or -1.
+
+Also we need a requires clause: arr is non-null. Also we might need to specify that arr.length is within integer bounds? Not necessary.
+
+We need to add loop annotations: For outer loop i: maintain something about i and the elements seen so far. For inner loop j: maintain something about j and duplicates found.
+
+We need to decide what invariants to maintain.
+
+The outer loop iterates i from 0 to arr.length - 1. At each iteration, we search for a duplicate of arr[i] among later elements j > i. If found, we return i. So the algorithm returns the smallest i that has a duplicate later. If no duplicate found after all loops, returns -1.
+
+Thus we can specify:
+
+- At start of outer loop: i is current index, and we have already checked all indices < i for duplicates and found none. So we can maintain that for all k such that 0 <= k < i, there is no j > k with arr[j] == arr[k] (i.e., no duplicates among earlier indices). That is a loop invariant for outer loop.
+
+- Also maintain that i is within bounds: 0 <= i <= arr.length.
+
+- Also maintain that the loop hasn't returned yet, i.e., we haven't found a duplicate yet.
+
+- For inner loop j: we maintain that j is the current candidate index > i being checked, and that for all k such that i < k < j, arr[k] != arr[i] (i.e., no duplicate of arr[i] found among indices between i+1 and j-1). Also maintain that j <= arr.length.
+
+- The inner loop decreases j as it increments. Actually j increments each iteration, so we can use decreases j. But we also need to maintain that j decreases? Actually j is increasing, so we cannot use decreases on j. But we can use decreases arr.length - j. Usually we can use decreases for loop variant: something that strictly decreases each iteration and is bounded below. For inner loop, we can use decreases arr.length - j (or arr.length - j). That is a typical pattern.
+
+Alternatively, we can use decreases for outer loop: decreases arr.length - i.
+
+But we need to ensure that we have loop specifications for each loop: maintaining and decreases.
+
+We also need to consider that the method returns early from inside loops. JML can handle that with ensures clause: The method ensures that if result != -1, then arr[result] appears at least twice (i.e., there exists some index > result with same value). Also ensures that result is the smallest such index. If result == -1, then no duplicates.
+
+We also need to consider that the method may be called with null arr; we can add requires arr != null. Also we may want to require arr.length >= 0 but that's automatic.
+
+Thus we can add:
+
+```java
+//@ requires arr != null;
+//@ ensures \result == -1 ==> (\forall int i; 0 <= i && i < arr.length; (\forall int j; i < j && j < arr.length; arr[i] != arr[j]));
+//@ ensures \result != -1 ==> (0 <= \result && \result < arr.length && (\exists int j; \result < j && j < arr.length; arr[\result] == arr[j]) && (\forall int i; 0 <= i && i < \result; (\forall int j; i < j && j < arr.length; arr[i] != arr[j])));
+```
+
+But we need to be careful with JML syntax: The ensures clause can be a bit complex. We can break it down.
+
+Better to have two ensures:
+
+- If result == -1, then no duplicates.
+
+- If result != -1, then result is the smallest index with a duplicate later.
+
+We can also specify that result is either -1 or a valid index.
+
+We also need to consider that the method returns i when it finds a duplicate. So the ensures clause should reflect that.
+
+We also need to add spec_public for fields that are used in specifications but are not public. In this case, there are no fields. So we don't need spec_public.
+
+We also need to add loop annotations:
+
+For outer loop:
+
+```java
+//@ maintaining 0 <= i && i <= arr.length;
+//@ maintaining (\forall int k; 0 <= k && k < i; (\forall int j; k < j && j < arr.length; arr[k] != arr[j]));
+//@ decreases arr.length - i;
+for (int i = 0; i < arr.length; ++i) {
+```
+
+But we also need to maintain that we haven't found duplicate yet (i.e., we haven't returned). However, the loop invariant can be that no duplicate found for indices less than i. That's what we have.
+
+But we also need to maintain that the loop hasn't returned early; but since we are inside the loop, we can assume that if we are in the loop, we haven't returned yet. However, we can also maintain that i is the current index being checked.
+
+We also need to consider that the inner loop will break early if duplicate found, but we will return from the method, so we don't need to maintain invariants for inner loop after return. But we need to provide invariants for inner loop while it runs.
+
+Thus we can annotate inner loop:
+
+```java
+//@ maintaining i + 1 <= j && j <= arr.length;
+//@ maintaining (\forall int k; i < k && k < j; arr[k] != arr[i]);
+//@ decreases arr.length - j;
+for (int j = i + 1; j < arr.length; ++j) {
+```
+
+But we also need to maintain that j is the current index being checked, and that we haven't found duplicate yet (i.e., arr[j] != arr[i] for all j before current j). Actually we want to maintain that for all indices between i+1 and j-1, arr[k] != arr[i]. That's what we have.
+
+We also need to ensure that the inner loop decreases something: arr.length - j is decreasing as j increases, but we need a loop variant that decreases. Actually we need a integer that strictly decreases each iteration. Usually we can use something like `arr.length - j` which decreases as j increases? Wait, j increases each iteration, so arr.length - j decreases. Yes, that works: each iteration j increments, so arr.length - j decreases. So we can use decreases arr.length - j.
+
+But we also need to ensure that the loop variant is non-negative: arr.length - j >= 0. That's true because j <= arr.length.
+
+Thus we can add:
+
+```java
+//@ decreases arr.length - j;
+```
+
+But we also need to maintain that j is within bounds: i+1 <= j <= arr.length.
+
+Thus we can add:
+
+```java
+//@ maintaining i + 1 <= j && j <= arr.length;
+//@ maintaining (\forall int k; i < k && k < j; arr[k] != arr[i]);
+//@ decreases arr.length - j;
+```
+
+But we also need to consider that the inner loop condition is `j < arr.length`. So we can maintain that j is the loop variable.
+
+We also need to consider that the outer loop variable i is incremented each iteration, and we can use decreases arr.length - i.
+
+Thus we can annotate outer loop:
+
+```java
+//@ maintaining 0 <= i && i <= arr.length;
+//@ maintaining (\forall int k; 0 <= k && k < i; (\forall int j; k < j && j < arr.length; arr[k] != arr[j]));
+//@ decreases arr.length - i;
+for (int i = 0; i < arr.length; ++i) {
+```
+
+But we also need to maintain that we haven't found duplicate for any index less than i. That's the second maintaining clause.
+
+We also need to ensure that the method returns i when duplicate found. That is captured by ensures clause.
+
+We also need to ensure that the method returns -1 only after checking all i.
+
+Thus we can add ensures clause: If result == -1, then no duplicates.
+
+We also need to ensure that the method returns the smallest i with duplicate. That is ensured by the ensures clause that says that for any i smaller than result, there is no duplicate.
+
+Thus we can write ensures:
+
+```java
+//@ ensures (\result == -1) ==> (\forall int i; 0 <= i && i < arr.length; (\forall int j; i < j && j < arr.length; arr[i] != arr[j]));
+//@ ensures (\result != -1) ==> (0 <= \result && \result < arr.length && (\exists int j; \result < j && j < arr.length; arr[\result] == arr[j]) && (\forall int i; 0 <= i && i < \result; (\forall int j; i < j && j < arr.length; arr[i] != arr[j])));
+```
+
+But we need to check JML syntax: The existential quantifier is \exists, universal is \forall. The condition for result != -1: we also need to ensure that result is the smallest index with duplicate. That can be expressed as: for all i < result, there is no j > i such that arr[i] == arr[j]. That is the second part.
+
+We also need to ensure that result is a valid index: 0 <= result < arr.length. That is also needed.
+
+Thus we can combine:
+
+```java
+//@ ensures \result == -1 ==> (\forall int i; 0 <= i && i < arr.length; (\forall int j; i < j && j < arr.length; arr[i] != arr[j]));
+//@ ensures \result != -1 ==> (0 <= \result && \result < arr.length && (\exists int j; \result < j && j < arr.length; arr[\result] == arr[j]) && (\forall int i; 0 <= i && i < \result; (\forall int j; i < j && j < arr.length; arr[i] != arr[j])));
+```
+
+But we also need to ensure that the method returns -1 only if no duplicate. That is covered.
+
+We also need to ensure that the method returns the smallest index with duplicate. The ensures clause for result != -1 includes that for all i < result, no duplicate. That ensures smallest.
+
+We also need to ensure that the method returns the index of the first duplicate found (the smallest i). That is satisfied.
+
+We also need to ensure that the method returns -1 if no duplicate. That is covered.
+
+We also need to ensure that the method works for empty array: arr.length == 0. Then loops do not execute, returns -1. The ensures clause should handle that: For empty array, the universal quantifier over i and j will be vacuously true, so result == -1 is allowed. The ensures for result != -1 will be false because there is no i with duplicate. So it's fine.
+
+We also need to ensure that the method works for array of length 1: no duplicate, returns -1. The ensures clause should hold.
+
+We also need to ensure that the method works for null arr: we add requires arr != null. That ensures we don't have NullPointerException.
+
+Thus we can add:
+
+```java
+//@ requires arr != null;
+```
+
+Now we need to decide where to place the JML comments. Usually we place them before the method signature, and before loops.
+
+We also need to ensure that we use the correct JML comment style: //@ for single-line comments, or /*@ ... @*/ for multi-line? In the examples, they used //@ for each clause. They used //@ for each clause on separate lines. They also used //@ for loop invariants and decreases.
+
+Thus we can follow that style: each clause on its own line starting with //@.
+
+We also need to ensure that we include the spec_public only when needed. In this program, there are no fields, so we don't need spec_public.
+
+We also need to ensure that we don't rename anything.
+
+Thus the final output should be:
+
+```java
+public class RepeatedNumNested {
+
+    //@ requires arr != null;
+    //@ ensures \result == -1 ==> (\forall int i; 0 <= i && i < arr.length; (\forall int j; i < j && j < arr.length; arr[i] != arr[j]));
+    //@ ensures \result != -1 ==> (0 <= \result && \result < arr.length && (\exists int j; \result < j && j < arr.length; arr[\result] == arr[j]) && (\forall int i; 0 <= i && i < \result; (\forall int j; i < j && j < arr.length; arr[i] != arr[j])));
+    public static int repeatedNum(int[] arr) {
+        //@ maintaining 0 <= i && i <= arr.length;
+        //@ maintaining (\forall int k; 0 <= k && k < i; (\forall int j; k < j && j < arr.length; arr[k] != arr[j]));
+        //@ decreases arr.length - i;
+        for (int i = 0; i < arr.length; ++i) {
+            //@ maintaining i + 1 <= j && j <= arr.length;
+            //@ maintaining (\forall int k; i < k && k < j; arr[k] != arr[i]);
+            //@ decreases arr.length - j;
+            for (int j = i + 1; j < arr.length; ++j) {
+                if(arr[i] == arr[j])
+                    return i;
+            }
+        }
+        return -1;
+    }
+    
+}
+```
+
+But we need to check the loop invariants: The outer loop invariant should maintain that for all indices less than i, there are no duplicates. However, we also need to maintain that i is the current index being processed. The condition we wrote is correct.
+
+But we also need to ensure that the outer loop invariant holds at the start of each iteration: i is the index being processed, and we haven't found any duplicate for indices less than i. That's what we have.
+
+We also need to ensure that the inner loop invariant holds: For all k between i+1 and j-1, arr[k] != arr[i]. That's what we have.
+
+We also need to ensure that the inner loop variant is decreasing: arr.length - j.
+
+But we also need to ensure that the inner loop condition is j < arr.length, and we maintain j <= arr.length. The invariant we wrote includes j <= arr.length, but we also need to maintain that j is at least i+1. That's included.
+
+We also need to ensure that the inner loop invariant is true before the inner loop starts: At the start of inner loop, j = i+1, so the condition "for all k between i+1 and j-1" is vacuously true because there are no k in that range. So it's fine.
+
+We also need to ensure that the inner loop invariant is maintained after each iteration: When j increments, we check arr[j] != arr[i]? Actually we only check after increment. The invariant we wrote says that for all k < j, arr[k] != arr[i]. But we need to ensure that we only return if arr[i] == arr[j]. So if we find equality, we return. So the invariant that arr[k] != arr[i] for all k < j holds as long as we haven't returned. However, we need to be careful: The invariant should hold for all k such that i < k && k < j, arr[k] != arr[i]. At the start, j = i+1, so there is no k with i < k < j, so invariant holds. After each iteration, we increment j, but we only check for equality at the start of the next iteration? Actually the loop condition is while (j < arr.length). At each iteration, we check if arr[i] == arr[j]; if true, we return. If not, we increment j. So after increment, j becomes j+1, and the invariant should hold for all k < j (i.e., up to the previous j). But we need to ensure that arr[j] (the new j) is not equal to arr[i]? Actually we haven't checked arr[j] yet. The invariant we maintain is that for all k < j, arr[k] != arr[i]. At the start of the iteration, j is the current index being checked. If arr[i] == arr[j], we return. So we only proceed to increment j if arr[i] != arr[j]. So after increment, we can maintain that for all k < j (including the new j?), we need to ensure that arr[k] != arr[i] for all k < j. Since we only increment after checking arr[i] != arr[j], we know that arr[j] != arr[i] for the current j. Then after increment, the new j is j+1, and we need to maintain that for all k < new j, arr[k] != arr[i]. That includes the previous j, which we know is not equal. So the invariant holds.
+
+Thus the invariant is correct.
+
+Now we need to check the outer loop invariants: At the start of each outer iteration, i is the current index being processed. We have not found any duplicate for indices less than i. That's what we maintain. However, we also need to maintain that i is the current index being processed, and that we haven't returned early. That's fine.
+
+We also need to ensure that the outer loop variant is decreasing: arr.length - i.
+
+Thus we have:
+
+```java
+//@ maintaining 0 <= i && i <= arr.length;
+//@ maintaining (\forall int k; 0 <= k && k < i; (\forall int j; k < j && j < arr.length; arr[k] != arr[j]));
+//@ decreases arr.length - i;
+```
+
+But we also need to ensure that the outer loop invariant holds at the start: i = 0, and there are no indices less than 0, so the universal quantifier is vacuously true. So it's fine.
+
+Now we also need to ensure that the ensures clause is correct. Let's test with some examples:
+
+Case 1: arr = [1

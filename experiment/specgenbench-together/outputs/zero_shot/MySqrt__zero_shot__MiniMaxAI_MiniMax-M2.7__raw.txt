@@ -1,0 +1,284 @@
+I need to add JML specifications to this Java program. Let me analyze the code:
+
+1. The class `MySqrt` has a method `mySqrt` that computes the integer square root of `x`.
+2. It uses binary search to find the largest integer `mid` such that `mid * mid <= x`.
+3. The method returns `ans` which is initialized to -1.
+
+Let me add appropriate JML specifications:
+
+For the method:
+- `requires`: The input `x` should be non-negative (since we're taking square root)
+- `ensures`: The result should satisfy certain properties:
+  - `ans * ans <= x`
+  - `(ans + 1) * (ans + 1) > x` (or ans == x if ans*ans == x)
+  - Actually, for integer square root, we want: ans^2 <= x < (ans+1)^2
+
+For the loop:
+- I need to add loop invariants and decreases clauses
+- The loop invariant should capture that we're searching in the range [l, r] and ans is the best candidate so far
+- The decreases clause should show that the search space is getting smaller
+
+Let me think about the loop invariant:
+- At any point, `ans` is the largest value seen so far where `ans*ans <= x`
+- The search space is within [l, r]
+- `ans` is always <= x (since ans*ans <= x and ans >= 0, so ans <= sqrt(x) <= x for x >= 1)
+
+Wait, let me reconsider. For x = 0, ans starts at -1, but the loop won't execute (l=0, r=0, 0 <= 0 is true, but let's see: mid = 0, 0*0 <= 0 is true, ans=0, l=1, then 1 <= 0 is false, exit, return 0). That's correct.
+
+For x = 1: l=0, r=1, mid=0, 0*0 <= 1, ans=0, l=1, mid=1, 1*1 <= 1, ans=1, l=2, 2 <= 1 false, return 1. Correct.
+
+For x = 8: l=0, r=8, mid=4, 16 <= 8 false, r=3, mid=1, 1 <= 8 true, ans=1, l=2, mid=2, 4 <= 8 true, ans=2, l=3, mid=3, 9 <= 8 false, r=2, 2 <= 2 true, mid=2, ans=2, l=3, 3 <= 2 false, return 2. Correct (sqrt(8) ≈ 2.82).
+
+So the method returns floor(sqrt(x)).
+
+JML specifications:
+
+```java
+class MySqrt {
+    /*@ 
+      @ requires x >= 0;
+      @ ensures \result >= 0;
+      @ ensures (long)\result * (long)\result <= x;
+      @ ensures (long)(\result + 1) * (long)(\result + 1) > x;
+      @*/
+    public int mySqrt(int x) {
+        int l = 0, r = x, ans = -1;
+        //@ loop_invariant 0 <= l && l <= r + 1 && r <= x;
+        //@ loop_invariant -1 <= ans && ans <= x;
+        //@ loop_invariant ans < l;
+        //@ loop_invariant (long)ans * (long)ans <= x;
+        //@ loop_invariant (\forall int i; ans < i && i < l; (long)i * (long)i > x);
+        //@ decreases r - l;
+        while (l <= r) {
+            int mid = l + (r - l) / 2;
+            if ((long) mid * mid <= x) {
+                ans = mid;
+                l = mid + 1;
+            } else {
+                r = mid - 1;
+            }
+        }
+        return ans;
+    }
+}
+```
+
+Let me reconsider the loop invariant. The key properties are:
+1. ans is the largest value found so far where ans*ans <= x
+2. All values in [l, r] are candidates that haven't been fully processed
+3. ans < l (since we update l to mid+1 when we find a valid mid)
+
+Actually, looking at the logic:
+- When we find mid*mid <= x, we set ans = mid and l = mid + 1
+- So ans is always < l after an update
+- Initially l = 0, ans = -1, so ans < l holds
+- The invariant should ensure that ans contains the best candidate found so far
+
+Let me refine:
+- `ans` is the largest value seen such that ans*ans <= x
+- The search space is [l, r]
+- We need to ensure that no value between ans+1 and l-1 satisfies the condition (i.e., they all have square > x)
+
+Actually, a simpler invariant:
+- `0 <= l && l <= r + 1` (ensures l and r are in valid range relative to each other)
+- `ans` is the maximum value in [0, l-1] such that ans*ans <= x
+- `r` is the upper bound of the search space
+
+Wait, after the loop terminates, we have l > r. And ans is the result.
+
+Let me think about what the loop invariant should be:
+
+At the start of each iteration:
+1. The answer is in the range [l, r] (or already found in ans)
+2. ans is the largest value < l such that ans*ans <= x
+3. l and r are within valid bounds
+
+Actually, looking at the standard binary search invariant:
+- The element we're looking for (if it exists) is in the range [l, r]
+- ans is the best candidate found so far
+
+Let me try:
+- `0 <= l && l <= r + 1` (when l = r + 1, loop terminates)
+- `ans < l` (ans is always less than the left bound)
+- `(long)ans * (long)ans <= x` (ans is valid)
+- `(\forall int i; l <= i && i <= r; i == ans || (long)i * (long)i > x || i > r)` - this is getting complicated
+
+Actually, the simpler way:
+- `ans` is the largest integer such that ans*ans <= x among all integers < l
+- The remaining search space is [l, r]
+
+So:
+- `0 <= l && l <= r + 1`
+- `-1 <= ans && ans < l`
+- `(long)ans * (long)ans <= x`
+- For all i in [ans+1, l-1], i*i > x (but this is automatically true if ans is the largest valid one)
+
+Actually, the key insight is:
+- Initially, ans = -1, l = 0, so ans < l holds
+- When we find a valid mid, we update ans = mid and l = mid + 1, so ans < l still holds
+- When we find an invalid mid, we update r = mid - 1, so the range shrinks
+
+So the invariant `ans < l` is maintained.
+
+And the invariant that ans is the best so far: `(long)ans * (long)ans <= x` and ans is the maximum in [0, l) with this property.
+
+For the decreases clause: `r - l` decreases in each iteration (since either r becomes mid-1 or l becomes mid+1, and mid is in between).
+
+Let me write the final specification:
+
+```java
+class MySqrt {
+    /*@ 
+      @ requires x >= 0;
+      @ ensures \result >= 0;
+      @ ensures (long)\result * (long)\result <= x;
+      @ ensures (long)(\result + 1) * (long)(\result + 1) > x;
+      @*/
+    public int mySqrt(int x) {
+        int l = 0, r = x, ans = -1;
+        //@ loop_invariant 0 <= l && l <= r + 1 && r <= x;
+        //@ loop_invariant -1 <= ans && ans < l;
+        //@ loop_invariant (long)ans * (long)ans <= x;
+        //@ loop_invariant (\forall int i; ans < i && i < l; (long)i * (long)i > x);
+        //@ decreases r - l;
+        while (l <= r) {
+            int mid = l + (r - l) / 2;
+            if ((long) mid * mid <= x) {
+                ans = mid;
+                l = mid + 1;
+            } else {
+                r = mid - 1;
+            }
+        }
+        return ans;
+    }
+}
+```
+
+Wait, I need to check the invariant `\forall int i; ans < i && i < l; (long)i * (long)i > x`.
+
+This says: for all i strictly greater than ans and strictly less than l, i*i > x.
+
+This is true because:
+- Initially, ans = -1, l = 0, so the range is empty, vacuously true
+- When we update ans = mid and l = mid + 1, we are saying that all i in (mid, mid+1) have i*i > x, which is vacuously true since there's no integer there
+- Wait, that's not right. We need to ensure that when we move l past mid, we haven't missed any candidates.
+
+Actually, the invariant should be that ans is the largest valid value in the range [0, l). So:
+- ans is valid: ans*ans <= x
+- All values in (ans, l) are invalid: i*i > x
+
+So the invariant is: `(\forall int i; ans < i && i < l; (long)i * (long)i > x)`
+
+But wait, when we set ans = mid and l = mid + 1, we are establishing that mid is valid and all values between mid and mid+1 are invalid (vacuously). But we also need to ensure that previously established facts still hold.
+
+Actually, the invariant that ans is the largest valid value in [0, l) is maintained because:
+- When we find mid is valid (mid*mid <= x), we set ans = mid and l = mid + 1. Now the range [0, l) = [0, mid+1) includes mid, and all i in (mid, mid+1) don't exist. But what about values < mid? They were already in [0, l) before, and ans was the largest valid one. Since mid >= ans (because we only update when we find a valid mid), and we're setting ans = mid which is >= the old ans, this is fine.
+- When we find mid is invalid (mid*mid > x), we set r = mid - 1. The range [l, r] shrinks, but l doesn't change, so [0, l) doesn't change, so ans remains the largest valid value in [0, l).
+
+So the invariant holds.
+
+But there's a subtle issue: when x = 0, ans = -1, l = 0, r = 0.
+- Loop invariant: 0 <= 0 && 0 <= 0+1 && 0 <= 0 (true), -1 <= -1 && -1 < 0 (true), (-1)*(-1) <= 0 (true, but wait, -1*-1 = 1 which is > 0... oh wait, ans starts at -1, but we need ans*ans <= x. For x=0, ans=-1 gives 1 <= 0 which is false!)
+
+Ah, there's a problem! When x = 0, ans = -1, and we need ans*ans <= x, but (-1)*(-1) = 1 > 0.
+
+So the invariant needs to handle the case where ans = -1 specially. Or we need to ensure that the invariant only applies when ans >= 0.
+
+Actually, looking at the code: `int ans = -1;`
+
+For x = 0:
+- l = 0, r = 0, ans = -1
+- mid = 0
+- 0*0 <= 0 is true
+- ans = 0
+- l = 1
+- Loop exits
+- Return 0
+
+So ans is always updated to a valid value before being returned. But during the loop invariant, ans could be -1.
+
+So the invariant `(long)ans * (long)ans <= x` is problematic when ans = -1 and x = 0.
+
+We need to adjust: either `ans == -1 || (long)ans * (long)ans <= x` or handle it differently.
+
+Actually, for x > 0, ans = -1 is fine because -1*-1 = 1 > 0 anyway.
+For x = 0, ans = -1 violates ans*ans <= x.
+
+But actually, looking at the logic: when x = 0, the first mid is 0, and we update ans to 0 immediately. So the invariant `(long)ans * (long)ans <= x` is only required to hold when ans >= 0, or we need to be careful.
+
+Actually, let's check: if ans = -1, then ans*ans = 1. For x >= 1, 1 <= x holds. For x = 0, 1 <= 0 is false.
+
+So we need: `ans == -1 || (long)ans * (long)ans <= x`
+
+Or we can change the initial value, but the problem says not to change executable code.
+
+So I'll use: `ans == -1 || (long)ans * (long)ans <= x`
+
+Wait, but actually, if ans = -1, it means we haven't found any valid candidate yet. The invariant should reflect that ans is either -1 (meaning no candidate found yet) or a valid candidate.
+
+Actually, looking at the quantifier: `\forall int i; ans < i && i < l; (long)i * (long)i > x`
+
+If ans = -1 and l = 0, then the condition is `(-1 < i && i < 0)` which is never true for integers, so the quantifier is vacuously true.
+
+So the issue is only with `(long)ans * (long)ans <= x` when ans = -1 and x = 0.
+
+So I'll add: `ans == -1 || (long)ans * (long)ans <= x`
+
+But wait, for x = 0, ans = -1, and the loop condition is l <= r (0 <= 0), so we enter the loop.
+- mid = 0
+- 0*0 <= 0 is true
+- ans = 0
+- l = 1
+- Now ans = 0, l = 1, ans*ans = 0 <= 0 is true.
+
+So actually, the invariant holds after the first iteration. But at the very start, before any iteration, ans = -1 and x = 0, so ans*ans = 1 > 0.
+
+So we need to handle the initial state. The invariant is supposed to hold at the beginning of each iteration. At the start of the first iteration, ans = -1 and x = 0.
+
+So yes, we need: `ans == -1 || (long)ans * (long)ans <= x`
+
+Or we can use: `(long)ans * (long)ans <= x || ans == -1`
+
+Actually, in JML, we can write: `ans < 0 || (long)ans * (long)ans <= x` (since ans is int, if ans < 0, it could be -1 or other negative values, but in our code ans is only set to non-negative values after initialization, or stays -1).
+
+Actually, looking at the code, ans is only assigned:
+- Initially: -1
+- Inside loop: `ans = mid` where mid >= 0 (since l >= 0 and mid = l + (r-l)/2 >= 0)
+
+So ans is either -1 or >= 0.
+
+So `ans == -1 || (long)ans * (long)ans <= x` is correct.
+
+But actually, if ans is negative (like -1), then ans*ans is positive, so for x >= 0, ans*ans > x unless x is very large... wait, for x = 0, ans = -1 gives ans*ans = 1 > 0. For x = 1, ans = -1 gives 1 <= 1, which is true.
+
+So actually, for x >= 1, ans = -1 satisfies ans*ans <= x.
+For x = 0, ans = -1 does NOT satisfy ans*ans <= x.
+
+So we need the disjunction.
+
+Let me reconsider the invariant. Actually, a cleaner way is to note that:
+- If ans = -1, then there is no valid integer in [0, l) (since l starts at 0)
+- If ans >= 0, then ans is valid
+
+So the invariant that ans is the largest valid integer in [0, l) can be expressed as:
+- `ans < l`
+- `(ans < 0 || (long)ans * (long)ans <= x)` (either no candidate yet, or ans is valid)
+- `(\forall int i; ans < i && i < l; (long)i * (long)i > x)` (all values between ans and l are invalid)
+
+This works because:
+- If ans = -1, then ans < 0 is true, so the second clause is satisfied
+- The third clause says all i in (-1, l) have i*i > x. Since there are no integers between -1 and 0, this is vacuously true when l = 0. When l > 0, it says all i in [0, l) have i*i > x, which is correct if ans = -1 means no valid candidate found yet.
+
+Wait, if ans = -1 and l = 1, then the third clause says: for all i such that -1 < i < 1, i*i > x. The only integer is i = 0, so it says 0*0 > x, i.e., 0 > x. But if x > 0, this is false!
+
+So there's a problem. Let me trace through x = 1:
+- ans = -1, l = 0, r = 1
+- Iteration 1: mid = 0, 0*0 <= 1, ans = 0, l = 1
+- Now ans = 0, l = 1
+- Loop condition: 1 <= 1 is true
+- Iteration 2: mid = 1, 1*1 <= 1, ans = 1, l = 2
+- Loop exits
+- Return 1
+
+At the start of iteration 1

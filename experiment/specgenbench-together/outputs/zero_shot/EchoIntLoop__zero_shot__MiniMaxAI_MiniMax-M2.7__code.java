@@ -1,0 +1,15 @@
+public class EchoIntLoop {
+    /*@ requires x >= 0;
+      @ ensures \result == x;
+      @*/
+    public static int echo(int x) {
+        int res = 0;
+        /*@ loop_invariant 0 <= i && i <= x && res == i;
+          @ decreases x - i;
+          @*/
+        for(int i = 0; i < x; i++) {
+            res = res + 1;
+        }
+        return res;
+    }
+}

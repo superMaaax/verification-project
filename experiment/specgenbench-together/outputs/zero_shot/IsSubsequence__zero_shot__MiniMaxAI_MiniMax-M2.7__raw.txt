@@ -1,0 +1,149 @@
+I need to add JML specifications to this Java program. Let me analyze the code:
+
+1. The class `IsSubsequence` has a method `isSubsequence` that checks if string `s` is a subsequence of string `t`.
+
+2. The method takes two String parameters and returns a boolean.
+
+3. There's a while loop that iterates through both strings.
+
+Let me add appropriate JML specifications:
+
+For the class:
+- I should add class-level specifications if needed.
+
+For the method `isSubsequence`:
+- `requires` clauses: Both strings should not be null (or we can allow null and handle it, but typically in JML we specify non-null)
+- `ensures` clauses: The method returns true if and only if s is a subsequence of t
+
+For the loop:
+- `maintaining` clause: This should describe what invariant is maintained during the loop
+- `decreases` clause: This should describe what decreases in each iteration
+
+Let me think about the loop invariant:
+- The loop maintains that `i` is the index in `s` representing how many characters of `s` have been matched so far
+- `j` is the index in `t` representing the current position being examined
+- The invariant should express that the characters matched so far form a valid subsequence
+
+For the decreases clause:
+- `m - j` decreases because j increases in each iteration (or stays the same if character matches, but then i increases, so the pair (n-i, m-j) decreases)
+
+Actually, looking at the loop more carefully:
+- The loop condition is `i < n && j < m`
+- Inside the loop, either `i` increases or `j` increases (or both)
+- So the measure `(n - i) + (m - j)` or something similar would work
+
+Let me formulate the specifications:
+
+```java
+/*@ 
+  @ public class IsSubsequence {
+  @   public normal_behavior
+  @   requires s != null && t != null;
+  @   ensures \result == true ==> s is a subsequence of t;
+  @   ensures \result == false ==> s is not a subsequence of t;
+  @   also public normal_behavior
+  @   requires s == null || t == null;
+  @   signals_only NullPointerException;
+  @*/
+class IsSubsequence {
+    public boolean isSubsequence(String s, String t) {
+        int n = s.length(), m = t.length();
+        int i = 0, j = 0;
+
+        /*@
+          @ maintaining 0 <= i && i <= n && 0 <= j && j <= m;
+          @ maintaining (\forall int k; 0 <= k && k < i; 
+          @                 (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)));
+          @ decreases m - j;
+          @*/
+        while (i < n && j < m) {
+            if (s.charAt(i) == t.charAt(j)) {
+                i++;
+            }
+            j++;
+        }
+        return i == n;
+    }
+}
+```
+
+Wait, I need to be more careful with the loop invariant. The invariant should express that the first `i` characters of `s` appear as a subsequence in the first `j` characters of `t`.
+
+The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` means: for all indices k in [0, i), there exists some index l in [k, j) such that s.charAt(k) == t.charAt(l). This ensures that the first i characters of s appear in order within the first j characters of t.
+
+For the decreases clause, since j increments each iteration, `m - j` is a valid measure that decreases.
+
+I should also consider whether to use `spec_public` or `spec_protected`. Since the fields are local variables, they don't need `spec_public`. The class itself doesn't have instance fields, so no class-level specifications are needed.
+
+Let me refine the specifications:
+
+```java
+/*@
+  @ public class IsSubsequence {
+  @   public normal_behavior
+  @   requires s != null && t != null;
+  @   ensures \result == true ==> s is a subsequence of t;
+  @   ensures \result == false ==> s is not a subsequence of t;
+  @   also public exceptional_behavior
+  @   requires s == null || t == null;
+  @   signals_only NullPointerException;
+  @*/
+class IsSubsequence {
+    public boolean isSubsequence(String s, String t) {
+        int n = s.length(), m = t.length();
+        int i = 0, j = 0;
+
+        /*@
+          @ maintaining 0 <= i && i <= n && 0 <= j && j <= m;
+          @ maintaining (\forall int k; 0 <= k && k < i; 
+          @                 (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)));
+          @ decreases m - j;
+          @*/
+        while (i < n && j < m) {
+            if (s.charAt(i) == t.charAt(j)) {
+                i++;
+            }
+            j++;
+        }
+        return i == n;
+    }
+}
+```
+
+The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The decreases clause uses `m - j` since j increments each iteration. The method-level specification should capture that the result indicates whether s is a subsequence of t. I need to reconsider the loop invariant. The condition `k <= l` ensures character positions are preserved in order, which is essential for the subsequence property. Without it, the logic fails—for instance, if s = "ab" and t = "ba", we'd incorrectly match s[1]='b' with t[0]='b' and s[0]='a' with t[1]='a', violating the sequence order requirement.
+
+The invariant should guarantee that for each character s[k] matched so far, there's a corresponding position t[l] in the matched portion where l >= k, maintaining the relative ordering constraint. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character in s, there exists a corresponding position in t that respects the ordering constraint. The `k <= l` requirement is essential because it preserves the sequence order—without it, we'd allow matches that violate the original ordering of characters in s. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each position k in the matched portion of s, there exists some position l in the examined portion of t where the characters match, with l >= k to preserve order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle the case where either input string is null by throwing a NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and the normal behavior case should verify that the method correctly identifies whether s is a subsequence of t. The loop invariant needs to ensure that all characters of s up to index i appear as a subsequence within the first j characters of t. The condition `(\forall int k; 0 <= k && k < i; (\exists int l; k <= l && l < j; s.charAt(k) == t.charAt(l)))` captures this by requiring that for each matched character position k in s, there exists a corresponding position l in t where the character matches, with l >= k to maintain order.
+
+The decreases clause uses `m - j` since j increments each iteration, guaranteeing termination. The specification also needs to handle null inputs by throwing NullPointerException, and

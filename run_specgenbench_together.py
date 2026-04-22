@@ -22,7 +22,10 @@ from typing import Any
 from together import AsyncTogether
 
 
-DEFAULT_MODEL = "Qwen/Qwen3-Coder-Next-FP8"
+# DEFAULT_MODEL = "Qwen/Qwen3-Coder-Next-FP8"
+# DEFAULT_MODEL = "Qwen/Qwen3.5-9B"
+DEFAULT_MODEL = "MiniMaxAI/MiniMax-M2.7"
+
 DEFAULT_BENCHMARK_DIR = "benchmark/SpecGenBench/common"
 DEFAULT_PROMPT_DIR = "experiment/pilot-5/prompts"
 DEFAULT_OUTPUT_DIR = "experiment/specgenbench-together"
@@ -40,6 +43,13 @@ CODE_FENCE_RE = re.compile(r"```(?:java)?\s*(.*?)```", re.IGNORECASE | re.DOTALL
 class Benchmark:
     name: str
     source_path: Path
+
+
+class TogetherCallError(RuntimeError):
+    def __init__(self, last_error: Exception, attempts: list[dict[str, Any]]) -> None:
+        super().__init__(str(last_error))
+        self.last_error = last_error
+        self.attempts = attempts
 
 
 def safe_name(value: str) -> str:
@@ -120,10 +130,17 @@ async def call_together(
     prompt: str,
     temperature: float,
     max_tokens: int,
+    max_tokens_fallbacks: list[int] | None,
     retries: int,
     retry_base_delay: float,
     enable_thinking: bool,
+    reasoning_effort: str | None,
 ) -> tuple[str, dict[str, Any]]:
+    token_budgets: list[int] = []
+    for candidate in [max_tokens, *(max_tokens_fallbacks or [])]:
+        if candidate > 0 and candidate not in token_budgets:
+            token_budgets.append(candidate)
+
     kwargs: dict[str, Any] = {
         "model": model,
         "messages": [
@@ -131,44 +148,65 @@ async def call_together(
             {"role": "user", "content": prompt},
         ],
         "temperature": temperature,
-        "max_tokens": max_tokens,
     }
     if not enable_thinking:
         kwargs["chat_template_kwargs"] = {"enable_thinking": False}
+    if reasoning_effort:
+        kwargs["reasoning_effort"] = reasoning_effort
 
     last_error: Exception | None = None
-    for attempt in range(retries + 1):
-        try:
-            response = await client.chat.completions.create(**kwargs)
-            choice = response.choices[0]
-            message = choice.message
-            content = message.content or ""
-            reasoning = getattr(message, "reasoning", None) or ""
-            raw = content if content.strip() else reasoning
-            metadata = {
-                "finish_reason": jsonable(getattr(choice, "finish_reason", None)),
-                "usage": jsonable(getattr(response, "usage", None)),
-                "had_reasoning_field": bool(reasoning),
-            }
-            return raw, metadata
-        except Exception as exc:
-            last_error = exc
-            error_text = str(exc).lower()
-            if "chat_template_kwargs" in kwargs and (
-                "chat_template_kwargs" in error_text or "enable_thinking" in error_text
-            ):
-                kwargs.pop("chat_template_kwargs", None)
-                continue
-            if attempt >= retries:
-                break
-            is_rate_limit = "429" in error_text or "rate" in error_text or "timeout" in error_text
-            wait = retry_base_delay * (2**attempt)
-            if not is_rate_limit:
-                wait = min(wait, retry_base_delay)
-            await asyncio.sleep(wait)
+    attempt_errors: list[dict[str, Any]] = []
+    for budget_index, token_budget in enumerate(token_budgets):
+        kwargs["max_tokens"] = token_budget
+        exhausted_with_timeout = False
+        for attempt in range(retries + 1):
+            try:
+                response = await client.chat.completions.create(**kwargs)
+                choice = response.choices[0]
+                message = choice.message
+                content = message.content or ""
+                reasoning = getattr(message, "reasoning", None) or ""
+                raw = content if content.strip() else reasoning
+                metadata = {
+                    "finish_reason": jsonable(getattr(choice, "finish_reason", None)),
+                    "usage": jsonable(getattr(response, "usage", None)),
+                    "had_reasoning_field": bool(reasoning),
+                }
+                return raw, metadata
+            except Exception as exc:
+                last_error = exc
+                attempt_errors.append(
+                    {
+                        "attempt": attempt + 1,
+                        "max_tokens": token_budget,
+                        "error_type": type(exc).__name__,
+                        "error": str(exc),
+                    }
+                )
+                error_text = str(exc).lower()
+                if "chat_template_kwargs" in kwargs and (
+                    "chat_template_kwargs" in error_text or "enable_thinking" in error_text
+                ):
+                    kwargs.pop("chat_template_kwargs", None)
+                    continue
+
+                is_timeout = "timeout" in error_text
+                if attempt >= retries:
+                    exhausted_with_timeout = is_timeout
+                    break
+
+                is_rate_limit = "429" in error_text or "rate" in error_text or is_timeout
+                wait = retry_base_delay * (2**attempt)
+                if not is_rate_limit:
+                    wait = min(wait, retry_base_delay)
+                await asyncio.sleep(wait)
+
+        has_fallback_budget = budget_index + 1 < len(token_budgets)
+        if not (exhausted_with_timeout and has_fallback_budget):
+            break
 
     assert last_error is not None
-    raise last_error
+    raise TogetherCallError(last_error, attempt_errors) from last_error
 
 
 async def generate_one(
@@ -221,9 +259,11 @@ async def generate_one(
                 prompt=prompt,
                 temperature=args.temperature,
                 max_tokens=args.max_tokens,
+                max_tokens_fallbacks=args.max_tokens_fallback,
                 retries=args.retries,
                 retry_base_delay=args.retry_base_delay,
                 enable_thinking=args.enable_thinking,
+                reasoning_effort=args.reasoning_effort,
             )
             elapsed = time.time() - started
             code = extract_java_code(raw)
@@ -241,13 +281,16 @@ async def generate_one(
             }
         except Exception as exc:
             elapsed = time.time() - started
+            root_error = getattr(exc, "last_error", exc)
             return {
                 "method": benchmark.name,
                 "status": "error",
                 "source_path": str(benchmark.source_path),
                 "prompt_path": str(prompt_path),
                 "elapsed_seconds": round(elapsed, 3),
-                "error": str(exc),
+                "error": str(root_error),
+                "error_type": type(root_error).__name__,
+                "attempt_errors": getattr(exc, "attempts", None),
             }
 
 
@@ -302,6 +345,11 @@ async def main_async(args: argparse.Namespace) -> int:
                 "output_dir": str(output_dir),
                 "temperature": args.temperature,
                 "max_tokens": args.max_tokens,
+                "max_tokens_fallback": args.max_tokens_fallback,
+                "client_timeout": args.client_timeout,
+                "client_max_retries": args.client_max_retries,
+                "reasoning_effort": args.reasoning_effort,
+                "outer_retries": args.retries,
                 "concurrency": args.concurrency,
                 "num_selected": len(benchmarks),
                 "dry_run": args.dry_run,
@@ -322,7 +370,14 @@ async def main_async(args: argparse.Namespace) -> int:
     api_key = args.api_key
     if args.api_key_file:
         api_key = Path(args.api_key_file).read_text().strip()
-    client = None if args.dry_run else (AsyncTogether(api_key=api_key) if api_key else AsyncTogether())
+    client_kwargs: dict[str, Any] = {}
+    if api_key:
+        client_kwargs["api_key"] = api_key
+    if args.client_timeout is not None:
+        client_kwargs["timeout"] = args.client_timeout
+    if args.client_max_retries is not None:
+        client_kwargs["max_retries"] = args.client_max_retries
+    client = None if args.dry_run else AsyncTogether(**client_kwargs)
 
     semaphore = asyncio.Semaphore(args.concurrency)
     tasks = [
@@ -370,6 +425,31 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--delay", type=float, default=0.0, help="Seconds to wait before each API call")
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--max-tokens", type=int, default=4096)
+    parser.add_argument(
+        "--max-tokens-fallback",
+        nargs="*",
+        type=int,
+        default=None,
+        help="Optional smaller max-token budgets to try after a timeout, e.g. --max-tokens-fallback 1024 768 512",
+    )
+    parser.add_argument(
+        "--client-timeout",
+        type=float,
+        default=None,
+        help="Together client request timeout in seconds; defaults to SDK behavior",
+    )
+    parser.add_argument(
+        "--client-max-retries",
+        type=int,
+        default=None,
+        help="Together SDK retries per request; defaults to SDK behavior",
+    )
+    parser.add_argument(
+        "--reasoning-effort",
+        choices=["low", "medium", "high"],
+        default=None,
+        help="Optional Together reasoning effort hint for supported models",
+    )
     parser.add_argument("--retries", type=int, default=4)
     parser.add_argument("--retry-base-delay", type=float, default=2.0)
     parser.add_argument("--api-key", default=None, help="Together API key; defaults to TOGETHER_API_KEY")

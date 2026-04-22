@@ -1,0 +1,12 @@
+{
+  "benchmark_dir": "benchmark/SpecGenBench/common",
+  "concurrency": 2,
+  "dry_run": false,
+  "max_tokens": 4096,
+  "model": "Qwen/Qwen3.5-9B",
+  "num_selected": 1,
+  "output_dir": "experiment/specgenbench-together",
+  "prompt_path": "experiment/pilot-5/prompts/zero_shot.txt",
+  "strategy": "zero_shot",
+  "temperature": 0.0
+}

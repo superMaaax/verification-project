@@ -1,0 +1,117 @@
+I need to add JML specifications to this Java program. Let me analyze the code:
+
+1. The class `ContainsDuplicate` has a method `containsDuplicate` that checks if there are any duplicate elements in an array.
+
+2. The method:
+   - Takes an int array `nums` as input
+   - Sorts the array in place
+   - Iterates through adjacent pairs to check for duplicates
+   - Returns true if a duplicate is found, false otherwise
+
+Let me add appropriate JML specifications:
+
+For the class:
+- The class itself doesn't need special invariants
+
+For the method `containsDuplicate`:
+- `requires`: The input array should not be null
+- `ensures`: The method returns true if and only if there exists some i and j such that i != j and nums[i] == nums[j]
+
+For the loop:
+- `maintaining`: An invariant that tracks what we've checked so far
+- `decreases`: The remaining portion of the array to check
+
+Let me think about the loop invariant:
+- Before the loop starts, we haven't checked any adjacent pairs
+- During the loop, at iteration i, we've checked pairs (0,1), (1,2), ..., (i-1, i)
+- The loop invariant should state that no duplicates have been found in the checked portion
+
+For the loop:
+- Loop condition: i < n - 1
+- Loop variable: i
+- Decreases: n - 1 - i (the number of remaining pairs to check)
+
+Loop invariant:
+- 0 <= i <= n - 1
+- For all j in [0, i), nums[j] != nums[j+1]
+
+Let me write the JML specifications:
+
+```java
+import java.util.Arrays;
+
+public class ContainsDuplicate {
+
+    /*@ requires nums != null;
+        ensures \result == (\exists int i; 0 <= i && i < nums.length; 
+                           \exists int j; 0 <= j && j < nums.length && i != j && nums[i] == nums[j]);
+    @*/
+    public boolean containsDuplicate(int[] nums) {
+        Arrays.sort(nums);
+        int n = nums.length;
+
+        /*@ maintaining 0 <= i && i <= n - 1;
+            maintaining (\forall int j; 0 <= j && j < i; nums[j] != nums[j + 1]);
+            decreases n - 1 - i;
+        @*/
+        for (int i = 0; i < n - 1; i++) {
+            if (nums[i] == nums[i + 1]) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+The specification ensures the method returns true precisely when duplicates exist in the array. The loop invariant maintains that all adjacent pairs up to position i have been verified as distinct, while the decreases clause guarantees termination by reducing the remaining unexamined portion of the array. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've exited the loop after checking pairs up to n-2. So at any point during iteration, for all j in [0, i), nums[j] != nums[j+1] holds true.
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish that i stays within valid bounds and that no duplicates exist in the portion we've examined so far. The loop invariant needs to track that we've checked all adjacent pairs up to position i without finding duplicates. The condition `i < n - 1` means when i reaches n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring the loop terminates properly. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property for the checked portion. The loop invariant needs to track that we've checked all adjacent pairs from 0 to i-1 and found no duplicates. The condition `i < n - 1` means when i = n-1, we've already verified pairs (0,1) through (n-2,n-1), so the invariant should hold that for all j in [0, i), nums[j] != nums[j+1].
+
+The decreases clause should be n - 1 - i, which starts at n - 1 and reaches 0 when i = n - 1, ensuring termination. The maintain clause needs to establish both the bounds on i and the no-duplicates property

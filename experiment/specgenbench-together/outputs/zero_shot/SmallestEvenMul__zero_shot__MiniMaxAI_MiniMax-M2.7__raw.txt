@@ -1,0 +1,17 @@
+```java
+/*@
+  @ public class SmallestEvenMul {
+  @   public normal_behavior
+  @     requires n > 0;
+  @     ensures \result > 0;
+  @     ensures \result % 2 == 0;
+  @     ensures \result % n == 0;
+  @     ensures \forall int x; x > 0 && x % 2 == 0 && x % n == 0; x >= \result;
+  @ }
+  @*/
+class SmallestEvenMul {
+    public int smallestEvenMultiple(int n) {
+        return n % 2 == 0 ? n : 2 * n;
+    }
+}
+```

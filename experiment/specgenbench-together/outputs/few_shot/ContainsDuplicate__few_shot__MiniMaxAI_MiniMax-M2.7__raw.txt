@@ -1,0 +1,163 @@
+We need to generate JML specifications for the given Java program. The program is:
+
+```java
+import java.util.Arrays;
+
+public class ContainsDuplicate {
+
+    public boolean containsDuplicate(int[] nums) {
+        Arrays.sort(nums);
+        int n = nums.length;
+
+        for (int i = 0; i < n - 1; i++) {
+            if (nums[i] == nums[i + 1]) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+We need to add JML comments: requires and ensures for the method, and loop specifications for the for loop (which is a while in JML). Also we need to consider spec_public for fields if needed. There's no fields. The method is public, so we need to specify behavior.
+
+We need to add JML directly into the Java source code. The output should be the full Java file with JML annotations.
+
+We need to generate requires and ensures clauses for each method where appropriate. The method containsDuplicate takes an int[] nums. We need to specify that nums is not null? Typically JML requires that arrays passed are non-null unless specified otherwise. We can add a requires clause: //@ requires nums != null; Also we can add ensures clause: //@ ensures \result == (\exists int i; 0 <= i && i < nums.length; (\exists int j; i < j && j < nums.length; nums[i] == nums[j])); But we need to be careful: after sorting, duplicates become adjacent. So the method returns true if there is any duplicate in the original array. The ensures can be: \result == (\exists int i; 0 <= i < nums.length; (\exists int j; i < j < nums.length; nums[i] == nums[j])); But we need to consider that after sorting, the array is mutated. However, the ensures clause should refer to the original array? In JML, we can refer to the value of the parameter before the method call using \old(nums). But we can also just state that \result is true iff there exists duplicates in the array after sorting? Actually the method returns true if any adjacent equal elements after sorting, which is equivalent to duplicates in the original array. So we can write ensures: \result == (\exists int i; 0 <= i < nums.length; \exists int j; i < j && j < nums.length; nums[i] == nums[j]); But note that after sorting, the array is modified, but the existence of duplicates is preserved. So we can just say that \result is true iff there exist two distinct indices i and j such that nums[i] == nums[j] (the current array after sorting). However, we might want to refer to the original array using \old. But the method does not have a contract that the array is not modified? Actually it modifies the array by sorting it in place. In JML, we can specify that the method is a pure method? But it's not pure because it modifies the array. However, we can still specify ensures. The ensures clause can refer to the array after the method call. But we might want to specify that the method returns true if and only if there is a duplicate in the original array. But since the array is sorted, the condition is equivalent. We can write:
+
+//@ ensures \result == (\exists int i; 0 <= i && i < nums.length; (\exists int j; i < j && j < nums.length; nums[i] == nums[j]));
+
+But note that after sorting, the array may have changed, but the existence of duplicates is the same. However, the ensures clause should reflect the behavior: the method returns true if and only if there is a duplicate in the array after sorting (which is the same as before). So we can use the same array.
+
+Alternatively, we can use \old to refer to the original array:
+
+//@ ensures \result == (\exists int i; 0 <= i && i < nums.length; (\exists int j; i < j && j < nums.length; \old(nums)[i] == \old(nums)[j]));
+
+But note that \old(nums) returns the array before the method call. However, the method modifies the array, so we might want to specify that the array is sorted after the method. But the problem does not require to specify that. We only need to add requires and ensures.
+
+We also need to add loop specifications for the for loop. The for loop is:
+
+for (int i = 0; i < n - 1; i++) {
+    if (nums[i] == nums[i + 1]) {
+        return true;
+    }
+}
+
+We need to add maintaining and decreases clauses. The loop iterates over the array from index 0 to n-2. We need to specify that the loop maintains that the indices seen so far have no duplicates? Actually the loop is checking for adjacent duplicates. We can maintain that for all indices j and k such that j < i and k < i, if they are equal then the method would have returned true already? Actually the loop checks adjacent equal elements. We can maintain that up to index i, there are no duplicates among the elements up to i? But note that the loop only checks adjacent pairs. Since the array is sorted, if there are any duplicates, they will become adjacent. So the loop is checking that for all j from 0 to i, there is no j such that nums[j] == nums[j+1] for j <= i-1? Actually the loop checks each adjacent pair. So we can maintain that the loop has not found a duplicate yet, and that the elements in the prefix [0, i] are in non-decreasing order and have no duplicates? But the array is sorted, so we don't need to maintain that. We can maintain that the loop invariant is that for all j from 0 to i, nums[j] != nums[j+1] (if j+1 <= i). But note that the loop condition is i < n-1, so i goes from 0 to n-2. At each iteration, we check if nums[i] == nums[i+1]. So the loop invariant can be: for all j such that 0 <= j && j < i, nums[j] != nums[j+1]. And we also need to maintain that i is within bounds: 0 <= i && i <= n-1. And we need to decrease i? Actually the loop decreases i? No, i increases. So we need a decreases clause for the loop variable? In JML, we need to specify that some variable decreases each iteration to guarantee termination. Usually we use a variable that decreases. In this case, we can use n-1-i as the decreases clause. But note that the loop may return early. However, the decreases clause is only needed for the loop itself, not for the method. We can add:
+
+//@ maintaining 0 <= i && i <= n;
+//@ maintaining (\forall int j; 0 <= j && j < i; nums[j] != nums[j+1]);
+//@ decreases n - i;
+
+But note: the loop condition is i < n-1, so i goes from 0 to n-2. At the start, i=0. At each iteration, we check the condition, then if not returned, we increment i. So the loop invariant should hold at the beginning of each iteration. We can write:
+
+//@ maintaining 0 <= i && i <= n-1;
+//@ maintaining (\forall int j; 0 <= j && j < i; nums[j] != nums[j+1]);
+
+And the decreases clause: //@ decreases n - 1 - i; or //@ decreases n - i; but note that i increases, so n-1-i decreases. However, the loop condition is i < n-1, so when i = n-1, the loop exits. So we can use decreases n-1-i.
+
+Alternatively, we can use a while loop representation. But the problem uses a for loop. We can add the loop specifications as comments before the for loop.
+
+We also need to consider the method's requires clause. The method takes an int[] nums. We should require that nums is not null. Also, we might want to require that the array is of length at least 2 for a duplicate? But not necessary. We can add: //@ requires nums != null;
+
+Also, we might want to specify that the method does not throw an exception? But not necessary.
+
+We also need to add /*@ spec_public @*/ only when needed for specification visibility. There are no fields, so we don't need to add any.
+
+Now, let's write the annotated Java file.
+
+We need to output only the complete annotated Java file. So we will write:
+
+import java.util.Arrays;
+
+public class ContainsDuplicate {
+
+    //@ requires nums != null;
+    //@ ensures \result == (\exists int i; 0 <= i && i < nums.length; (\exists int j; i < j && j < nums.length; nums[i] == nums[j]));
+    public boolean containsDuplicate(int[] nums) {
+        Arrays.sort(nums);
+        int n = nums.length;
+
+        //@ maintaining 0 <= i && i <= n-1;
+        //@ maintaining (\forall int j; 0 <= j && j < i; nums[j] != nums[j+1]);
+        //@ decreases n - 1 - i;
+        for (int i = 0; i < n - 1; i++) {
+            if (nums[i] == nums[i + 1]) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+But note: the ensures clause uses \exists. However, we need to be careful: the method returns true if there is a duplicate. So the ensures clause should be: \result == true <=> (\exists int i; 0 <= i && i < nums.length; (\exists int j; i < j && j < nums.length; nums[i] == nums[j])); Or we can write: \result == (\exists int i; 0 <= i && i < nums.length; (\exists int j; i < j && j < nums.length; nums[i] == nums[j])); But note that \result is boolean, so we can write: \result == (\exists int i; 0 <= i && i < nums.length; (\exists int j; i < j && j < nums.length; nums[i] == nums[j])); This is acceptable.
+
+Alternatively, we can use \result == (\exists int i, j; 0 <= i && i < j && j < nums.length; nums[i] == nums[j]);
+
+We need to make sure the syntax is correct. JML uses (\exists int i; 0 <= i && i < nums.length; ...) for existential quantifier. We can also use (\exists int i, j; 0 <= i && i < j && j < nums.length; nums[i] == nums[j]).
+
+But note: the ensures clause is evaluated after the method. The array is sorted, but the condition is the same. However, we might want to use \old to be precise. But the problem does not require that level of detail. We can leave it as is.
+
+We also need to consider that the method modifies the array. In JML, we might want to specify that the method is not pure, but we don't need to. However, we might want to specify that the array is sorted after the method. But the problem does not require that. We only need to add requires and ensures.
+
+Now, let's check the loop specifications. The loop invariant: we want to maintain that there are no duplicates in the prefix up to i. But note: the loop checks adjacent pairs. Since the array is sorted, if there are any duplicates, they will be adjacent. So the loop invariant can be: for all j from 0 to i-1, nums[j] != nums[j+1]. But note that at the start, i=0, so the invariant holds vacuously. At each iteration, we check if nums[i] == nums[i+1]. If not, we increment i. So the invariant should hold for the next i. So we can write: (\forall int j; 0 <= j && j < i; nums[j] != nums[j+1]). But note that when i is incremented, we need to ensure that the new nums[i] != nums[i+1] for the next iteration? Actually the invariant is that for all j < i, nums[j] != nums[j+1]. So when we increment i, we need to ensure that the previous check (nums[i] != nums[i+1]) is maintained? Actually the loop checks the condition at the beginning of each iteration. So we can write the invariant as:
+
+//@ maintaining 0 <= i && i <= n-1;
+//@ maintaining (\forall int j; 0 <= j && j < i; nums[j] != nums[j+1]);
+
+But note: when i = n-1, the loop condition fails. So the invariant holds for i <= n-1. However, the loop exits when i = n-1. So we can set the invariant to hold at the beginning of each iteration. We can also include that i is the current index being checked.
+
+We also need to add a decreases clause. Since i increases, we need to use a decreasing measure. We can use (n-1-i) as the decreases clause. But note: when i = n-1, the loop condition is false, so we don't need to decrease further. So we can write: //@ decreases n - 1 - i; But note that i is an int, so n-1-i is an int that decreases. However, when i = n-2, then n-1-i = 1, and after incrementing i to n-1, the loop condition fails. So it's okay.
+
+Alternatively, we can use a while loop representation. But the problem uses a for loop. We can add the loop specifications as comments before the for loop.
+
+We also need to consider that the method may return early. The loop specifications should hold at the point of return? Actually the loop specifications are only for the loop. The return statements are inside the loop. So we don't need to worry about the loop invariant at the return points because the method returns. However, we might want to specify that the loop terminates. But that's not required.
+
+Now, let's write the code.
+
+We need to output the full Java file. So we will write:
+
+```java
+import java.util.Arrays;
+
+public class ContainsDuplicate {
+
+    //@ requires nums != null;
+    //@ ensures \result == (\exists int i; 0 <= i && i < nums.length; (\exists int j; i < j && j < nums.length; nums[i] == nums[j]));
+    public boolean containsDuplicate(int[] nums) {
+        Arrays.sort(nums);
+        int n = nums.length;
+
+        //@ maintaining 0 <= i && i <= n-1;
+        //@ maintaining (\forall int j; 0 <= j && j < i; nums[j] != nums[j+1]);
+        //@ decreases n - 1 - i;
+        for (int i = 0; i < n - 1; i++) {
+            if (nums[i] == nums[i + 1]) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+```
+
+But note: the ensures clause uses \exists. However, we might want to use \old to refer to the original array. But the problem does not require that. We can leave it as is.
+
+We also need to consider that the method modifies the array. In JML, we might want to specify that the method is not pure, but we don't need to. However, we might want to specify that the array is sorted after the method. But the problem does not require that. We only need to add requires and ensures.
+
+We should also consider that the method may be called with an empty array or an array of length 1. In that case, the loop condition (i < n-1) will be false for n=0 or n=1. The method will return false. Our ensures clause should hold: for an empty array or length 1, there is no duplicate, so \result should be false. Our ensures clause: \result == (\exists int i; 0 <= i && i < nums.length; (\exists int j; i < j && j < nums.length; nums[i] == nums[j])); For length 0 or 1, the inner exists will be false because there is no i and j with i<j. So \result will be false. So it's okay.
+
+We also need to consider that the method may be called with a null array. We added requires nums != null. So that's fine.
+
+Now, we need to check the loop invariant. The loop invariant we wrote is:
+
+//@ maintaining 0 <= i && i <= n-1;
+//@ maintaining (\forall int j; 0 <= j && j < i; nums[j] != nums[j+1]);
+
+But note: at the beginning of the loop, i=0. The condition 0 <= i && i <= n-1 holds. The second invariant: (\forall int j; 0 <= j && j < i; nums[j] != nums[j+1]) holds because there is no j satisfying 0 <= j && j < 0. So it's vacuously true.
+
+At each iteration, we check if nums[i] == nums[i+1]. If not, we increment i. The loop condition is i < n-1. So when i is incremented, we need to ensure that the invariant holds for the new i. The second invariant says that for all j < i, nums[j] != nums[j+1]. After incrementing i, we have j < i for all j up to the previous i. So the invariant holds. However, we also need to ensure that the new nums[i] != nums[i+1] for the next iteration? Actually the loop invariant does not require that. It only requires that for all j < i, nums[j] != nums[j+1]. So when we increment i, we are extending the prefix. The condition for the new i is not checked until the next iteration. So the invariant is maintained.
+
+We also need to consider that the loop may break early if a duplicate is found. In that case, the method returns true. The loop invariant is not required to hold at the return point because the method returns. So it's okay.
+
+Now, we need to check the decreases clause. We wrote: //@ decreases n - 1 - i; But note: i is an int. The expression n-1-i is an int that decreases as i increases. However, when i is incremented, the value of n-1-i decreases. But note: the loop condition is i < n-1. So when i = n-2, n-1-i = 1. After incrementing i to n-1, the loop condition fails. So the decreases clause is valid. However, we need to ensure that the decreases clause is written correctly. In JML, we can write: //@ decreases n - 1 - i; But note: i is a local variable in the loop. We can also write: //@ decreases n - i; But note: when i = n-2, n-i = 2, and when i = n-1, n-i = 1. But the loop condition is i < n-1, so when i = n-1, the

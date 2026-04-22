@@ -1,0 +1,12 @@
+/*@
+  @ public invariant (\forall int i; i > 0; true);
+  @*/
+public class DivisorGame {
+    /*@
+      @ requires true;
+      @ ensures \result == (n % 2 == 0);
+      @*/
+    public boolean divisorGame(int n) {
+        return n % 2 == 0;
+    }
+}

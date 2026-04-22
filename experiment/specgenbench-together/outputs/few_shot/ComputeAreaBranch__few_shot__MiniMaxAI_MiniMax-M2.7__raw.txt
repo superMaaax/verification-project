@@ -1,0 +1,281 @@
+We need to generate JML specifications for the given Java program. The program is a class ComputeAreaBranch with a method computeOverlapArea that takes eight ints: ax1, ay1, ax2, ay2, bx1, by1, bx2, by2. It computes the area of two rectangles defined by lower-left and upper-right coordinates (presumably). Then computes overlap area and returns sum of areas minus overlap area.
+
+We need to add JML comments: requires and ensures clauses for the method, and loop specifications for loops if any. The code has no loops. So we just need requires and ensures.
+
+We need to consider integer overflow? The method uses multiplication of differences. In JML we can specify that the result equals area1 + area2 - overlapArea, which is what the code returns. But we can also specify more about the rectangles: that ax1 <= ax2, ay1 <= ay2, bx1 <= bx2, by1 <= by2. Also that the computed areas are non-negative. Also that the result is non-negative? Actually sum of areas minus overlap area is at least max(area1, area2). Might be negative if rectangles don't overlap? Actually if they don't overlap, overlap area = 0, so result = area1 + area2, which is non-negative. So ensures that result >= 0. But we can just specify ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - overlapArea. But we need to define overlapArea in terms of the coordinates. We can also specify that overlapArea is computed as max(0, min(ax2, bx2) - max(ax1, bx1)) * max(0, min(ay2, by2) - max(ay1, by1)). But the code does that.
+
+We need to add JML comments for requires: maybe require that rectangles are valid: ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2. Also require that the differences are non-negative and multiplication does not overflow? But we can ignore overflow for spec.
+
+We also need to consider that the method is not static. So we can add requires for the parameters.
+
+We need to add spec_public only when needed for specification visibility. The method is public, so we may need to specify visibility of fields? There are no fields.
+
+We need to output the full Java file with JML comments.
+
+Thus we will produce something like:
+
+```java
+//@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+//@ ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - overlapArea;
+//@ ensures \result >= 0;
+public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+    int area1 = (ax2 - ax1) * (ay2 - ay1);
+    int area2 = (bx2 - bx1) * (by2 - by1);
+    int minX2 = bx2;
+    if (ax2 < bx2) {
+        minX2 = ax2;
+    }
+    int maxX1 = bx1;
+    if (ax1 > bx1) {
+        maxX1 = ax1;
+    }
+    int minY2 = by2;
+    if (ay2 < by2) {
+        minY2 = ay2;
+    }
+    int maxY1 = by1;
+    if (ay1 > by1) {
+        maxY1 = ay1;
+    }
+    int overlapWidth = minX2 - maxX1;
+    int overlapHeight = minY2 - maxY1;
+    if (overlapWidth < 0) {
+        overlapWidth = 0;
+    }
+    if (overlapHeight < 0) {
+        overlapHeight = 0;
+    }
+    int overlapArea = overlapHeight * overlapWidth;
+    return area1 + area2 - overlapArea;
+}
+```
+
+But we need to ensure that the ensures clause uses the same variable names as in the method? In JML, we can refer to the method's local variables in ensures? Usually we can use any expression, but we need to be careful: The ensures clause can refer to the parameters and local variables, but it's okay. However, we need to ensure that the spec uses the same variable names. The ensures clause can be something like:
+
+```java
+//@ ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - overlapArea;
+```
+
+But we need to define overlapArea in terms of the coordinates. Actually we can compute overlapArea as:
+
+```
+max(0, min(ax2, bx2) - max(ax1, bx1)) * max(0, min(ay2, by2) - max(ay1, by1))
+```
+
+But the code computes it via local variables. In ensures, we can refer to those local variables as they exist after the method? In JML, ensures clause refers to the final state after the method executes, but local variables are not visible outside. However, we can use the same expressions. So we can write ensures that \result equals that expression. But we can also just specify that \result equals area1 + area2 - overlapArea, where area1, area2, overlapArea are defined as in the method. But those are not visible outside. However, JML allows referencing them if they are in scope? In ensures clause, we can reference them because they are in the method's scope? Actually JML ensures clause is a postcondition that can refer to the method's parameters and any fields, but not local variables because they are not visible after the method returns. However, we can use the same expressions with the parameters. So we should avoid referencing local variables in ensures. Instead we can write ensures in terms of parameters.
+
+Thus we can write ensures:
+
+```
+ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - (max(0, min(ax2, bx2) - max(ax1, bx1)) * max(0, min(ay2, by2) - max(ay1, by1)))
+```
+
+But we need to use JML functions: we can use \max, \min? In JML, we have \max, \min? Actually JML has \max and \min functions? I think JML has \max and \min for integers? In JML, we can use \max and \min as functions. But we can also use Java's Math.max and Math.min in specifications? In JML, we can use Java's Math.max and Math.min in specifications as well. But we need to ensure that we use correct syntax. The spec may be simpler: just ensure that \result equals the sum of the two areas minus the overlap area, where overlap area is computed as above. But we can also just ensure that \result is non-negative and that it equals the formula.
+
+Better to include a simple ensures: \result >= 0. And also \result == area1 + area2 - overlapArea, but referencing local variables is not allowed. However, we can use the parameters to compute area1, area2, overlapArea. So we can write:
+
+```
+ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - overlapArea
+```
+
+But we need to define overlapArea in terms of parameters. We can define a helper variable in JML? Not needed. We can just compute it in ensures.
+
+Better to write:
+
+```
+ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - (max(0, min(ax2, bx2) - max(ax1, bx1)) * max(0, min(ay2, by2) - max(ay1, by1)))
+```
+
+But we need to ensure that we use correct syntax: In JML, we can use \max and \min? Actually JML provides \max and \min as binary functions. But we can also use Java's Math.max and Math.min. However, in JML, we can use \max and \min for integer arguments: e.g., \max(a,b). But I'm not 100% sure. The typical JML spec uses \max and \min. But we can also use Java's Math.max in specifications. The spec is not required to be executable; it's just for verification. So we can use \max and \min.
+
+Thus we can write:
+
+```
+ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - (\max(0, \min(ax2, bx2) - \max(ax1, bx1)) * \max(0, \min(ay2, by2) - \max(ay1, by1)))
+```
+
+But we need to check the parentheses.
+
+Better to break it down: The overlap width is max(0, min(ax2, bx2) - max(ax1, bx1)). The overlap height is max(0, min(ay2, by2) - max(ay1, by1)). Then overlap area is product.
+
+Thus we can write ensures:
+
+```
+ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - (\max(0, \min(ax2, bx2) - \max(ax1, bx1)) * \max(0, \min(ay2, by2) - \max(ay1, by1)))
+```
+
+But we need to ensure that the parentheses are correct: The product is *.
+
+We also need to ensure that the ensures clause is on one line or can be broken across lines with continuation? In JML, we can have multiple lines but we need to have comment markers.
+
+We also need to add requires clause: The rectangles should be valid: ax1 <= ax2, ay1 <= ay2, bx1 <= bx2, by1 <= by2. Also maybe require that the coordinates are such that the areas fit within integer range? But we can ignore.
+
+Thus we can add:
+
+```
+//@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+```
+
+We can also add that the differences are non-negative: Already covered.
+
+We also need to ensure that the multiplication does not overflow? Not needed.
+
+We also need to add spec_public only when needed. There are no fields.
+
+Thus the final output will be the Java file with JML comments.
+
+We need to output the full Java file and nothing else. So we need to include the class declaration and the method with JML comments.
+
+Thus final answer:
+
+```java
+//@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+//@ ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - (\max(0, \min(ax2, bx2) - \max(ax1, bx1)) * \max(0, \min(ay2, by2) - \max(ay1, by1)));
+public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+    int area1 = (ax2 - ax1) * (ay2 - ay1);
+    int area2 = (bx2 - bx1) * (by2 - by1);
+    int minX2 = bx2;
+    if (ax2 < bx2) {
+        minX2 = ax2;
+    }
+    int maxX1 = bx1;
+    if (ax1 > bx1) {
+        maxX1 = ax1;
+    }
+    int minY2 = by2;
+    if (ay2 < by2) {
+        minY2 = ay2;
+    }
+    int maxY1 = by1;
+    if (ay1 > by1) {
+        maxY1 = ay1;
+    }
+    int overlapWidth = minX2 - maxX1;
+    int overlapHeight = minY2 - maxY1;
+    if (overlapWidth < 0) {
+        overlapWidth = 0;
+    }
+    if (overlapHeight < 0) {
+        overlapHeight = 0;
+    }
+    int overlapArea = overlapHeight * overlapWidth;
+    return area1 + area2 - overlapArea;
+}
+```
+
+But we need to ensure that the ensures clause uses the correct syntax for \max and \min. In JML, we can use \max and \min. However, we need to check if we need to use parentheses: \max(0, \min(ax2, bx2) - \max(ax1, bx1)). Actually we need to compute max(0, min(ax2,bx2) - max(ax1,bx1)). So we can write:
+
+```
+\max(0, \min(ax2, bx2) - \max(ax1, bx1))
+```
+
+Yes.
+
+Thus final answer is as above.
+
+But we also need to consider that the ensures clause may be too long for one line, but we can break it with continuation lines. However, we can keep it on one line.
+
+We also need to ensure that we include the comment markers //@ for each clause. We can combine multiple clauses on separate lines.
+
+Thus final answer:
+
+```java
+//@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+//@ ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - (\max(0, \min(ax2, bx2) - \max(ax1, bx1)) * \max(0, \min(ay2, by2) - \max(ay1, by1)));
+public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+    int area1 = (ax2 - ax1) * (ay2 - ay1);
+    int area2 = (bx2 - bx1) * (by2 - by1);
+    int minX2 = bx2;
+    if (ax2 < bx2) {
+        minX2 = ax2;
+    }
+    int maxX1 = bx1;
+    if (ax1 > bx1) {
+        maxX1 = ax1;
+    }
+    int minY2 = by2;
+    if (ay2 < by2) {
+        minY2 = ay2;
+    }
+    int maxY1 = by1;
+    if (ay1 > by1) {
+        maxY1 = ay1;
+    }
+    int overlapWidth = minX2 - maxX1;
+    int overlapHeight = minY2 - maxY1;
+    if (overlapWidth < 0) {
+        overlapWidth = 0;
+    }
+    if (overlapHeight < 0) {
+        overlapHeight = 0;
+    }
+    int overlapArea = overlapHeight * overlapWidth;
+    return area1 + area2 - overlapArea;
+}
+```
+
+We also need to consider that the method is not static, so we may need to add a requires clause for the receiver object? Not needed.
+
+Thus final answer is as above.
+
+But we need to ensure that we do not rename any variables. The code uses local variables: area1, area2, minX2, maxX1, minY2, maxY1, overlapWidth, overlapHeight, overlapArea. We should not rename them. Our ensures clause uses only parameters, not local variables, so it's fine.
+
+We also need to consider that the ensures clause may need to include that the result is non-negative. But it's implied by the formula. However, we can add an ensures clause for result >= 0. But not required.
+
+We also need to consider that the method may be called with negative coordinates? But we require that rectangles are defined correctly.
+
+Thus final answer is as above.
+
+We should also consider that the JML comment should be placed before the method, and we should not add any extra code.
+
+Thus final answer is the Java file with JML comments.
+
+Now we need to output only the complete annotated Java file and nothing else.
+
+Thus we will output the code block with the annotated Java code.
+
+We need to ensure that we include the class declaration and the method with JML comments.
+
+Thus final answer:
+
+```java
+//@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+//@ ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - (\max(0, \min(ax2, bx2) - \max(ax1, bx1)) * \max(0, \min(ay2, by2) - \max(ay1, by1)));
+public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+    int area1 = (ax2 - ax1) * (ay2 - ay1);
+    int area2 = (bx2 - bx1) * (by2 - by1);
+    int minX2 = bx2;
+    if (ax2 < bx2) {
+        minX2 = ax2;
+    }
+    int maxX1 = bx1;
+    if (ax1 > bx1) {
+        maxX1 = ax1;
+    }
+    int minY2 = by2;
+    if (ay2 < by2) {
+        minY2 = ay2;
+    }
+    int maxY1 = by1;
+    if (ay1 > by1) {
+        maxY1 = ay1;
+    }
+    int overlapWidth = minX2 - maxX1;
+    int overlapHeight = minY2 - maxY1;
+    if (overlapWidth < 0) {
+        overlapWidth = 0;
+    }
+    if (overlapHeight < 0) {
+        overlapHeight = 0;
+    }
+    int overlapArea = overlapHeight * overlapWidth;
+    return area1 + area2 - overlapArea;
+}
+```
+
+We need to ensure that we include the class declaration: class ComputeAreaBranch. The original code had "class ComputeAreaBranch {". So we need to include that.
+
+Thus final answer should be:
+
+```java
+class ComputeArea

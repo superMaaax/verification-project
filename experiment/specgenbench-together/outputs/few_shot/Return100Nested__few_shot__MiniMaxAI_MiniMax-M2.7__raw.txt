@@ -1,0 +1,190 @@
+We need to generate JML specifications for the given Java program. The program:
+
+```
+public class Return100Nested {
+    public static int return100 () {
+        int res = 0;
+        for(int i = 0; i < 10; i++) {
+            for(int j = 0; j < 10; j++) {
+                res = res + 1;
+            }
+        }
+        return res;
+    }
+}
+```
+
+We need to add JML comments: requires and ensures for the method, loop specifications for each for loop: maintaining and decreases. Also spec_public if needed for visibility. The method is static, returns int. The method has no parameters, so requires clause is trivial: maybe no precondition needed (or "requires true"?). But we can add "requires true;" but not necessary. Usually JML allows "requires true;" but not required. However we need to add ensures clause: ensures \result == 100. Because the loops increment res 100 times (10*10). So ensures \result == 100.
+
+Loop specifications: For outer loop: for (int i = 0; i < 10; i++). We need maintaining and decreases. The loop invariant: something like "0 <= i && i <= 10 && res == i * 10". Actually after each iteration of outer loop, inner loop increments res 10 times, so after i iterations, res = i*10. So we can maintain "res == i * 10". But we need to also maintain something about inner loop? The inner loop also has its own invariant. For inner loop: for (int j = 0; j < 10; j++). The invariant: "0 <= j && j <= 10 && res == i*10 + j". But careful: i is outer loop variable, but inside inner loop we need to capture that i is fixed. So we can have outer loop invariant: "0 <= i && i <= 10 && res == i*10". The inner loop invariant: "0 <= j && j <= 10 && res == i*10 + j". The decreases clause: for loops, we can use "decreases 10 - i" for outer loop, and "decreases 10 - j" for inner loop. However JML for for loops: we can use "decreases 10 - i" as the loop variant. But typical JML uses "decreases" clause after loop label: e.g., "//@ decreases i;" but for for loops we can also use "decreases 10 - i". However we need to ensure we follow JML syntax: "decreases i;" is okay because i is decreasing? Actually i increments, so we need a decreasing measure: "decreases 10 - i". Many examples use "decreases i" for while loops where i decreases. For for loops, we can use "decreases 10 - i". But we can also use "decreases i" if we consider i decreasing after loop? Not correct. So we need to use "decreases 10 - i". However typical JML for for loops: we can use "decreases i" if i is decreasing, but here i increments, so we need to use "decreases 10 - i". But we can also use "decreases i" if we consider loop variant is i, but i is not decreasing. Actually JML loop variant must be a integer expression that strictly decreases on each iteration. So we need to use something like "decreases 10 - i". But we can also use "decreases i" if we invert: "decreases i" would be decreasing if i goes from 10 down to 0, but not the case. So we need to use "decreases 10 - i". However we can also use "decreases i" if we rewrite loop to count down. But we should follow the given code.
+
+Thus we need to add JML comments for each loop. Also we need to add spec_public for fields? There are no fields. So we don't need spec_public.
+
+We also need to ensure we don't change executable code. So we just insert JML comments.
+
+Thus final output should be:
+
+```
+public class Return100Nested {
+    //@ ensures \result == 100;
+    public static int return100 () {
+        int res = 0;
+        //@ maintaining 0 <= i && i <= 10 && res == i * 10;
+        //@ decreases 10 - i;
+        for(int i = 0; i < 10; i++) {
+            //@ maintaining 0 <= j && j <= 10 && res == i * 10 + j;
+            //@ decreases 10 - j;
+            for(int j = 0; j < 10; j++) {
+                res = res + 1;
+            }
+        }
+        return res;
+    }
+}
+```
+
+But we need to consider the order of JML comments: Usually they are placed before the loop. In the example for AddLoop, they placed "decreases n;" and "maintaining ..." before the while loop. For for loops, similar.
+
+Thus we need to place them before each for loop. However we need to ensure we have correct syntax: The JML comment is "//@" for each clause. In the examples, they used "//@ maintaining ..." and "//@ decreases ..." on separate lines before the loop. They also used "//@ ensures ..." before method.
+
+Thus we should produce exactly that.
+
+But we also need to consider that the outer loop invariant must hold before the loop starts (i=0). At i=0, res=0, so res == i*10 holds. At each iteration, after inner loop completes, res increments by 10, making res = (i+1)*10. But the invariant we wrote is "res == i * 10". At the start of outer loop body, i is current i. After inner loop, res becomes i*10 + 10 = (i+1)*10, then i increments. The invariant for outer loop should hold after each iteration. Usually we need to maintain invariant that holds at start of each iteration. The typical pattern: before outer loop, i=0, res=0. At each iteration, we want to maintain that at the beginning of the iteration, res == i*10. Then we execute inner loop, which increments res by 10, then i increments, and the invariant holds for next iteration. So the invariant we wrote is correct.
+
+But we also need to maintain inner loop invariant that holds at each iteration of inner loop. The inner loop runs for j from 0 to 9. At start of inner loop, j=0, res = i*10. At each iteration, we increment res by 1, and j increments. So after each iteration, res = i*10 + j. So invariant "res == i*10 + j" holds at start and after each iteration. At termination, j=10, res = i*10 + 10 = (i+1)*10. Then inner loop exits, i increments. So that works.
+
+Thus we need to add those invariants.
+
+We also need to add "requires" clause? The method has no parameters, so we can either omit or add "requires true;". The example for AddLoop had a requires clause that checked overflow. But we can add "requires true;" but not necessary. The requirement says "Add JML directly into the given Java source code. Generate requires and ensures clauses for each method where appropriate." Since there are no parameters, we can either omit requires or add "requires true;". Usually we can add "requires true;" but it's optional. The example for AddLoop had a requires clause because they needed to check overflow. For this method, no preconditions needed. But we might add "requires true;" to be explicit. However the requirement says "Generate requires and ensures clauses for each method where appropriate." So we should add ensures, and maybe requires if needed. Since there is no precondition, we can either omit or add "requires true;". The example for Smallest they only added ensures, not requires. They didn't add requires for Smallest because they didn't need any. So we can omit requires. But we might add a requires clause to indicate no constraints: "requires true;". But it's optional. The requirement says "Generate requires and ensures clauses for each method where appropriate." So we should decide if it's appropriate. I'd say we can add "requires true;" but it's not needed. However we can also just add ensures. The example for AddLoop they added requires because they needed to check overflow. For this method, we can just add ensures. So we will only add ensures.
+
+Thus final output:
+
+```
+public class Return100Nested {
+    //@ ensures \result == 100;
+    public static int return100 () {
+        int res = 0;
+        //@ maintaining 0 <= i && i <= 10 && res == i * 10;
+        //@ decreases 10 - i;
+        for(int i = 0; i < 10; i++) {
+            //@ maintaining 0 <= j && j <= 10 && res == i * 10 + j;
+            //@ decreases 10 - j;
+            for(int j = 0; j < 10; j++) {
+                res = res + 1;
+            }
+        }
+        return res;
+    }
+}
+```
+
+But we need to ensure we follow JML syntax for loop specifications: The "maintaining" and "decreases" are placed before the loop, each on separate lines. In the example for AddLoop they placed "decreases n;" and "maintaining sum == x + y - n && 0 <= n;" before the while loop. They placed them on separate lines. For nested loops, we need to place them accordingly.
+
+Thus we should output exactly that.
+
+But we also need to consider that JML expects "decreases" clause to be after the loop, but typical syntax is "decreases <expression>;" after the loop. In the example, they placed "decreases n;" before the while loop. Actually they placed "decreases n;" before the while loop? Let's check the example:
+
+Example 1 Output:
+
+```
+public class AddLoop {
+    //@ requires Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && y != Integer.MIN_VALUE;
+    //@ ensures \result == x + y;
+    public static int AddLoop(int x, int y) {
+        int sum = x;
+        if (y > 0) {
+            int n = y;
+            //@ decreases n;
+            //@ maintaining sum == x + y - n && 0 <= n;
+            while (n > 0) {
+                sum = sum + 1;
+                n = n - 1;
+            }
+        } else {
+            int n = -y;
+            //@ maintaining sum == x + y + n && 0 <= n;
+            //@ decreases n;
+            while (n > 0) {
+                sum = sum - 1;
+                n = n - 1;
+            }
+        }
+        return sum;
+    }
+}
+```
+
+In the first branch, they placed "decreases n;" before the while loop, then "maintaining ...". In the second branch, they placed "maintaining ..." then "decreases n;". So order can be any. But we need to place them before the loop. Usually we can place them in any order. But we should follow typical pattern: place "decreases" then "maintaining". But it's okay.
+
+Thus for outer loop we can place "decreases 10 - i;" then "maintaining ...". For inner loop we can place "decreases 10 - j;" then "maintaining ...". But we need to ensure we use correct variable names: i and j are loop variables. The decreasing expression should be something that decreases each iteration. For outer loop, i increments from 0 to 9, so 10 - i decreases from 10 to 1. So we can use "decreases 10 - i;". For inner loop, j increments from 0 to 9, so 10 - j decreases. So "decreases 10 - j;". However we need to ensure that the decreasing expression is integer and non-negative and strictly decreases. At each iteration, i increments, so 10 - i decreases. At i=9, 10 - i = 1, after iteration i becomes 10, loop condition fails. So it's okay.
+
+But we also need to ensure that the decreasing clause is placed after the loop variable is initialized. In the for loop, the loop variable is initialized before the loop. So we can place the decreasing clause before the for loop. However we need to be careful: The decreasing clause uses i, which is defined in the for loop's initialization part. In JML, we can refer to the loop variable in the decreasing clause, but we need to ensure it's in scope. Usually we can place the decreasing clause after the for loop? Actually typical usage is to place the decreasing clause before the loop, but we need to refer to the loop variable. In the example for AddLoop, they declared "int n = y;" then placed "decreases n;" before the while loop. So they declared n before the loop. For for loops, the loop variable is declared in the for's initialization part. We can place the decreasing clause after the variable is declared, but before the loop? The variable is declared in the for statement itself. In JML, we can place the decreasing clause before the for loop, but we need to refer to the variable i. However we cannot refer to i before it's declared? Actually i is declared in the for statement: "for (int i = 0; ...)" The variable i is in scope after the for's initialization. In Java, the variable i is scoped within the for statement. But we can place JML comments before the for statement, but we cannot refer to i because it's not yet declared. However we can refer to i inside the loop body, but the decreasing clause is placed before the loop, but we need to refer to i. In the example for AddLoop, they declared n before the while loop, then placed decreasing clause before the while loop. For for loops, we can also declare the variable before the loop, but in the code we have "for (int i = 0; ...)" which declares i inside the for. If we want to refer to i in the decreasing clause before the loop, we cannot because i is not yet in scope. However we can place the decreasing clause after the for statement? Actually we can place the decreasing clause after the for statement but before the loop body? The syntax for loop specifications is typically placed after the loop statement, but before the loop body? Let's check typical JML usage for for loops. In the example for AddLoop, they used while loops. But for for loops, typical usage is to place the loop specification after the for statement but before the body? Actually typical JML syntax for loops is:
+
+```
+//@ loop invariant ...;
+//@ decreases ...;
+for (int i = 0; i < n; i++) {
+    // loop body
+}
+```
+
+But the loop invariant and decreases are placed before the for loop, after the for statement? Actually the syntax is to place them before the for loop, but they refer to the loop variable. However we need to check the exact syntax. According to JML syntax, loop specifications are placed as comments before the loop statement, but they can refer to variables declared in the loop initializer. However the variable is not yet in scope at that point? In Java, the variable declared in the for loop is scoped to the loop, but it's visible in the loop initializer and condition and increment parts. However in JML, we can refer to the variable in the loop specification if we place the specification after the for loop? Let's check typical JML examples. Searching memory: Many examples show loop invariants placed after the for loop but before the body, like:
+
+```
+for (int i = 0; i < n; i++) {
+    //@ loop invariant 0 <= i && i <= n;
+    //@ decreases n - i;
+    // loop body
+}
+```
+
+But I'm not entirely sure. Actually typical JML syntax is to place the loop invariant and variant after the loop statement but before the loop body, inside a comment. For while loops, they place them before the while. For for loops, they can also place them before the for loop? Let's check the JML reference manual. The loop specification is placed before the loop statement. But they can also be placed after the loop statement? The syntax is:
+
+```
+//@ loop invariant <expression>;
+//@ decreases <expression>;
+while (<condition>) {
+    <body>
+}
+```
+
+Similarly for for loops:
+
+```
+//@ loop invariant <expression>;
+//@ decreases <expression>;
+for (<init>; <cond>; <inc>) {
+    <body>
+}
+```
+
+Thus we can place them before the for loop. However we need to refer to the loop variable i, which is declared in the for's init part. In JML, we can refer to i in the loop invariant if we declare i in the for's init part. But the loop specification is placed before the for loop, but the variable i is declared in the for's init part, which is part of the for statement. In Java, the variable i is scoped to the for statement, but it's not visible before the for statement. However JML may allow referencing variables declared in the for statement in the loop specification placed before the for statement? This is a nuance. Usually we see loop invariants placed after the for statement but before the body, like:
+
+```
+for (int i = 0; i < n; i++) {
+    //@ loop invariant 0 <= i && i <= n;
+    //@ decreases n - i;
+    // body
+}
+```
+
+But the example from the problem uses while loops, not for loops. The problem statement does not provide an example for for loops. But we can assume we can place the loop specifications before the for loop, but we need to ensure we can refer to i. However we can also place the loop specifications inside the loop body as a comment before the loop? Actually typical JML usage is to place them before the loop statement, but they can also be placed after the loop statement? Let's check typical JML syntax for for loops in the context of ESC/Java2. I recall that for for loops, we can place the loop invariant after the for statement but before the body, like:
+
+```
+for (int i = 0; i < n; i++) {
+    //@ loop invariant 0 <= i && i <= n;
+    //@ decreases n - i;
+    sum += a[i];
+}
+```
+
+But we need to confirm. In the JML syntax, the loop specification is a comment that appears before the loop statement, but can also be placed after the loop statement? The JML grammar says:
+
+```
+LoopStatement:
+    while ( Expression ) Block
+    for ( ForInit ; Expression ; ForUpdate ) Block
+    for ( FormalParameter : Expression ) Block
+```
+
+And loop specifications are placed as comments before the loop statement. However the grammar may allow them after the loop statement? Actually the JML reference manual says that loop invariants are placed as comments before the loop statement. But in practice, many tools also accept them after the loop statement. However to be safe, we should follow the pattern used in the examples

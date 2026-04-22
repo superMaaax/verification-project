@@ -1,0 +1,121 @@
+We need to generate JML specifications for the given Java program. The program is:
+
+```java
+public class AddLoopFor {
+    public static int addLoop(int x, int y) {
+        int sum = y;
+        if (x > 0) {
+            for(int n = x; n > 0; n = n - 1) {
+                sum = sum + 1;
+            }
+        } else {
+            for(int n = -x; n > 0; n = n - 1) {
+                sum = sum - 1;
+            }
+        }
+        return sum;
+    }
+}
+```
+
+We need to add JML comments: requires and ensures clauses for each method where appropriate, loop specifications (maintaining, decreases) for each loop, and spec_public only when needed for specification visibility.
+
+We must not change executable Java code. So we need to insert JML comments before the method and inside loops.
+
+First, we need to determine the specification for the method addLoop. The method computes sum = y + x if x > 0, or sum = y - (-x) = y + x if x < 0? Wait: Let's compute.
+
+Case x > 0: sum starts as y. Loop runs x times, each iteration adds 1 to sum. So sum = y + x.
+
+Case x <= 0: Actually the else branch runs when x <= 0? The condition is if (x > 0) else. So else includes x <= 0. In else branch, sum = y, then for loop with n = -x (so if x is negative, -x positive; if x is zero, -x = 0, loop runs zero times). Each iteration subtracts 1 from sum. So sum = y - (-x) = y + x (since x is negative or zero). For x = 0, sum = y - 0 = y, which equals y + x (0). So overall, sum = y + x for any integer x? But careful: If x > 0, sum = y + x. If x <= 0, sum = y - (-x) = y + x. So indeed sum = y + x for all x. However, we need to consider overflow? The method returns sum = y + x. But we need to ensure that the addition does not overflow? In JML we can specify requires that x + y is within int range. The original AddLoop example had requires: Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && y != Integer.MIN_VALUE. Actually they had requires: Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && y != Integer.MIN_VALUE. Wait, check the example: In Example 1 Input, they had AddLoop method with x and y. The spec they gave: requires Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && y != Integer.MIN_VALUE; ensures \result == x + y. Why they included y != Integer.MIN_VALUE? Possibly because they used -y in the else branch, and -Integer.MIN_VALUE overflows. Indeed, if y = Integer.MIN_VALUE, then -y overflows (since -Integer.MIN_VALUE = Integer.MIN_VALUE due to overflow). So they excluded that case. In our program, we have similar situation: In else branch, we compute n = -x, and then loop subtracting 1 from sum. So we need to avoid overflow when x = Integer.MIN_VALUE, because -x overflows. Also in the for loop we have n = -x; if x = Integer.MIN_VALUE, -x is also Integer.MIN_VALUE (overflow). But the loop condition n > 0 will be false for n = Integer.MIN_VALUE? Actually Integer.MIN_VALUE > 0 is false, so loop won't execute. However, the problem is that computing -x may overflow in Java, but it's defined as integer overflow which wraps around to negative. In JML, we might want to restrict inputs to avoid overflow. The original AddLoop example had y != Integer.MIN_VALUE because they used -y. In our case, we have -x in both branches? Actually we have -x only in else branch, but also in the for loop we have n = -x. So we need to ensure that x != Integer.MIN_VALUE? But also we need to ensure that sum + x does not overflow? Actually sum = y + x, but we need to ensure that y + x is within int range. However, we also need to ensure that the loop variable n doesn't overflow. In the else branch, we compute n = -x; if x = Integer.MIN_VALUE, n becomes Integer.MIN_VALUE, which is not > 0, so loop doesn't run. But the expression -x may overflow, but it's defined in Java as overflow wrap-around, but JML might treat it as unspecified? Usually JML expects no overflow in arithmetic. So we should restrict x to not be Integer.MIN_VALUE to avoid overflow in -x. Also we need to restrict y such that y + x is within int range. But note that sum starts as y, then we add or subtract x times. So we need to ensure that y + x does not overflow. However, we also need to ensure that y is not Integer.MIN_VALUE? Actually we don't use -y anywhere. So only x may cause overflow when negated. But also we need to ensure that y + x does not overflow. But we can combine both: require Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && x != Integer.MIN_VALUE. But also we might need to ensure y is not Integer.MIN_VALUE? Not needed. However, the original example had y != Integer.MIN_VALUE because they used -y. In our case we use -x, so we need x != Integer.MIN_VALUE. Also we need to ensure that x + y does not overflow. So we can have requires: Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && x != Integer.MIN_VALUE. But also we need to consider the case x = 0, y = any. Then sum = y. That's fine.
+
+But also we need to consider the else branch when x <= 0. If x = 0, then n = -0 = 0, loop doesn't run. So sum = y. That's fine.
+
+Thus we can specify:
+
+requires Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && x != Integer.MIN_VALUE;
+
+ensures \result == x + y;
+
+But we also need to consider that the method is static. So we can add static modifier.
+
+Now loop specifications: For each for loop, we need to add maintaining and decreases clauses. In JML, for loops are represented as while loops with initialization and increment. But we can annotate the for loop directly with loop specifications. The JML syntax for for loops is similar to while loops: we can use /*@ loop ... @*/ before the for loop. Actually JML allows specifying loop specifications for for loops using the same syntax as for while loops: we can use /*@ loop ... @*/ before the for loop. The loop specification includes maintaining and decreases. The decreases clause must be a expression that decreases each iteration and is bounded below (like >= 0). The maintaining clause is a predicate that holds at the start and each iteration.
+
+We need to add loop specifications for each for loop. There are two for loops: one for x > 0 case, one for else case.
+
+First loop: for(int n = x; n > 0; n = n - 1). The loop variable n starts at x and decrements by 1 each iteration. The condition is n > 0. So the loop runs x times (if x > 0). The loop body adds 1 to sum each iteration. So we need to maintain that sum == y + (x - n) maybe? Let's think: At the start of each iteration, n is the current value of the loop variable. The loop runs while n > 0. At each iteration, we add 1 to sum. So after k iterations (where n has been decremented from x to x - k), sum = y + k. At the start of loop (before any iteration), n = x, sum = y. At each iteration, we want to maintain sum == y + (x - n). Actually after each iteration, n is decreased by 1, and sum increased by 1. So we can maintain sum == y + (x - n). But note that n is the loop variable, not a separate variable. At the start, n = x, sum = y, so sum = y + (x - n) = y + (x - x) = y, correct. After each iteration, n = n - 1, sum = sum_prev + 1. Suppose we assume before iteration: sum_prev = y + (x - n_prev). After iteration: n = n_prev - 1, sum = sum_prev + 1 = y + (x - n_prev) + 1 = y + (x - (n_prev - 1)) = y + (x - n). So holds. At loop termination, n <= 0, but we don't care. So we can maintain sum == y + (x - n). However, we need to ensure that the maintaining clause is valid at each iteration and at the start. Also we need to ensure that n is decreased each iteration, i.e., decreases n. Actually decreases clause should be something that decreases to 0. Usually we use decreases n; because n is decreasing each iteration and is bounded below by 0. But note that n is an int, and we need to ensure that n is non-negative? Actually the condition is n > 0, so n is positive at start, then decrements. At each iteration, n decreases by 1, eventually to 0, then loop exits. So we can use decreases n. However, we need to ensure that n is always >= 0 at the start of each iteration? Actually the loop condition ensures n > 0 before iteration, so n >= 1. So decreases n works.
+
+But we also need to consider the else branch: for(int n = -x; n > 0; n = n - 1). Here n starts at -x (which is positive if x < 0). The loop runs -x times, each iteration subtracts 1 from sum. So sum = y - (-x) = y + x. At start, sum = y, n = -x. At each iteration, sum decreases by 1, n decreases by 1. So we can maintain sum == y - (-x - n) maybe? Let's derive: At start, n = -x, sum = y. After k iterations, n = -x - k, sum = y - k. So sum = y - ( -x - n )? Actually -x - n = -x - (-x - k) = k. So sum = y - ( -x - n ). So we can maintain sum == y - (-x - n). Simplify: sum == y + x + n? Wait, we can also express as sum == y + (n + x)? Let's try to find a consistent invariant. Let's define the loop variable n in else branch: n = -x - k after k iterations. So sum = y - k. Since x is negative, -x is positive. We can maintain sum == y - ( -x - n ). Since -x - n = (-x) - n = k. So sum = y - k = y - ( -x - n ). So sum = y + n + x? Actually -x - n = -(x + n). Wait, compute: -x - n = -(x + n). But n is negative? Actually n is positive and decreasing. Let's keep it as sum == y - (-x - n). But we can also express sum == y + x + n? Let's test: At start, n = -x, sum = y. Then y + x + n = y + x + (-x) = y, correct. After k iterations, n = -x - k, sum = y - k. Then y + x + n = y + x + (-x - k) = y - k, correct. So sum == y + x + n holds. Indeed, sum = y + x + n. At start, n = -x, sum = y + x + (-x) = y. At each iteration, n decreases by 1, sum decreases by 1, so sum = y + x + n holds. At termination, n <= 0, but we don't need to consider. So we can maintain sum == y + x + n. However, note that x is negative, but we can treat it as integer.
+
+But we also need to maintain that n >= 0? Actually condition n > 0 ensures n is positive at start, then decreases to 0. So we can maintain 0 <= n <= -x maybe? Actually at start n = -x, which is >= 0 if x <= 0. In else branch, x <= 0, so -x >= 0. So n starts at -x and decreases. So we can maintain n >= 0. Also we can maintain sum == y + x + n. But note that x is negative, so y + x + n may be less than y. That's fine.
+
+Alternatively, we can maintain sum == y - (original_n - n) where original_n = -x. But easier: maintain sum == y + x + n.
+
+But we also need to ensure that the loop variable n is decreasing: decreases n. Actually we need to ensure that the decreases clause is something that decreases each iteration and is bounded below. Usually we use decreases n; but n is decreasing from -x to 0, so it's fine. However, note that n is positive and decreasing, so decreases n works. But also we can use decreases -x - n? But simpler: decreases n.
+
+But we also need to ensure that the loop variable is non-negative? Actually the condition n > 0 ensures n > 0 at each iteration, so n is at least 1. So decreases n is fine.
+
+Now we need to add loop specifications for each for loop. The JML syntax for for loops is similar to while loops: we can use /*@ loop ... @*/ before the for loop. The loop specification includes maintaining and decreases. The syntax is:
+
+/*@ maintaining invariant; ... @*/
+/*@ decreases n; @*/
+for (initialization; condition; update) { body }
+
+But we need to be careful: The JML spec for for loops is placed before the for loop, and we can include multiple clauses. The syntax is:
+
+/*@ loop invariant ...; decreases ...; @*/
+for (init; cond; inc) { body }
+
+But note that the maintaining clause is called "loop invariant" in JML. Actually JML uses "loop invariant" for the predicate that must hold at each iteration. The "maintaining" clause is used in older examples? In the examples they used "maintaining" and "decreases". Actually in the examples they used "//@ maintaining ..." and "//@ decreases ...". That's a older syntax? Actually JML uses "//@ loop invariant ..." and "//@ decreases ...". But the examples show they used "//@ maintaining ..." and "//@ decreases ...". Let's check the example output:
+
+Example 1 Output:
+
+```java
+public class AddLoop {
+    //@ requires Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && y != Integer.MIN_VALUE;
+    //@ ensures \result == x + y;
+    public static int AddLoop(int x, int y) {
+        int sum = x;
+        if (y > 0) {
+            int n = y;
+            //@ decreases n;
+            //@ maintaining sum == x + y - n && 0 <= n;
+            while (n > 0) {
+                sum = sum + 1;
+                n = n - 1;
+            }
+        } else {
+            int n = -y;
+            //@ maintaining sum == x + y + n && 0 <= n;
+            //@ decreases n;
+            while (n > 0) {
+                sum = sum - 1;
+                n = n - 1;
+            }
+        }
+        return sum;
+    }
+}
+```
+
+They used "//@ maintaining ..." and "//@ decreases ...". That's the older JML syntax for loop specifications (the "maintaining" clause is actually called "loop invariant" in JML, but they used "maintaining" as a keyword? Actually JML uses "loop invariant" but the examples show "maintaining". Let's check the JML reference: In JML, the loop invariant is specified using "loop invariant". However, the examples show "maintaining". Possibly they used a shorthand. Actually the examples show they used "maintaining" and "decreases". Let's check the JML syntax: The older JML syntax used "maintaining" and "decreases" for loops. But the standard JML uses "loop invariant" and "decreases". However, the examples show they used "maintaining". So we should follow the same style as the examples: use "//@ maintaining ..." and "//@ decreases ...". Also they used "//@ requires ..." and "//@ ensures ...". So we should follow that style.
+
+Thus we will add:
+
+//@ requires Integer.MIN_VALUE <= x + y && x + y <= Integer.MAX_VALUE && x != Integer.MIN_VALUE;
+//@ ensures \result == x + y;
+
+Then for each for loop, we add:
+
+//@ maintaining ...;
+//@ decreases ...;
+
+But note: In the example, they placed the maintaining and decreases after the variable declarations and before the while loop. For for loops, we can place them before the for loop. However, we need to ensure that the loop variable is declared inside the for loop. In JML, we can specify the loop invariant using the loop variable. But we need to be careful: The loop variable is declared in the for loop initialization. In JML, we can refer to the loop variable in the invariant. But we need to ensure that the invariant holds at the start of the loop. Since the loop variable is declared in the for loop, we need to include the declaration in the invariant? Actually we can include the loop variable in the invariant. The JML syntax for for loops: we can write:
+
+/*@ loop invariant ...; decreases ...; @*/
+for (int n = x; n > 0; n = n - 1) {
+    sum = sum + 1;
+}
+
+But note that the loop variable n is declared in the for loop. In the loop invariant, we can refer to n. However, we need to ensure that the invariant holds at the start of the loop. At the start, n = x. So we can write invariant: sum == y + (x - n) && n >= 0. But note that n is declared inside the for loop, so we cannot refer to it before the loop? Actually we can refer to it in the invariant because the invariant is evaluated after the initialization but before the first iteration. In JML, the loop invariant must hold before the loop body is executed for the first time. So we can include n in the invariant.
+
+But we need to be careful: The loop variable is scoped to the for loop. In JML, we can use the loop variable in the invariant. However, we might need

@@ -1,0 +1,240 @@
+We need to generate JML specifications for the given Java program. The program is a class ConvertToTitle with a method convertToTitle that takes an int columnNumber and returns a String representing the Excel column title.
+
+We need to add JML comments directly into the Java source code. We need to generate requires and ensures clauses for each method where appropriate. Also generate loop specifications such as maintaining and decreases for each loop. Add spec_public only when needed for specification visibility. Do not change executable Java code. Do not rename classes, methods, fields, or variables. Output the full Java file and nothing else. Do not omit any original code.
+
+We need to think about the JML specification for the method convertToTitle. The method takes an int columnNumber and returns a String. The while loop iterates until columnNumber becomes 0. We need to specify that the method returns the correct Excel column title for the given column number. Also we need to specify that the method does not modify any state except possibly the creation of the StringBuffer. But the method is pure? It creates a StringBuffer and returns a new String, so it does not modify any input or object state. However, the method is not static, but it does not use any instance fields. So we can specify that the method is pure, or we can specify that it does not modify any object fields. But since there are no instance fields, it's trivial.
+
+We need to add JML comments for the method. Also we need to add loop specifications for the while loop. The loop uses a local StringBuffer sb. We need to specify the loop invariants and decreases clause.
+
+We also need to consider the class. There are no fields. So we might add a class invariant? Usually class invariants are not needed if there are no fields.
+
+We need to output the full Java file with JML comments. The original code is:
+
+```java
+class ConvertToTitle {
+    public String convertToTitle(int columnNumber) {
+        StringBuffer sb = new StringBuffer();
+        while (columnNumber > 0) {
+            int a0 = (columnNumber - 1) % 26 + 1;
+            sb.append((char)(a0 - 1 + 'A'));
+            columnNumber = (columnNumber - a0) / 26;
+        }
+        return sb.reverse().toString();
+    }
+}
+```
+
+We need to insert JML comments. We need to add spec_public only when needed. For the method, we might need to specify the parameter and return value. Also we need to specify the loop invariants.
+
+Let's think about the specification:
+
+- requires: columnNumber > 0? Actually, the method can handle columnNumber = 0? The algorithm uses while (columnNumber > 0). If columnNumber is 0, then the loop won't execute and sb will be empty, then sb.reverse().toString() returns empty string. But is that correct? In Excel, there is no column 0. Usually column numbers start at 1. So we might require columnNumber >= 1. But the problem might assume columnNumber >= 1. The original problem (LeetCode Convert to Title) says columnNumber is a positive integer. So we can require columnNumber >= 1.
+
+- ensures: the returned string is the correct column title. We can specify that the returned string is the representation of the column number in base 26 with letters A-Z, where 1 -> A, 26 -> Z, 27 -> AA, etc.
+
+We can also specify that the returned string is non-empty.
+
+We can also specify that the method does not modify any object fields (pure). But since there are no fields, it's trivial. However, we might add a ensures clause that the returned string is not null.
+
+We also need to add loop specifications. The loop is while (columnNumber > 0). We need to specify that the loop maintains some invariant. The invariant could be that sb contains the reverse of the lower part of the column title built so far, and columnNumber is the remaining part. Alternatively, we can specify that at each iteration, the characters appended to sb correspond to the least significant digit in the base-26 representation.
+
+We need to write the invariant in JML. We need to use the \old(columnNumber) to refer to the original input? But the parameter columnNumber is being modified in the loop. So we need to refer to the original value. We can use a variable like \old(columnNumber) in the invariant. But note that in JML, \old can be used in ensures clauses, but for loop invariants we can use the original value of columnNumber before the loop. However, since columnNumber is a parameter, we can use \old(columnNumber) in the invariant. But note that the parameter columnNumber is not declared as a local variable in the method? Actually, it is a parameter. In the loop, we are modifying columnNumber. So we need to refer to the original input. We can store the original value in a local variable? But we are not allowed to change the code. So we must use the parameter columnNumber and refer to its original value using \old. However, in JML, \old can be used in ensures and invariant clauses, but for loop invariants, we might need to use the original value. But note that the loop invariant is evaluated at the beginning of each iteration, and the parameter columnNumber is being updated. So we need to capture the original input. We can use a variable like \old(columnNumber) in the invariant. But note that in JML, \old is allowed in loop invariants? Actually, JML allows \old in loop invariants to refer to the value at the start of the loop. But we must be careful: the loop invariant is supposed to hold at the beginning of each iteration, and it can refer to the original value of parameters. So we can write:
+
+```java
+//@ loop_invariant columnNumber >= 0 && columnNumber <= \old(columnNumber);
+```
+
+But note that the loop condition is columnNumber > 0, so when the loop starts, columnNumber is positive. At each iteration, we reduce columnNumber. We need to ensure that the loop terminates. We can specify decreases columnNumber. But note that columnNumber is being divided by 26 each time, so it will eventually become 0. We can specify:
+
+```java
+//@ decreases columnNumber;
+```
+
+But note that columnNumber is an int, and we are updating it. The decreases clause should be a non-negative expression that decreases each iteration. Since columnNumber is positive and decreasing, we can use columnNumber. But note that if columnNumber becomes negative? The algorithm ensures columnNumber becomes 0 eventually. So we can use decreases columnNumber.
+
+But we also need to specify the loop invariant that sb contains the reverse of the part built so far. We need to express that in JML. We might need to use a helper method to compute the title from the remaining columnNumber? But that might be too complex. Alternatively, we can specify that at each iteration, the characters in sb (in reverse order) correspond to the lower part of the column title for the original column number. But we don't have a function for that. We can specify that the string built so far (sb.reverse().toString()) is the correct title for the part of the column number that has been processed. But note that sb is being built in reverse order, so at the end we reverse it. So we can specify that after each iteration, the string represented by sb (reversed) is the title for the original column number minus the remaining columnNumber? Actually, the algorithm builds the title from the least significant digit. So at each iteration, we compute a0 and then append the character for a0. Then we update columnNumber to the remaining part. So we can specify that the string built so far (sb reversed) is the title for the original column number divided by the remaining columnNumber? This is tricky.
+
+Alternatively, we can specify the loop invariant as:
+
+- sb contains the characters corresponding to the lower part of the column title for the original column number, in reverse order.
+- columnNumber is the remaining part of the column number to be converted.
+
+We can express that the string built so far (sb reversed) concatenated with the title of columnNumber (in base 26) equals the title of the original column number. But we don't have a function for the title. We can use a helper method? But we are not allowed to add new methods. However, we can use a lemma? But we are just writing specifications.
+
+We might simplify: we can specify that the loop invariant is that columnNumber is a non-negative integer and that the string built so far (sb reversed) is the correct title for the original column number minus the remaining columnNumber? Actually, the algorithm is:
+
+Let n be the original columnNumber. At each iteration, we compute a0 = (n-1) % 26 + 1, then append the character for a0, then set n = (n - a0) / 26. So after k iterations, we have processed the last k digits of the base-26 representation of the original n. And sb contains the characters for those digits in reverse order. So the string built so far (sb reversed) is the title for the original n divided by 26^k? Actually, the remaining n is the original n divided by 26^k. So we can say that the string built so far (sb reversed) is the title for the original n minus the remaining n? Not exactly.
+
+We can express the invariant as:
+
+```java
+//@ loop_invariant columnNumber >= 0;
+//@ loop_invariant \old(columnNumber) == columnNumber * (int)Math.pow(26, sb.length()) + value(sb.reverse().toString());
+```
+
+But we don't have a function to convert a string to the column number. We can define a helper method? But we are not allowed to add new methods. However, we can use a lemma in the specification? But we are just writing specifications for the given code.
+
+Alternatively, we can avoid specifying the exact invariant and just specify that the loop terminates and that the final result is correct. But we need to specify the loop invariants for correctness.
+
+We can also note that the method is small and the loop is straightforward. We can specify the loop invariant in a simpler way: that sb contains the characters for the part of the title that has been processed, and that columnNumber is the remaining part. We can say that the concatenation of the string built so far (sb reversed) and the title of columnNumber (in base 26) is equal to the title of the original column number. But we don't have a function for the title. So we might need to define a helper method.
+
+But the problem says: "Generate JML specifications for the Java program below." It doesn't require the specifications to be complete or formally verified. We just need to add JML comments that specify the behavior. So we can write a high-level specification.
+
+We can write:
+
+- requires: columnNumber >= 1.
+- ensures: the returned string is the correct Excel column title for the given columnNumber.
+
+We can also specify that the returned string is not null and is non-empty.
+
+For the loop, we can specify:
+
+- loop_invariant: columnNumber >= 0.
+- decreases: columnNumber.
+
+But we might also want to specify that sb is being built correctly. However, we can also specify that after the loop, sb contains the reverse of the title, and then we reverse it to get the title.
+
+We can also add a clause that the method does not modify any object fields (pure). But since there are no fields, it's trivial.
+
+Let's write the JML comments.
+
+We need to add JML comments before the class and before the method. We can add:
+
+```java
+/*@
+  @ class invariant: true;
+  @*/
+```
+
+But since there are no fields, we don't need a class invariant.
+
+For the method, we can write:
+
+```java
+/*@
+  @ requires columnNumber >= 1;
+  @ ensures \result != null;
+  @ ensures \result.length() > 0;
+  @ ensures <some condition that the result is the correct title>;
+  @*/
+```
+
+But we need to express the condition. We can use a helper method? But we are not allowed to add new methods. However, we can express the condition in terms of the algorithm. Alternatively, we can use a lemma in the specification? But that might be too advanced.
+
+We can instead specify that the result is the string that would be the column title in Excel. We can specify that the result is the representation of columnNumber in base 26 with digits 1..26 mapped to A..Z. We can specify that the result is the string that satisfies:
+
+- For each character in the result, it is an uppercase letter.
+- The result is the shortest string such that the column number is represented in base 26 with 1=A, 2=B, ..., 26=Z.
+
+We can also specify that the result is the same as the string that would be returned by the algorithm.
+
+But we want to specify the algorithm's correctness. We can use a loop to specify the conversion? But we are not allowed to change the code.
+
+We can write an ensures clause that uses a helper method? But we are not allowed to add new methods. However, we can use a lemma in the specification? But JML allows us to write assertions and lemmas in the specification, but we are not writing a verification proof, just specifications.
+
+Given the constraints, we can write a simple specification that the method returns the correct title. We can say:
+
+```java
+/*@
+  @ requires columnNumber >= 1;
+  @ ensures \result != null;
+  @ ensures \result.length() > 0;
+  @ ensures (\forall int i; 0 <= i < \result.length(); \result.charAt(i) >= 'A' && \result.charAt(i) <= 'Z');
+  @*/
+```
+
+But that doesn't specify the exact mapping.
+
+Alternatively, we can use a model method. But we are not allowed to add new methods. However, we can use a model class? But that might be too much.
+
+Given the problem, we can write a specification that the method returns the correct title based on the algorithm. We can specify that the result is the string that is the column title for columnNumber. We can use a lemma that the algorithm is correct, but we don't have to prove it.
+
+We can write:
+
+```java
+/*@
+  @ requires columnNumber >= 1;
+  @ ensures \result != null;
+  @ ensures \result.length() > 0;
+  @ ensures (\forall int i; 0 <= i < \result.length(); \result.charAt(i) >= 'A' && \result.charAt(i) <= 'Z');
+  @ pure
+  @*/
+```
+
+But the method is not pure? It doesn't modify any fields, but it creates a new String. So we can mark it as pure.
+
+We also need to add loop specifications. For the while loop, we can write:
+
+```java
+//@ loop_invariant columnNumber >= 0;
+//@ loop_invariant sb != null;
+//@ decreases columnNumber;
+```
+
+But we might also want to specify that sb contains the characters built so far. We can also specify that the length of sb is the number of iterations done. We can say:
+
+```java
+//@ loop_invariant sb.length() == <number of iterations done>;
+```
+
+But we don't have a variable for that. We can use sb.length() to track the number of iterations.
+
+We can also specify that the characters in sb are uppercase letters. But that is already specified in the ensures clause.
+
+We can also specify that the loop invariant is that the string built so far (sb reversed) is the title for the part of the column number that has been processed. But we don't have a function for that. We can use a helper method? But we are not allowed to add new methods.
+
+Given the difficulty, we can write a loop invariant that says the string sb (in reverse) is the title for the remaining columnNumber? Actually, at each iteration, we are processing the least significant digit. So we can say that the string sb (reversed) is the title for the original column number divided by 26^(sb.length()). But we don't have a function for that.
+
+Alternatively, we can avoid specifying the exact invariant and just specify the termination.
+
+But the problem says to generate loop specifications such as maintaining and decreases for each loop. So we need to add a maintaining clause (loop_invariant) and a decreases clause.
+
+We can write:
+
+```java
+//@ loop_invariant columnNumber >= 0;
+//@ loop_invariant sb.length() == <number of iterations done>;
+//@ decreases columnNumber;
+```
+
+But we don't have a variable for the number of iterations. We can use sb.length() to represent the number of iterations because each iteration appends one character. So we can say:
+
+```java
+//@ loop_invariant columnNumber >= 0;
+//@ loop_invariant sb.length() == <number of iterations done>;
+//@ decreases columnNumber;
+```
+
+But we need to express the number of iterations done. We can use a variable? But we are not allowed to change the code. We can use the expression: the number of iterations done is the number of times the loop has executed. We can use a ghost variable? But we are not allowed to add ghost code.
+
+We can use the fact that sb.length() is the number of characters appended, which is the number of iterations. So we can write:
+
+```java
+//@ loop_invariant columnNumber >= 0;
+//@ loop_invariant sb.length() >= 0;
+//@ decreases columnNumber;
+```
+
+But that is trivial.
+
+We might want to specify that the loop invariant is that the string built so far (sb reversed) is the title for the original column number minus the remaining columnNumber? But we don't have a function.
+
+Given the constraints, we can write a loop invariant that says the string sb contains only uppercase letters. But that is already in the ensures clause.
+
+We can write:
+
+```java
+//@ loop_invariant (\forall int i; 0 <= i < sb.length(); sb.charAt(i) >= 'A' && sb.charAt(i) <= 'Z');
+//@ loop_invariant columnNumber >= 0;
+//@ decreases columnNumber;
+```
+
+But note that StringBuffer does not have a charAt method? Actually, StringBuffer does have a charAt method. But we are using sb.append((char)(a0 - 1 + 'A')). So the character is appended as a char. So we can use sb.charAt(i) to get the character at index i. However, note that StringBuffer is a mutable sequence of characters, and we are appending characters. So we can use sb.charAt(i) in the invariant.
+
+But note: the invariant sb.charAt(i) is only valid if sb.length() > i. We can use (\forall int i; 0 <= i < sb.length(); sb.charAt(i) >= 'A' && sb.charAt(i) <= 'Z').
+
+We also need to specify that the loop terminates. We can use decreases columnNumber.
+
+We might also want to specify that the loop invariant is that the string sb (reversed) is the title for the part of the column number that has been processed. But we don't have a function for that. We can use a helper method? But we are not allowed to add new methods.
+
+Given the difficulty, we can write a simpler loop invariant that ensures the loop is making progress and that sb contains the characters built so far. We can also specify that the loop invariant is

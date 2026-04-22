@@ -1,0 +1,24 @@
+import java.util.Arrays;
+
+public class ContainsDuplicate {
+
+    /*@ requires nums != null;
+        ensures \result == (\exists int i; 0 <= i && i < nums.length; 
+                           \exists int j; 0 <= j && j < nums.length && i != j && nums[i] == nums[j]);
+    @*/
+    public boolean containsDuplicate(int[] nums) {
+        Arrays.sort(nums);
+        int n = nums.length;
+
+        /*@ maintaining 0 <= i && i <= n - 1;
+            maintaining (\forall int j; 0 <= j && j < i; nums[j] != nums[j + 1]);
+            decreases n - 1 - i;
+        @*/
+        for (int i = 0; i < n - 1; i++) {
+            if (nums[i] == nums[i + 1]) {
+                return true;
+            }
+        }
+        return false;
+    }
+}

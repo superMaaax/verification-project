@@ -1,0 +1,193 @@
+We need to generate JML specifications for the given Java program. The program is a class MoveZeroes with two methods: moveZeroes and swap. We need to add JML comments for requires and ensures for each method where appropriate, and loop specifications for loops (maintaining, decreases). Also, we need to add /*@ spec_public @*/ only when needed for specification visibility. We must not change executable Java code. We must output the full Java file with JML annotations.
+
+We need to consider the semantics of moveZeroes: It moves all zeros to the end while preserving the relative order of non-zero elements. The algorithm uses two pointers left and right. left points to the position where the next non-zero element should be placed. right scans the array. When nums[right] != 0, it swaps with left and increments left. At the end, all non-zero elements are at the beginning, and zeros after left.
+
+We need to specify behavior: The method should rearrange the array such that all non-zero elements appear before zeros, and the relative order of non-zero elements is preserved. Also, the method should not change the number of zeros and non-zeros.
+
+We need to write requires and ensures clauses for moveZeroes. The ensures clause should express that the array is partitioned: all elements before left are non-zero, and all elements from left to end are zero. Also, the multiset of elements is preserved (i.e., the array contents are a permutation of the original). Also, left should be the count of non-zero elements.
+
+We also need to specify swap method: It swaps two elements. The requires clause should specify that left and right are within bounds. The ensures clause should specify that the elements at left and right are exchanged.
+
+We also need to add loop specifications for the while loop in moveZeroes. The loop uses right and left. We need to add maintaining and decreases clauses.
+
+We also need to consider that the class may be used in other contexts. We need to add spec_public when needed. For example, the fields left and right are local variables, not fields, so we don't need spec_public. However, if we need to refer to them in specifications, we might need to declare them as spec_public? Actually, JML specifications for local variables are not needed to be declared as spec_public because they are not fields. The spec_public is only for fields that need to be visible in specifications. Since there are no fields, we don't need spec_public.
+
+But we might need to add spec_public for the array parameter? Actually, the array is a parameter, and it's already visible. We don't need spec_public for parameters.
+
+We need to ensure that the ensures clause for moveZeroes uses \result? Actually, moveZeroes returns void, so we cannot use \result. Instead, we need to specify the state of the array after the method.
+
+We need to write the JML comments in the style of the examples. The examples show that they put the JML comments before the method. For the loop, they put the comments inside the loop? Actually, in the examples, they put the loop specifications after the while statement? Let's check the examples.
+
+Example 1: They put:
+```java
+        if (y > 0) {
+            int n = y;
+            //@ decreases n;
+            //@ maintaining sum == x + y - n && 0 <= n;
+            while (n > 0) {
+                sum = sum + 1;
+                n = n - 1;
+            }
+        }
+```
+So they put the loop specifications before the while loop? Actually, they put them after the declaration of n and before the while. The order: they put decreases and maintaining before the while. That's acceptable. In JML, loop specifications are usually placed immediately before the while loop. So we should do the same.
+
+For the second example, they put:
+```java
+        //@ maintaining 0 <= index && index <= a.length;
+        //@ maintaining 0 <= smallest && smallest < a.length;
+        //@ maintaining (\forall int i; 0 <= i && i < index; a[smallest] <= a[i]);
+        //@ decreases a.length - index;
+        while (a.length - index > 0) {
+```
+So they put the loop specifications before the while.
+
+Thus, for our program, we should put the loop specifications for the while loop before the while statement.
+
+Now, let's design the specifications.
+
+First, for moveZeroes:
+
+Requires: The array nums is not null? Actually, the method does not check for null. In JML, we can require that nums is not null. However, the original code does not handle null, so we might assume that the caller passes a non-null array. We can add requires nums != null. But the problem does not specify whether we should add null checks. In the examples, they did not add null checks. For example, in Example 2, they did not require a != null. However, in JML, it's common to add requires clauses for non-null. But the problem says "where appropriate". Since the method does not check for null, we might not require it. However, if we want to specify the ensures clause that the array is rearranged, we might need to assume that the array is not null to avoid null pointer exceptions. But the ensures clause will refer to nums, so we might need to require nums != null to avoid undefined. Let's see the examples: In Example 1, they did not require x and y to be non-null because they are primitives. In Example 2, they used a.length, which would throw NullPointerException if a is null. They did not add requires a != null. So maybe we should not add requires for null. However, in JML, it's common to add requires for non-null for reference types. But the problem says "where appropriate". Since the method does not check for null, we might not add it. But we can add it if we think it's appropriate. However, the problem says "Generate `requires` and `ensures` clauses for each method where appropriate." So we need to decide.
+
+Let's look at the method: It uses nums.length, and then accesses nums[right] and swap. If nums is null, it would throw NullPointerException. So the method's behavior is undefined for null. In JML, we can specify that the method requires nums != null. But the original code does not check, so the method would fail. However, in JML, we can specify the precondition to avoid undefined behavior. But the problem does not specify whether we should add preconditions for null. In the examples, they didn't. So maybe we should not add requires for null. But let's see the ensures clause: We want to say that the array is rearranged. We need to express that the non-zero elements are moved to the front. We can use quantifiers.
+
+We need to express that after moveZeroes, the array nums is a permutation of the original array (i.e., the same multiset of elements). Also, all non-zero elements appear before zeros. Also, the relative order of non-zero elements is preserved.
+
+We can write:
+
+ensures (\forall int i; 0 <= i && i < left; nums[i] != 0);
+ensures (\forall int i; left <= i && i < nums.length; nums[i] == 0);
+ensures (\exists int k; 0 <= k && k <= nums.length; left == k && ...); Actually, left is the number of non-zero elements.
+
+But we also need to express that the multiset of non-zero elements is preserved. We can use \fresh? No. We can use \old(nums) to refer to the original array. Then we can say that the array nums is a permutation of the original. In JML, we can say that the number of non-zero elements is preserved, and the non-zero elements are the same. But we need to be careful: The array may have duplicate non-zero values.
+
+We can write:
+
+ensures (\forall int i; 0 <= i && i < nums.length; 
+          (nums[i] != 0 ==> (\exists int j; 0 <= j && j < nums.length; \old(nums[j]) == nums[i] && ...)) );
+
+But that's complicated. Alternatively, we can say that the sequence of non-zero elements in nums is equal to the sequence of non-zero elements in the original array (in order). And the zeros are at the end.
+
+We can use the \old construct.
+
+Let's design the ensures clause:
+
+We can say:
+
+ensures (\forall int i; 0 <= i && i < left; nums[i] != 0);
+ensures (\forall int i; left <= i && i < nums.length; nums[i] == 0);
+ensures left == (\num_of int i; 0 <= i && i < nums.length; \old(nums[i]) != 0);
+
+But we also need to ensure that the non-zero elements are the same as the original non-zero elements in the same order. We can write:
+
+ensures (\forall int i; 0 <= i && i < left; 
+          (\exists int j; 0 <= j && j < nums.length; \old(nums[j]) == nums[i] && \old(nums[j]) != 0 && ...));
+
+But that's messy. Alternatively, we can use the fact that the algorithm swaps elements, so the array is a permutation of the original. We can say:
+
+ensures (\forall int i; 0 <= i && i < nums.length; 
+          (\exists int j; 0 <= j && j < nums.length; \old(nums[j]) == nums[i]));
+
+But that only says that each element in the new array is present in the old array. That's true for a permutation, but it doesn't guarantee that the zeros are at the end. We already have that.
+
+We can also say that the number of zeros is preserved. Let Z be the number of zeros in the original array. Then left should be n - Z. And the non-zero elements are in the same order? Actually, the algorithm preserves the relative order of non-zero elements. So we need to ensure that the sequence of non-zero elements is the same as the original sequence of non-zero elements.
+
+We can write:
+
+ensures (\forall int i; 0 <= i && i < left; 
+          (\exists int j; 0 <= j && j < nums.length; \old(nums[j]) == nums[i] && \old(nums[j]) != 0));
+
+But that doesn't guarantee order. We need to ensure that the non-zero elements appear in the same order as they did in the original array. We can use a lemma: The algorithm does not change the order of non-zero elements. So we can say:
+
+ensures (\forall int i; 0 <= i && i < left; 
+          (\forall int j; 0 <= j && j < i; \old(nums[j]) != 0 ==> ...));
+
+But that's complicated. Alternatively, we can use the fact that the algorithm only swaps non-zero elements with left, and left increments only when a non-zero is swapped. So the non-zero elements are placed in the order they appear in the original array. So we can say:
+
+ensures (\forall int i; 0 <= i && i < left; 
+          (\exists int j; 0 <= j && j < nums.length; \old(nums[j]) == nums[i] && \old(nums[j]) != 0 && 
+           (\forall int k; j < k && k < nums.length; \old(nums[k]) != 0 ==> ...)));
+
+But that's too much. We can simplify by saying that the sequence of non-zero elements in nums is equal to the sequence of non-zero elements in \old(nums). We can use the \old and quantifiers.
+
+We can write:
+
+ensures (\forall int i; 0 <= i && i < left; 
+          (\exists int j; 0 <= j && j < nums.length; \old(nums[j]) == nums[i] && \old(nums[j]) != 0 && 
+           (\forall int k; 0 <= k && k < j; \old(nums[k]) != 0 ==> ...)));
+
+But we need to express that the non-zero elements are in the same order. We can use the fact that the algorithm does not change the order of non-zero elements, so the first non-zero in nums is the first non-zero in the original, etc.
+
+We can write:
+
+ensures (\forall int i; 0 <= i && i < left; 
+          (\exists int j; 0 <= j && j < nums.length; 
+             \old(nums[j]) == nums[i] && \old(nums[j]) != 0 && 
+             (\forall int k; 0 <= k && k < j; \old(nums[k]) != 0 ==> \old(nums[k]) == nums[k - (j-i)]?)));
+
+That's messy.
+
+Alternatively, we can use the lemma that the algorithm is stable: it preserves the order of non-zero elements. So we can write:
+
+ensures (\forall int i; 0 <= i && i < left; 
+          (\forall int j; i < j && j < left; 
+             (\exists int k; 0 <= k && k < nums.length; \old(nums[k]) == nums[i] && \old(nums[k]) != 0 && 
+              (\forall int l; k < l && l < nums.length; \old(nums[l]) != 0 ==> ...)));
+
+But that's too complicated.
+
+We can simplify by saying that the array nums after the method is a permutation of the original array, and that all non-zero elements are before zeros. That might be sufficient. In the problem, they might expect a simple ensures clause.
+
+Looking at the examples, they used simple ensures clauses. For Example 2, they used:
+
+ensures \result == -1 <==> a.length == 0;
+ensures -1 < \result ==> (\forall int i; 0 <= i && i < a.length; a[\result] <= a[i]);
+
+So they used quantifiers and conditions.
+
+For moveZeroes, we can write:
+
+ensures (\forall int i; 0 <= i && i < nums.length; nums[i] == 0 || nums[i] != 0); // trivial.
+
+But we need to express the partition.
+
+We can write:
+
+ensures (\forall int i; 0 <= i && i < left; nums[i] != 0);
+ensures (\forall int i; left <= i && i < nums.length; nums[i] == 0);
+ensures left == (\num_of int i; 0 <= i && i < nums.length; \old(nums[i]) != 0);
+
+But we also need to ensure that the non-zero elements are the same as the original non-zero elements. We can say:
+
+ensures (\forall int i; 0 <= i && i < left; 
+          (\exists int j; 0 <= j && j < nums.length; \old(nums[j]) == nums[i] && \old(nums[j]) != 0));
+
+But that doesn't guarantee that the non-zero elements are exactly the same set. It only says that each non-zero in the new array appears somewhere in the old array. But if the old array had a zero, then it might be swapped? Actually, the algorithm only swaps non-zero elements, so zeros are only moved to the end. So the set of non-zero elements is preserved. So the above clause is okay.
+
+But we also need to ensure that the number of non-zero elements is preserved. We already have left == number of non-zero in original.
+
+We can also say that the array is a permutation of the original. In JML, we can use the keyword \perm? No.
+
+We can write:
+
+ensures (\forall int i; 0 <= i && i < nums.length; 
+          (\exists int j; 0 <= j && j < nums.length; \old(nums[j]) == nums[i]));
+
+But that only says that every element in the new array appears in the old array. It doesn't say that every element in the old array appears in the new array. But since the array is the same size, it implies a permutation if we also have that each element appears at least once. Actually, if every element in the new array appears in the old array, then the new array is a submultiset of the old. But since the sizes are equal, it must be a permutation. However, if there are duplicate elements, it's possible that some elements are missing and others are duplicated? But if every element in the new array is from the old array, and the old array has the same size, then the new array must be a permutation. Because the total count of elements is the same, and if some element is missing, then some other element must be duplicated to compensate. But if the missing element is replaced by a duplicate of another, then the new array might not be a permutation because the duplicate would be from the old array, but then the missing element is not present. However, if every element in the new array is from the old array, then the multiset of the new array is a submultiset of the old. Since they have the same size, they must be equal. So it's fine.
+
+Thus, we can write:
+
+ensures (\forall int i; 0 <= i && i < nums.length; 
+          (\exists int j; 0 <= j && j < nums.length; \old(nums[j]) == nums[i]));
+
+But that clause is actually equivalent to saying that the new array is a permutation of the old one? Not exactly: It says that for each i, there exists a j such that the old element at j equals the new element at i. This means that the new array is a rearrangement of the old array, but it doesn't guarantee that the old array elements are all used? Actually, it does: Because for each i, we find a j. But if the old array has two of the same value, then it's possible that the new array uses only one of them and duplicates the other? But then the new array would have two of the same value, and the old array has two, so it's okay. But if the new array has a value that appears more times than in the old array, then it wouldn't be true because there wouldn't be enough j's. But the clause says for each i, there exists a j, but j can be the same for different i? Actually, the clause is: for each i, there exists a j. It doesn't say that j is unique. So it allows the same j to be used for multiple i. That means that the new array could have a value that appears more times than in the old array, as long as the old array has at least one occurrence. But then the old array would have to have that value appear more times? Actually, if the new array has a value that appears more times than in the old array, then for the extra occurrences, there would be no j such that \old(nums[j]) equals that value. So the clause would fail. So the clause actually ensures that the multiset of the new array is a subset of the multiset of the old array. Since they have the same size, they are equal. So it's fine.
+
+Thus, we can use that clause.
+
+But we also need to ensure that the zeros are at the end. We already have that.
+
+So we can write the ensures clause for moveZeroes as:
+
+ensures (\forall int i; 0 <= i && i < left; nums[i] != 0);
+ensures (\forall int i; left <= i && i < nums.length;

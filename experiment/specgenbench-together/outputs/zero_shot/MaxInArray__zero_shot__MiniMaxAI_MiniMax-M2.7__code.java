@@ -1,0 +1,21 @@
+/*@ public class MaxInArray @*/
+class MaxInArray {
+    /*@ requires a != null;
+        ensures \result == -1 <==> a.length == 0;
+        ensures a.length > 0 ==> \result >= (\forall int i; 0 <= i && i < a.length; \result >= a[i]);
+        ensures a.length > 0 ==> (\exists int i; 0 <= i && i < a.length; \result == a[i]);
+     @*/
+    public int maxElementInArray(int[] a) {
+        if (a.length == 0) return -1;
+        int res = Integer.MIN_VALUE;
+        /*@ loop_invariant 0 <= i && i <= a.length;
+            loop_invariant (\forall int j; 0 <= j && j < i; res >= a[j]);
+            loop_invariant (\exists int j; 0 <= j && j < i; res == a[j]);
+            decreases a.length - i;
+         @*/
+        for(int i = 0; i < a.length; i++) {
+            res = ((a[i] > res) ? a[i] : res);
+        }
+        return res;
+    }
+}

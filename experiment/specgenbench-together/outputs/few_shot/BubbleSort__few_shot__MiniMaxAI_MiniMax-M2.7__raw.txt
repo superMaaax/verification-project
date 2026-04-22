@@ -1,0 +1,102 @@
+We need to generate JML specifications for the given Java program (BubbleSort). The program has a class BubbleSort with a swap method and a bubbleSort method. We need to add JML comments directly into the Java source code. We need to generate requires and ensures clauses for each method where appropriate. Also loop specifications (maintaining, decreases) for each loop. Also add spec_public only when needed for specification visibility. Do not change executable Java code. Do not rename classes, methods, fields, or variables. Output the full Java file and nothing else. Do not omit any original code.
+
+We need to think about JML syntax for methods. The swap method takes three parameters: int x, int y, int array[]. It swaps array[x] and array[y]. We need to specify that x and y are valid indices within array bounds, and that after swap, the elements at positions x and y are exchanged, and all other elements remain the same. Also we need to consider that x and y may be equal? Typically swap with same indices does nothing. The spec should allow that. Also we need to ensure that the method does not modify the length of the array, etc.
+
+The bubbleSort method takes an int arr[] and returns the sorted array (or maybe returns arr). It sorts the array in non-decreasing order. We need to specify that after sorting, the array is sorted, and that the method returns the same array reference (or maybe a sorted copy). The code returns arr (the same reference). So we need to ensure that the returned array is sorted and is a permutation of the original elements (i.e., same multiset). Also we need to specify that the method does not change the length of the array. Also we need to specify preconditions: arr is not null, maybe. Also we need to specify that the method works for any length n >= 0. Also we need to specify that the method returns arr.
+
+We also need to add loop specifications for the nested loops in bubbleSort. The outer loop i from 0 to n-2, inner loop j from 0 to n-i-2. We need to add maintaining and decreases for each loop. Also we need to ensure that the loops maintain some invariants: e.g., after each outer iteration, the last i elements are sorted and are the largest elements. The typical bubble sort invariants: after i iterations (i from 0 to n-1), the last i elements are sorted and are the maximum of the remaining unsorted part. Also we need to maintain that the array is a permutation of the original. Also we need to maintain that the loop indices are within bounds. Also we need to add decreases for loops: for outer loop, we can use n-1-i as decreasing, for inner loop, n-i-1-j as decreasing.
+
+We also need to add spec_public for fields that are used in specifications but not visible. The class has no fields. The methods are not static. The swap method is void and returns nothing. The bubbleSort returns int[]. So we need to add spec_public for array parameters? Usually JML requires that parameters are referenced in specs. For swap, we need to specify that array is not null and indices are within bounds. For bubbleSort, we need to specify arr is not null. Also we may need to specify that the method does not modify the length of the array. Also we may need to specify that the method returns the same array reference.
+
+We need to consider JML syntax for requires and ensures. For example:
+
+/*@ requires x >= 0 && x < array.length && y >= 0 && y < array.length; @*/
+/*@ ensures (\forall int i; i != x && i != y; array[i] == \old(array[i])); @*/
+/*@ ensures array[x] == \old(array[y]) && array[y] == \old(array[x]); @*/
+
+But note that JML uses \old to refer to pre-state values. For swap, we need to ensure that after swap, the elements at positions x and y are swapped. However, we also need to ensure that other elements remain unchanged. Also we need to ensure that the method does not change the length of the array. Also we need to ensure that the method does not throw an exception (assuming valid inputs). Also we need to ensure that the method works for any array length >= 2 (though indices may be equal). But we can allow x and y to be any indices within bounds, including equal.
+
+We also need to consider that the swap method is not static, but it doesn't use any instance fields. It just swaps elements in the given array. So we can treat it as a pure method.
+
+For bubbleSort, we need to specify:
+
+/*@ requires arr != null; @*/
+/*@ ensures arr != null; @*/
+/*@ ensures (\forall int i; 1 <= i && i < arr.length; arr[i-1] <= arr[i]); @*/
+/*@ ensures (\forall int i; 0 <= i && i < arr.length; (\exists int j; 0 <= j && j < arr.length; arr[i] == \old(arr[j]))); @*/ (i.e., same multiset). But we can also use \sorted and \permutes.
+
+Better: Use JML's \sorted and \permutes. However, JML does not have built-in \permutes, but we can use \forall and \exists to express permutation. But we can also use \old to capture original array and then ensure that the array is a permutation. However, JML does not have a built-in permutation predicate, but we can specify that the array is a permutation of the original using \forall and \exists. But we can also use the approach: after sorting, the array is sorted and the same elements as before. We can use \old(arr) to refer to the original array, but we need to ensure that the array is the same reference? Actually, the method returns arr, but we can also ensure that the array is sorted and that the elements are the same as the original. We can use \old(arr) to refer to the original array's contents, but note that \old works only for expressions, not for arrays? Actually, \old can be used for any expression, but for arrays, we can use \old(arr) to refer to the original array reference, but we need to compare the contents. We can use (\forall int i; 0 <= i && i < arr.length; (\exists int j; 0 <= j && j < arr.length; arr[i] == \old(arr[j]))) to ensure each element in the new array appears in the old array. But we also need to ensure that the number of each value is preserved. However, we can also use \multiset_eq. JML has \multiSetEq? Actually, JML has \eq and \ne for arrays? I'm not sure. But we can use \forall and \exists to express permutation. But we also need to ensure that the array is sorted. So we can do:
+
+/*@ ensures \sorted(arr); @*/
+/*@ ensures \permutes(arr, \old(arr)); @*/
+
+But JML does not have \permutes as a built-in. However, there is a library for permutation, but we can just use \sorted and \forall and \exists. But the problem expects typical JML specs for bubble sort. Let's think about typical JML spec for bubble sort:
+
+We can do:
+
+/*@ requires arr != null; @*/
+/*@ ensures \result == arr; @*/
+/*@ ensures (\forall int i; 1 <= i && i < arr.length; arr[i-1] <= arr[i]); @*/
+/*@ ensures (\forall int i; 0 <= i && i < arr.length; (\exists int j; 0 <= j && j < arr.length; arr[i] == \old(arr[j]))); @*/
+
+But we also need to ensure that the length is unchanged. We can add ensures arr.length == \old(arr.length). But that is implied by the permutation condition? Actually, if we ensure that each element appears somewhere, but we also need to ensure that the length is unchanged. But we can just add ensures arr.length == \old(arr.length). However, we can also rely on the method not changing length. But it's good to include.
+
+Also we need to ensure that the method does not modify the length of the array. Since we only swap elements, it's fine.
+
+Now, we also need to add loop invariants for the nested loops. For the outer loop:
+
+for (int i = 0; i < n-1; i++)
+
+We need to add invariants that hold at the start of each iteration. Typically, we want to maintain that the last i elements are sorted and are the largest elements. Also we need to maintain that the array is a permutation of the original. Also we need to maintain that i is within bounds. Also we need to maintain that the loop index i is less than n. Also we need to maintain that the loop variable i is incremented each iteration.
+
+We also need to add decreases clause for the outer loop: we can use decreases n-1-i. But JML's decreases clause expects an expression that decreases each iteration and is non-negative. Usually we can use decreases n - i. But note that i goes from 0 to n-2, so n-1-i goes from n-1 down to 1. But we can also use decreases n - i. But we need to ensure that the decreases clause is placed correctly. In JML, we can add a comment before the loop: //@ decreases n - i; //@ maintaining ... ;. However, note that the loop condition is i < n-1, so i can be up to n-2. At the start of the loop, i is less than n-1. The decreases expression can be (n-1-i). But we need to ensure that it is always non-negative. At i = n-2, n-1-i = 1, at i = n-1 (which is not entered) it's 0. So it's okay.
+
+But we also need to add invariants for the inner loop. For the inner loop:
+
+for (int j = 0; j < n-i-1; j++)
+
+We need to maintain invariants: j is within bounds, and the array from 0 to j-1 is sorted? Actually, in bubble sort, after each inner iteration, the largest element among the first n-i-1 elements is moved to position n-i-1. So we can maintain that after each inner iteration, the subarray from n-i-1 to n-i-1 is the largest of the unsorted part. But we can also maintain simpler invariants: that the array from n-i to n-1 is sorted and contains the largest i elements. Also we can maintain that the array is a permutation of the original. Also we can maintain that j is the current index and that the loop is decreasing the remaining unsorted length.
+
+We also need to add decreases for inner loop: decreases n-i-1-j. But note that j increments each iteration, so n-i-1-j decreases. At the start, j=0, n-i-1-j = n-i-1. At the end, j = n-i-1, then the loop condition fails, and n-i-1-j = 0. So it's okay.
+
+We also need to add spec_public for any variables that are used in the spec but not visible. In this case, we have local variables i and j inside loops. But we can refer to them in invariants. However, JML requires that variables used in specifications are visible. In the loop invariants, we can refer to i and j because they are in scope. But we need to add spec_public for them? Actually, JML allows referencing local variables in loop invariants. However, we need to ensure that they are declared in the method. In JML, we can use them directly. But we need to add spec_public for fields only. Since i and j are local, we don't need spec_public. However, we need to ensure that the invariants are written correctly.
+
+We also need to consider that the swap method is called within bubbleSort. We need to ensure that the invariants hold across the call to swap. Since swap modifies the array, we need to ensure that the invariants are preserved. But we can just trust that swap does what it does, and we can specify that swap preserves the permutation and does not change length. But we already have invariants that the array is a permutation of the original, and swap will maintain that. However, we need to ensure that swap does not change the length. But we can specify that in swap's ensures.
+
+Now, we need to write the JML comments in the code. We need to output the full Java file with JML comments inserted. We need to ensure that we do not change the executable code. So we need to insert JML comments before each method and before each loop. Also we need to add spec_public if needed.
+
+Let's think about the swap method. We need to add JML comments for swap. The method signature is:
+
+void swap(int x, int y, int array[])
+
+We need to add requires clause: x and y must be valid indices. Also we need to ensure that array is not null? Actually, we can require array != null. Also we need to ensure that x and y are within bounds: 0 <= x && x < array.length && 0 <= y && y < array.length. Also we can allow x == y (no change). Also we need to ensure that after swap, the elements at x and y are swapped, and all other elements remain unchanged. Also we need to ensure that the length of array is unchanged. Also we need to ensure that the method does not throw an exception.
+
+We also need to consider that the method is void and returns nothing. So ensures clause for the return value is not needed. But we can specify that the method does not modify anything else.
+
+We also need to consider that the method may be called with x and y out of bounds. But we can restrict to valid indices. Since bubbleSort calls swap(j, j+1, arr), and j is within 0 to n-i-2, so j+1 is within 1 to n-i-1, so both indices are valid. So we can require that x and y are valid indices.
+
+We also need to consider that the method does not modify the array length. But we can just ensure that array.length == \old(array.length). But we can also rely on the fact that swap only modifies elements, not length. But we can add ensures array.length == \old(array.length). However, JML does not require that for void methods, but it's okay.
+
+We also need to ensure that the method does not change the array reference. But we can just ensure that the array is the same object. But we can just say array == \old(array). But we can also not include that.
+
+Now, for bubbleSort, we need to add requires: arr != null. Also we need to ensure that the method returns arr. So we can add ensures \result == arr. Also we need to ensure that the array is sorted after sorting. Also we need to ensure that the array is a permutation of the original. Also we need to ensure that the length is unchanged.
+
+We also need to add loop invariants for the outer and inner loops.
+
+We also need to add spec_public for the array parameter? Actually, we need to add spec_public for fields that are used in specs but not visible. In this case, we have no fields. But we might need to add spec_public for the array parameter if we want to refer to it in specs? But we can refer to it directly. However, JML requires that parameters are visible. In JML, we can refer to parameters in specs. But we need to ensure that the parameters are not private. Since they are parameters, they are visible. So we don't need spec_public.
+
+But we also need to consider that the method bubbleSort returns int[]. We need to ensure that the returned array is the same as the input. So we can add ensures \result == arr. But note that \result is used in ensures for the return value. However, we also need to ensure that the array is sorted. So we can add ensures (\forall int i; 1 <= i && i < arr.length; arr[i-1] <= arr[i]). But note that arr is the parameter, but after the method, arr is the same reference. So we can use arr in ensures. However, we need to be careful: arr is a parameter, but after the method, the array may be modified. So we can use arr in ensures to refer to the post-state. But we need to use \old(arr) to refer to the original array. But we can also use \old(arr) to refer to the original contents. But we need to ensure that the array is sorted and is a permutation of the original. So we can do:
+
+/*@ ensures \sorted(arr); @*/
+/*@ ensures \permutes(arr, \old(arr)); @*/
+
+But we don't have \permutes. So we can do:
+
+/*@ ensures (\forall int i; 0 <= i && i < arr.length; (\exists int j; 0 <= j && j < arr.length; arr[i] == \old(arr[j]))); @*/
+
+But this only ensures that each element in the new array appears somewhere in the old array, but does not ensure that the multiplicities match. However, if we also ensure that the length is unchanged, and that the array is sorted, then the only possible permutation is the original multiset? Actually, not necessarily: we could have a sorted array with the same elements but different order? But sorted order is unique for distinct elements, but for duplicates, there are multiple permutations that are sorted. But we want to ensure that the array is sorted and contains the same elements as the original. The condition (\forall int i; 0 <= i && i < arr.length; (\exists int j; 0 <= j && j < arr.length; arr[i] == \old(arr[j]))) ensures that each element in the new array appears somewhere in the old array, but does not ensure that the old array's elements are all present in the new array. However, we can also add the converse: (\forall int j; 0 <= j && j < arr.length; (\exists int i; 0 <= i && i < arr.length; arr[i] == \old(arr[j]))) to ensure that each original element appears in the new array. But we can also use \multiSetEq from JML? Actually, JML does not have a built-in multiset equality. But we can use \forall and \exists to express that the arrays are a permutation. The typical way is:
+
+/*@ ensures (\forall int i; 0 <= i && i < arr.length; (\exists int j; 0 <= j && j < arr.length; arr[i] == \old(arr[j]))); @*/
+/*@ ensures (\forall int j; 0 <= j && j < arr.length; (\exists int i; 0 <= i && i < arr.length; arr[i] == \old(arr[j]))); @*/
+
+But we can also use \old(arr) in ensures for the array contents. However, we need to be careful: \old(arr) refers to the array reference at the start, but we want to compare the contents. We can use \old(arr[i]) but we need to use \old(arr) in a way that we

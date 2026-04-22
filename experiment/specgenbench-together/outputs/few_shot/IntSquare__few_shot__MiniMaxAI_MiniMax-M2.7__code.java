@@ -1,0 +1,144 @@
+public class IntSquare {
+
+    public static int squareOf(int x) {
+        if(x < 0)
+            x = -x;
+        int res = 0;
+        for(int i = 0; i < x; i++) {
+            for(int j = 0; j < x; j++) {
+                res = res + 1;
+            }
+        }
+        return res;
+    }
+
+}
+
+Goal: Add JML comments directly into the Java source code. We need to generate requires and ensures clauses for each method where appropriate. Also loop specifications: maintaining and decreases for each loop. Also spec_public only when needed for specification visibility. Do not rename anything. Output the full Java file and nothing else.
+
+We need to consider the semantics: squareOf returns x*x (the square of the absolute value of x). Actually, if x is negative, it takes absolute value, then computes x*x. So result is x*x (where x after absolute). So we need to ensure that the method's contract matches that.
+
+Potential overflow: x could be Integer.MIN_VALUE, then -x is still negative? Actually, Math.abs(Integer.MIN_VALUE) returns Integer.MIN_VALUE (negative). But the code does x = -x; if x is negative, it flips sign. For Integer.MIN_VALUE, -x overflows to Integer.MIN_VALUE (since -(-2^31) = -2^31). So x remains negative. Then the loops: for(int i = 0; i < x; i++) where x is negative leads to infinite loop. But we can ignore that for JML spec. Usually we assume x is not Integer.MIN_VALUE, or we can require x != Integer.MIN_VALUE. But the spec may be simpler: require x to be any int, but ensure result equals x*x? Actually, after absolute, the result is (abs(x))* (abs(x)). So we can specify ensures \result == x * x? But careful: if x is negative, after absolute it's -x, but -x may overflow. So we need to handle that. But typical JML spec for absolute value: require -2^31 < x; i.e., x != Integer.MIN_VALUE. Or we can require x >= Integer.MIN_VALUE (i.e., x != Integer.MIN_VALUE). Or we can require x within range such that overflow does not happen. But the code uses x = -x only if x < 0. So if x = -2^31, -x = -2^31, which is still negative, but then the loop condition i < x will be false because i starts at 0 and x is negative, so loop doesn't execute. So result remains 0. But mathematically, squareOf(Integer.MIN_VALUE) returns 0? Actually, after absolute, x stays MIN_VALUE, but loops not executed, result 0. So spec may be weird. But we can ignore overflow issues for JML spec. Usually we can specify that result equals x*x for any int, but JML cannot handle overflow in integer arithmetic? JML uses mathematical integers for expressions, but we can use \result == x * x. However, if x is Integer.MIN_VALUE, x*x overflows to positive? Actually, (Integer.MIN_VALUE)^2 = 2^62, which overflows to 0? Let's compute: 2^31 = 2147483648, square = 4611686018427387904, which overflows to? In two's complement, the result is 0? Actually, 2^31 * 2^31 = 2^62. In 32-bit signed, the high bits overflow, result is 0? Let's check: 2^31 = 0x80000000, square = 0x4000000000000000, which truncated to 32 bits yields 0? Actually, 0x40000000 << 31? Wait, 2^31 * 2^31 = 2^62. In 32-bit signed, you only keep lower 32 bits: 2^62 mod 2^32 =? 2^62 = 0x4000000000000000. Lower 32 bits are 0x00000000? Actually, 2^62 = 0x4000000000000000. The lower 32 bits are 0x000000000000? Wait, 2^62 is 4 * 2^60. 2^60 is 0x1000000000000000? Actually, 2^10 = 1024, 2^20 = 0x100000, 2^30 = 0x40000000, 2^31 = 0x80000000, 2^32 = 0x100000000. So 2^62 = 2^32 * 2^30 = 0x100000000 * 0x40000000 = 0x4000000000000000? Actually, 2^62 = 0x4000000000000000 (16 hex digits). Lower 32 bits are 0x00000000. So indeed overflow yields 0. So result for MIN_VALUE is 0, which matches code? Actually code returns 0 because loops not executed. So maybe spec can be \result == x * x for all x? But for MIN_VALUE, x*x overflow to 0, but code returns 0 as well. So it's okay. But we need to consider overflow for negative values? Actually, x after absolute may be negative only for MIN_VALUE. So we can spec that result equals (x < 0 ? -x : x) * (x < 0 ? -x : x). But we can also spec that result equals x*x after absolute? Actually, we can just spec that result equals x*x for any x, but JML uses unbounded integers for expressions? In JML, integer expressions are mathematically interpreted, but we need to be careful about overflow. However, typical JML spec for integer operations uses mathematical integers, not overflow. But we can also use \result == x * x && \result >= 0. But we can just say \result == x * x. But we also need to handle the case where x is negative: after absolute, the loops compute x*x. So we can say ensures \result == x * x. But we also need to consider that x may be negative and we take absolute. But the spec can be \result == x * x after absolute? Actually, the code returns x*x after absolute. So we can say ensures \result == x * x. But if x is negative, -x may overflow, but we can ignore that. Usually JML spec for absolute value uses \abs(x). But JML has \abs function? In JML, \abs is not standard; we can use (x < 0 ? -x : x). But we can also use \result == x * x. But we need to ensure that the spec matches the code's behavior: after absolute, the loops compute x*x. So we can say ensures \result == (x < 0 ? -x : x) * (x < 0 ? -x : x). But we also need to consider overflow for MIN_VALUE. But we can ignore that for spec.
+
+Better: ensure \result == x * x. But we also need to consider that if x is negative, the code does x = -x, then loops compute x*x. So the result is indeed x*x for the original x? Actually, if x is negative, after absolute it's -x, which is positive, and then squared yields (-x)*(-x) = x*x. So indeed result equals x*x for original x. So we can just say ensures \result == x * x. But we also need to consider overflow for large magnitude? But we can ignore.
+
+Thus, we can add requires clause: maybe require true? Usually we can add requires true (no precondition). But we might want to require that x is not Integer.MIN_VALUE? But we can leave it as default (requires true). But we can also add requires x != Integer.MIN_VALUE? But the code does not handle that specially, but we can add a precondition to avoid overflow. However, the problem statement says "Generate requires and ensures clauses for each method where appropriate." So we can add a requires clause if needed. But we can also just add ensures clause. Usually for pure functions, we can have requires true. But we can also add requires \true. But we can also add requires x != Integer.MIN_VALUE? But the code does not check that, but it's okay to have precondition that ensures method's behavior is defined. But the problem says "Do not change executable Java code." So we can add any spec, but we should not change code. So we can add precondition if we think it's needed. But we need to be careful: if we add a precondition that is not satisfied by the code's behavior, then the spec may be wrong. But we can add a precondition that ensures overflow does not happen. But the code does not check for overflow, but we can spec that the method is only defined for x such that x*x does not overflow? But we can ignore.
+
+Better to just add ensures clause and maybe requires clause for overflow? But typical JML spec for squareOf would be ensures \result == x * x. But we also need to handle negative x. But we can just say ensures \result == x * x. However, if x is negative, the code does x = -x, then loops compute x*x, which equals (-x)*(-x) = x*x. So it's fine.
+
+Thus, we can add:
+
+//@ requires true;
+//@ ensures \result == x * x;
+
+But we also need to consider that x may be negative and we take absolute. But we can also add ensures \result == (x < 0 ? -x : x) * (x < 0 ? -x : x). But we can just use x*x.
+
+But we also need to add loop specifications: for each loop, we need maintaining and decreases.
+
+We have two nested for loops. The outer loop: for(int i = 0; i < x; i++). The inner loop: for(int j = 0; j < x; j++).
+
+We need to add JML comments for each loop. Usually we add //@ maintaining ... and //@ decreases ... for each loop. But we need to consider the loop invariants. For the outer loop, we need to maintain something about res and i. For the inner loop, we need to maintain something about res and j.
+
+We need to think about the loop invariants. The loops compute res = x*x. At each iteration of the outer loop, we add x to res (by inner loop). So after outer loop iteration i, we have res = i * x. Actually, after each outer iteration, we add x to res. So we can maintain that res == i * x. But we also need to maintain that i <= x. And for inner loop, we maintain that res == i * x + j. Actually, after inner loop iteration j, we have added j to res. So we can maintain that res == i * x + j. But we also need to maintain that j <= x.
+
+But we need to be careful: The loops use int i and int j. The loops are standard for loops. We can add invariants accordingly.
+
+We also need to add decreases clause for each loop. For the outer loop, we can decrease x - i. For inner loop, we can decrease x - j.
+
+But we need to consider that the loops are nested. The inner loop is inside the outer loop. So we need to add invariants for each loop. Usually we add invariants for each loop in the form of //@ maintaining ... and //@ decreases ... . But we need to place them before the loop. For nested loops, we need to add invariants for each loop separately.
+
+We also need to add spec_public for fields that are used in spec but are not public. In this code, there are no fields, only local variables. So we don't need spec_public.
+
+We also need to consider that the method is static. So we can add static spec.
+
+Thus, we can produce something like:
+
+public class IntSquare {
+
+    //@ requires true;
+    //@ ensures \result == x * x;
+    public static int squareOf(int x) {
+        if(x < 0)
+            x = -x;
+        int res = 0;
+        //@ maintaining res == i * x && 0 <= i && i <= x;
+        //@ decreases x - i;
+        for(int i = 0; i < x; i++) {
+            //@ maintaining res == i * x + j && 0 <= j && j <= x;
+            //@ decreases x - j;
+            for(int j = 0; j < x; j++) {
+                res = res + 1;
+            }
+        }
+        return res;
+    }
+
+}
+
+But we need to check the invariants: At the start of outer loop, i=0, res=0, so res == i*x holds (0==0). At each iteration, after inner loop, res becomes (i+1)*x. But we need to ensure that the invariant holds after each iteration. The invariant we wrote is res == i * x. But after the inner loop, j runs from 0 to x-1, adding x to res. So after inner loop, res = i*x + x = (i+1)*x. Then i increments to i+1. So after i increments, the invariant res == i*x holds for new i. So we need to maintain that invariant across the outer loop. But we also need to maintain that i <= x. So we can have invariant: res == i * x && 0 <= i && i <= x. But we also need to ensure that after the loop ends, i == x, and res == x*x. So we can have invariant that holds at each iteration.
+
+But we also need to consider the inner loop: At the start of inner loop for a given i, res == i*x, j=0. Then we add 1 for each j. So after each inner iteration, res == i*x + j. So we can have invariant: res == i*x + j && 0 <= j && j <= x. But we also need to ensure that after inner loop ends, j == x, and res == i*x + x = (i+1)*x. Then the outer loop increments i, and the invariant for outer loop should hold.
+
+Thus, we can write:
+
+//@ maintaining res == i * x && 0 <= i && i <= x;
+//@ decreases x - i;
+for (int i = 0; i < x; i++) {
+    //@ maintaining res == i * x + j && 0 <= j && j <= x;
+    //@ decreases x - j;
+    for (int j = 0; j < x; j++) {
+        res = res + 1;
+    }
+}
+
+But we need to be careful: The invariant for inner loop uses i, which is constant within the inner loop. But we need to ensure that i is not modified inside inner loop. That's fine.
+
+But we also need to consider that the loops are for loops, not while loops. In JML, we can add invariants for for loops as well. Usually we put the invariant before the loop. For nested loops, we need to add invariants for each loop. The order: we add outer loop invariants before outer loop, then inner loop invariants before inner loop. But we also need to add decreases for each loop. Usually we add decreases after the invariant, but we can combine them in any order. The example shows they put maintaining and decreases before the loop, but they also sometimes put maintaining after the loop? Actually, in the example, they put maintaining and decreases before the loop. In Example 1, they put:
+
+//@ decreases n;
+//@ maintaining sum == x + y - n && 0 <= n;
+while (n > 0) {
+
+But they also put maintaining after the loop? No, they put both before. In Example 2, they put:
+
+//@ maintaining 0 <= index && index <= a.length;
+//@ maintaining 0 <= smallest && smallest < a.length;
+//@ maintaining (\forall int i; 0 <= i && i < index; a[smallest] <= a[i]);
+//@ decreases a.length - index;
+while (a.length - index > 0) {
+
+So they put all invariants and decreases before the loop. So we can do the same.
+
+Thus, we can write:
+
+public class IntSquare {
+
+    //@ requires true;
+    //@ ensures \result == x * x;
+    public static int squareOf(int x) {
+        if(x < 0)
+            x = -x;
+        int res = 0;
+        //@ maintaining res == i * x && 0 <= i && i <= x;
+        //@ decreases x - i;
+        for(int i = 0; i < x; i++) {
+            //@ maintaining res == i * x + j && 0 <= j && j <= x;
+            //@ decreases x - j;
+            for(int j = 0; j < x; j++) {
+                res = res + 1;
+            }
+        }
+        return res;
+    }
+
+}
+
+But we need to check the invariants: At the start of outer loop, i=0, res=0, so res == i*x holds (0==0). At each iteration, after inner loop, res becomes (i+1)*x. Then i increments to i+1. So after i increments, the invariant holds. At the end of outer loop, i == x, and res == x*x. So ensures holds.
+
+But we also need to consider that the loops only run if x > 0. If x is 0, loops don't run, res stays 0, and result is 0, which is correct. If x is negative after absolute? Actually, if original x is negative, we set x = -x, which yields positive unless original x is MIN_VALUE. So if x is 0, loops don't run. So invariant holds.
+
+But we also need to consider that the loops are for loops, not while loops. The decreases clause for for loops is not typical, but we can still add decreases to specify the loop variant. Usually for for loops, we can also add decreases. But we need to ensure that the decreases clause is valid: for the outer loop, we can use x - i, which decreases to 0. For inner loop, x - j.
+
+But we also need to consider that the loops are nested, and the inner loop's decreases is relative to j, but we also need to ensure that the inner loop's decreases is measured each iteration. That's fine.
+
+But we also need to consider that the loops are for loops, and the loop variable is defined in the for loop. In JML, we can refer to the loop variable in invariants and decreases. But we need to place the JML comments before the loop. However, the loop variable is not yet in scope before the loop? Actually, in Java, the loop variable is scoped inside the for loop. But JML comments are placed before the loop, but they can refer to the loop variable? In JML, we can refer to the loop variable in invariants and decreases, but we need to ensure that the variable is visible. Usually we can

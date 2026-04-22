@@ -1,0 +1,164 @@
+We need to generate JML specifications for the given Java program. The program is a class ComputeArea with a method computeOverlapArea that takes eight ints: coordinates of two rectangles A and B (presumably lower-left and upper-right corners). It computes area of each rectangle, then overlap width and height, then overlap area, then returns sum of areas minus overlap area (i.e., area of union). We need to add JML requires and ensures clauses for the method. Also loop specifications? There are no loops in this method. So just requires and ensures. Also spec_public if needed for specification visibility. The method is public, so we may need to specify requires constraints to avoid overflow? The method uses multiplication of differences, which could overflow if coordinates are large. But we can assume typical usage. However we can add requires constraints to ensure that the computed areas and overlap area are within integer range. But JML can express that the result is area1 + area2 - overlapArea, which is straightforward. Also we can require that the coordinates satisfy ax1 <= ax2, ay1 <= ay2, bx1 <= bx2, by1 <= by2 (so that rectangles have non-negative width and height). Also require that the differences (ax2-ax1) etc. are non-negative and that multiplication does not overflow. But we can just require that each rectangle's area fits within integer range. However typical JML approach: require that the arguments satisfy certain constraints (like ordering). The ensures clause can express that the result equals the area of the union of the two rectangles. But we can also express that the result is area1 + area2 - overlapArea. However we can also express that the result is the area of the union. But we need to be careful: The method returns area1 + area2 - overlapArea, which is the area of the union if the rectangles overlap. Actually it's the area of the union of the two rectangles (including overlapping region counted once). So we can specify ensures \result == (ax2-ax1)*(ay2-ay1) + (bx2-bx1)*(by2-by1) - overlapArea. But we can also specify that overlapArea is defined as above. But we can just specify ensures \result == area1 + area2 - overlapArea. But we cannot refer to local variables in ensures? In JML, we can refer to the method's parameters and also to local variables? Usually JML ensures clause can refer to the method's parameters and also to local variables if they are in scope? Actually JML ensures clause can refer to any variables in the method's scope? I think we can refer to local variables if they are declared in the method. However typical usage is to refer to parameters and \result. But we can also use ghost variables. But we can just express the result in terms of parameters.
+
+Better: Provide requires that ax1 <= ax2, ay1 <= ay2, bx1 <= bx2, by1 <= by2. Also require that the areas computed are within integer range. But we can just require that the multiplication does not overflow. But we can also ignore overflow. The problem statement does not require to handle overflow constraints. We can just add simple requires and ensures.
+
+We also need to add spec_public only when needed for specification visibility. Since the method is public, we may need to mark fields as spec_public if they are used in specs. But there are no fields. So we don't need spec_public.
+
+Thus we will produce a Java file with JML comments inserted.
+
+We need to output the full Java file and nothing else. So we need to include the class declaration and method with JML comments.
+
+Thus final answer:
+
+```java
+class ComputeArea {
+    //@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+    //@ requires (ax2 - ax1) * (ay2 - ay1) >= 0 && (bx2 - bx1) * (by2 - by1) >= 0;
+    //@ ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) 
+    //@          - ((ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) > 0 
+    //@             ? (ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) : 0)
+    //@          * ((ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) > 0 
+    //@             ? (ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) : 0);
+    public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+        int area1 = (ax2 - ax1) * (ay2 - ay1), area2 = (bx2 - bx1) * (by2 - by1);
+        int overlapWidth = (ax2<bx2?ax2:bx2) - (ax1>bx1?ax1:bx1), overlapHeight = (ay2<by2?ay2:by2) - (ay1>by1?ay1:by1);
+        int overlapArea = (overlapWidth>0?overlapWidth:0) * (overlapHeight>0?overlapHeight:0);
+        return area1 + area2 - overlapArea;
+    }
+}
+```
+
+But we need to ensure that the ensures clause is correct and readable. The ensures clause can be simplified: ensure \result == area1 + area2 - overlapArea. But we cannot refer to local variables? Actually we can refer to local variables in ensures? In JML, you can refer to local variables if they are in scope, but it's not typical. However we can just use the formula with parameters. But the formula is a bit complex. But we can also express as:
+
+```
+/ *@ ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - ((ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) > 0 ? (ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) : 0) * ((ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) > 0 ? (ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) : 0); @*/
+```
+
+But that is messy. However we can also express ensures in terms of area1, area2, overlapWidth, overlapHeight, overlapArea. But we cannot refer to local variables? Actually JML does allow referencing local variables in ensures? I think yes, but it's not typical. But we can use ghost variables to store them. But we can also just use the formula.
+
+Better to keep ensures simple: ensure \result == area1 + area2 - overlapArea. But we need to define area1, area2, overlapArea in the spec. We can use ghost variables. But we can also just compute the expression.
+
+Given the problem statement: "Generate JML specifications for the Java program below." It does not require to be exhaustive, just add requires and ensures where appropriate. So we can add a requires clause that ensures the rectangles have non-negative dimensions, and ensures that the result equals the union area. That is enough.
+
+Thus we can produce:
+
+```
+/*@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+    @ ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1)
+    @          - ((ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) > 0
+    @             ? (ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) : 0)
+    @          * ((ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) > 0
+    @             ? (ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) : 0);
+    @*/
+public int computeOverlapArea(...)
+```
+
+But we need to be careful with line breaks. JML comments can be multi-line. Use //@ for each line.
+
+Better to format as:
+
+```
+//@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+//@ ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - ((ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) > 0 ? (ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) : 0) * ((ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) > 0 ? (ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) : 0);
+```
+
+But that line is extremely long. But it's okay. However we can also break it into multiple lines using //@ and continuation. In JML, you can break lines after operators and continue with //@. But we can also use /*@ ... @*/ block comment.
+
+Better to use block comment:
+
+```
+/ *@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+    @ ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1)
+    @          - ((ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) > 0
+    @             ? (ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) : 0)
+    @          * ((ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) > 0
+    @             ? (ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) : 0);
+    @*/
+```
+
+But note that the comment syntax for JML is either //@ for single line or /*@ ... @*/ for block. The problem statement uses //@ for each line in examples. So we can use //@ for each line. But we can also use block comment.
+
+Given the examples, they used //@ for each line. For the ensures they wrote:
+
+```
+//@ ensures \result == x + y;
+```
+
+Thus we can follow that style: each clause on its own line prefixed with //@.
+
+Thus we can write:
+
+```
+//@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+//@ ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1) - ((ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) > 0 ? (ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) : 0) * ((ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) > 0 ? (ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) : 0);
+```
+
+But that line is extremely long and may be hard to read. However it's acceptable. But maybe we can break it into multiple lines for readability:
+
+```
+//@ ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1)
+//@          - ((ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) > 0
+//@             ? (ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) : 0)
+//@          * ((ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) > 0
+//@             ? (ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) : 0);
+```
+
+But we need to ensure that each line is preceded by //@. In JML, continuation lines also need //@. The examples show they used //@ for each line, but they also used //@ for continuation lines. For example:
+
+```
+//@ maintaining sum == x + y - n && 0 <= n;
+```
+
+Thus we can do similar.
+
+Thus final code:
+
+```
+class ComputeArea {
+    //@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+    //@ ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1)
+    //@          - ((ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) > 0
+    //@             ? (ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) : 0)
+    //@          * ((ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) > 0
+    //@             ? (ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) : 0);
+    public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+        int area1 = (ax2 - ax1) * (ay2 - ay1), area2 = (bx2 - bx1) * (by2 - by1);
+        int overlapWidth = (ax2<bx2?ax2:bx2) - (ax1>bx1?ax1:bx1), overlapHeight = (ay2<by2?ay2:by2) - (ay1>by1?ay1:by1);
+        int overlapArea = (overlapWidth>0?overlapWidth:0) * (overlapHeight>0?overlapHeight:0);
+        return area1 + area2 - overlapArea;
+    }
+}
+```
+
+But we need to ensure that the ensures clause matches the actual computation. The actual computation uses overlapWidth and overlapHeight defined as the difference between the min of the upper coordinates and max of the lower coordinates. Then overlapArea is product of overlapWidth and overlapHeight if both positive, else zero. So the ensures clause must reflect that. However we can also simplify: The ensures clause can be \result == area1 + area2 - overlapArea, but we cannot refer to local variables? Actually we can refer to local variables in ensures? In JML, you can refer to local variables declared in the method body in the ensures clause? I think yes, but it's not typical because the ensures clause is about the method's contract, not about internal variables. However it's allowed. But we might want to avoid referencing local variables to keep spec clean. But we can also use ghost variables. However we can just use the expression.
+
+Given the problem statement: "Generate JML specifications for the Java program below." It does not require to be perfect, just add requires and ensures where appropriate. So we can add a requires clause that ensures the rectangles have non-negative dimensions, and ensures that the result equals the union area. That is enough.
+
+Thus final answer will be the Java file with JML comments.
+
+We also need to ensure we include the class name and method signature exactly as given. The original code is:
+
+```
+class ComputeArea {
+    public int computeOverlapArea(int ax1, int ay1, int ax2, int ay2, int bx1, int by1, int bx2, int by2) {
+        int area1 = (ax2 - ax1) * (ay2 - ay1), area2 = (bx2 - bx1) * (by2 - by1);
+        int overlapWidth = (ax2<bx2?ax2:bx2) - (ax1>bx1?ax1:bx1), overlapHeight = (ay2<by2?ay2:by2) - (ay1>by1?ay1:by1);
+        int overlapArea = (overlapWidth>0?overlapWidth:0) * (overlapHeight>0?overlapHeight:0);
+        return area1 + area2 - overlapArea;
+    }
+}
+```
+
+Thus we need to insert JML comments before the method. Possibly also add spec_public if needed. But there are no fields.
+
+Thus final answer will be:
+
+```
+class ComputeArea {
+    //@ requires ax1 <= ax2 && ay1 <= ay2 && bx1 <= bx2 && by1 <= by2;
+    //@ ensures \result == (ax2 - ax1) * (ay2 - ay1) + (bx2 - bx1) * (by2 - by1)
+    //@          - ((ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) > 0
+    //@             ? (ax2 < bx2 ? ax2 : bx2) - (ax1 > bx1 ? ax1 : bx1) : 0)
+    //@          * ((ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) > 0
+    //@             ? (ay2 < by2 ? ay2 : by2) - (ay1 > by1 ? ay1 : by1) : 0);
+    public int computeOverlapArea(int ax1, int ay1, int ax2, int

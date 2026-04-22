@@ -1,0 +1,12 @@
+{
+  "benchmark_dir": "benchmark/SpecGenBench/common",
+  "concurrency": 2,
+  "dry_run": false,
+  "max_tokens": 4096,
+  "model": "MiniMaxAI/MiniMax-M2.7",
+  "num_selected": 120,
+  "output_dir": "experiment/specgenbench-together",
+  "prompt_path": "experiment/pilot-5/prompts/zero_shot.txt",
+  "strategy": "zero_shot",
+  "temperature": 0.0
+}
