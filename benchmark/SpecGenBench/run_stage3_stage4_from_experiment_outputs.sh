@@ -254,4 +254,7 @@ if [[ $SKIP_COMPARE -eq 0 ]]; then
   echo "==> cross-run comparison"
   python3 "$ROOT/benchmark/SpecGenBench/stage4_jpf/compare_stage34_runs.py" \
     --work-root "$WORK_ROOT"
+  echo "==> per-method export"
+  python3 "$ROOT/benchmark/SpecGenBench/stage4_jpf/export_per_method_results.py" \
+    --work-root "$WORK_ROOT"
 fi
