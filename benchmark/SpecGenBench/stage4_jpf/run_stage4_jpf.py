@@ -33,6 +33,7 @@ import re
 import shutil
 import subprocess
 import sys
+import struct
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable
@@ -74,6 +75,75 @@ def discover_benchmarks(bench_root: Path) -> list[Bench]:
         if len(java_files) == 1:
             out.append(Bench(child.name, java_files[0]))
     return out
+
+
+def detect_class_major_version(classes_dir: Path) -> int | None:
+    for path in sorted(classes_dir.glob("*.class")):
+        data = path.read_bytes()
+        if len(data) >= 8 and data[:4] == b"\xca\xfe\xba\xbe":
+            return struct.unpack(">H", data[6:8])[0]
+    return None
+
+
+def class_major_to_java_release(major: int) -> int:
+    if major < 49:
+        raise ValueError(f"unsupported classfile major version: {major}")
+    return major - 44
+
+
+def find_host_java11() -> Path | None:
+    try:
+        out = subprocess.run(
+            ["/usr/libexec/java_home", "-v", "11"],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        java11 = Path(out.stdout.strip())
+        if (java11 / "bin" / "java").is_file():
+            return java11
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        pass
+
+    java_home = Path(os.environ.get("JAVA_HOME", ""))
+    if (java_home / "bin" / "java").is_file():
+        return java_home
+    return None
+
+
+def find_harness_javac(args: argparse.Namespace) -> Path:
+    if args.javac:
+        javac = Path(args.javac)
+        if not javac.is_file():
+            raise FileNotFoundError(f"javac not found: {javac}")
+        return javac
+
+    if args.javac_home:
+        javac = args.javac_home / "bin" / "javac"
+        if not javac.is_file():
+            raise FileNotFoundError(f"javac not found under --javac-home: {javac}")
+        return javac
+
+    candidates: list[Path] = []
+    which_javac = shutil.which("javac")
+    if which_javac:
+        candidates.append(Path(which_javac))
+    # OpenJML bundles a JDK that can read the emitted RAC class version.
+    candidates.append(args.jml_runtime.parent / "jdk" / "bin" / "javac")
+
+    java11_home = find_host_java11()
+    if java11_home:
+        candidates.append(java11_home / "bin" / "javac")
+
+    seen: set[Path] = set()
+    for candidate in candidates:
+        if candidate in seen:
+            continue
+        seen.add(candidate)
+        if candidate.is_file():
+            return candidate
+
+    raise FileNotFoundError("could not find a usable javac; pass --javac or --javac-home")
 
 
 def strip_jml(text: str) -> str:
@@ -362,28 +432,21 @@ def main() -> int:
     )
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
     ap.add_argument("--java11-home", type=Path, default=None, help="JDK 11 home (for javac/java).")
+    ap.add_argument("--javac-home", type=Path, default=None, help="JDK home to use for harness compilation.")
+    ap.add_argument("--javac", type=Path, default=None, help="Explicit javac path for harness compilation.")
     ap.add_argument("--wall-timeout", type=float, default=25.0, help="Seconds per JPF process (hard kill).")
     ap.add_argument("--max-methods", type=int, default=None)
     args = ap.parse_args()
 
     java11 = args.java11_home
     if java11 is None:
-        try:
-            out = subprocess.run(
-                ["/usr/libexec/java_home", "-v", "11"],
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            java11 = Path(out.stdout.strip())
-        except (subprocess.CalledProcessError, FileNotFoundError):
-            java11 = Path(os.environ.get("JAVA_HOME", ""))
+        java11 = find_host_java11()
 
     if not java11 or not (java11 / "bin" / "java").is_file():
         print("error: need JDK 11 (set --java11-home or install /usr/libexec/java_home -v 11)", file=sys.stderr)
         return 1
 
-    javac = java11 / "bin" / "javac"
+    javac = find_harness_javac(args)
     java = java11 / "bin" / "java"
     jpf_root = args.jpf_root
     run_jpf = jpf_root / "build" / "RunJPF.jar"
@@ -420,6 +483,12 @@ def main() -> int:
     benches = discover_benchmarks(args.src_root)
     if args.max_methods is not None:
         benches = benches[: args.max_methods]
+
+    class_major = detect_class_major_version(args.rac_classes)
+    if class_major is None:
+        print(f"error: no .class files found under {args.rac_classes}", file=sys.stderr)
+        return 1
+    harness_release = class_major_to_java_release(class_major)
 
     harness_files: list[Path] = []
     rows_meta: list[tuple[Bench, ParsedMethod, str]] = []
@@ -463,7 +532,7 @@ def main() -> int:
         ]
         cp_parts = [p for p in cp_parts if p]
         cp = os.pathsep.join(cp_parts)
-        cmd = [str(javac), "--release", "11", "-cp", cp, "-d", str(hbuild)] + [str(p) for p in harness_files]
+        cmd = [str(javac), "--release", str(harness_release), "-cp", cp, "-d", str(hbuild)] + [str(p) for p in harness_files]
         r = subprocess.run(cmd, capture_output=True, text=True)
         if r.returncode != 0:
             print("javac failed:", r.stderr or r.stdout, file=sys.stderr)

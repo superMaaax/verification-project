@@ -1,0 +1,5 @@
+config,strategy,model,prepare_expected,prepare_staged,prepare_missing,compile_total,compile_ok,compile_fail,jpf_total,jpf_pass,jpf_fail,jpf_timeout,jpf_pass_rate,jpf_fail_rate,jpf_timeout_rate
+few_shot__MiniMaxAI_MiniMax-M2.7,few_shot,MiniMaxAI_MiniMax-M2.7,120,120,0,120,88,32,120,65,55,7,0.5417,0.4583,0.0583
+few_shot__Qwen_Qwen3-Coder-Next-FP8,few_shot,Qwen_Qwen3-Coder-Next-FP8,120,120,0,120,87,33,120,63,57,7,0.5250,0.4750,0.0583
+zero_shot__MiniMaxAI_MiniMax-M2.7,zero_shot,MiniMaxAI_MiniMax-M2.7,120,120,0,120,62,58,120,43,77,6,0.3583,0.6417,0.0500
+zero_shot__Qwen_Qwen3-Coder-Next-FP8,zero_shot,Qwen_Qwen3-Coder-Next-FP8,120,120,0,120,31,89,120,25,95,1,0.2083,0.7917,0.0083

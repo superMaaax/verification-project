@@ -1,0 +1,33 @@
+{
+  "compile": {
+    "fail": 32,
+    "ok": 88,
+    "summary_path": "/Users/max/Downloads/verification-project/experiment/specgenbench-together/stage34_runs/few_shot__MiniMaxAI_MiniMax-M2.7/rac_javamath/compile_logs/summary.tsv",
+    "total": 120
+  },
+  "config": "few_shot__MiniMaxAI_MiniMax-M2.7",
+  "jpf": {
+    "csv_path": "/Users/max/Downloads/verification-project/experiment/specgenbench-together/stage34_runs/few_shot__MiniMaxAI_MiniMax-M2.7/jpf/results/jpf_verification.csv",
+    "fail": 55,
+    "pass": 65,
+    "pass_kinds": {
+      "A": 63,
+      "B": 2
+    },
+    "timeout": 7,
+    "total": 120,
+    "violation_types": {
+      "NoUncaughtExceptionsProperty": 15,
+      "exit_code_-9": 6,
+      "skipped": 34
+    }
+  },
+  "prepare": {
+    "expected_count": 120,
+    "extra_count": 0,
+    "missing_count": 0,
+    "missing_methods": [],
+    "staged_count": 120
+  },
+  "run_root": "/Users/max/Downloads/verification-project/experiment/specgenbench-together/stage34_runs/few_shot__MiniMaxAI_MiniMax-M2.7"
+}

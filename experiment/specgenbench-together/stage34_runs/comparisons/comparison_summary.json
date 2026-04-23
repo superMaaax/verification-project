@@ -1,0 +1,13 @@
+{
+  "compare_by_model_csv": "/Users/max/Downloads/verification-project/experiment/specgenbench-together/stage34_runs/comparisons/compare_by_model.csv",
+  "compare_by_strategy_csv": "/Users/max/Downloads/verification-project/experiment/specgenbench-together/stage34_runs/comparisons/compare_by_strategy.csv",
+  "configs": [
+    "few_shot__MiniMaxAI_MiniMax-M2.7",
+    "few_shot__Qwen_Qwen3-Coder-Next-FP8",
+    "zero_shot__MiniMaxAI_MiniMax-M2.7",
+    "zero_shot__Qwen_Qwen3-Coder-Next-FP8"
+  ],
+  "runs_found": 4,
+  "summary_csv": "/Users/max/Downloads/verification-project/experiment/specgenbench-together/stage34_runs/comparisons/summary.csv",
+  "work_root": "/Users/max/Downloads/verification-project/experiment/specgenbench-together/stage34_runs"
+}

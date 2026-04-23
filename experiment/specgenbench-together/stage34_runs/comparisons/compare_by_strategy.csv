@@ -1,0 +1,3 @@
+group,comparison_axis,left_config,right_config,left_label,right_label,prepare_staged_delta,prepare_missing_delta,compile_ok_delta,compile_fail_delta,jpf_pass_delta,jpf_fail_delta,jpf_timeout_delta,jpf_pass_rate_delta,jpf_timeout_rate_delta
+MiniMaxAI_MiniMax-M2.7,zero_shot_to_few_shot,zero_shot__MiniMaxAI_MiniMax-M2.7,few_shot__MiniMaxAI_MiniMax-M2.7,zero_shot,few_shot,0,0,26,-26,22,-22,1,0.1833,0.0083
+Qwen_Qwen3-Coder-Next-FP8,zero_shot_to_few_shot,zero_shot__Qwen_Qwen3-Coder-Next-FP8,few_shot__Qwen_Qwen3-Coder-Next-FP8,zero_shot,few_shot,0,0,56,-56,38,-38,6,0.3167,0.0500
