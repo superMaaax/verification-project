@@ -1,0 +1,8 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/xiangxinzhong/Code/verification-project/benchmark/SpecGenBench/common_few_shot_jml/RepeatedChar/RepeatedChar.java:7: error: cannot find symbol
+        Set<Character> seen = new HashSet<Character>();
+        ^
+  symbol:   class Set
+  location: class RepeatedChar
+1 error
+1 warning

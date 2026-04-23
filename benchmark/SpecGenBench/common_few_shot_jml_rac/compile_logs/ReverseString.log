@@ -1,0 +1,13 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/xiangxinzhong/Code/verification-project/benchmark/SpecGenBench/common_few_shot_jml/ReverseString/ReverseString.java:7: error: cannot find symbol
+        //@ maintaining (\forall int k; 0 <= k && k < left; s[k] == \old(s[n - 1 - k]));
+                                                                           ^
+  symbol:   variable n
+  location: class ReverseString
+/Users/xiangxinzhong/Code/verification-project/benchmark/SpecGenBench/common_few_shot_jml/ReverseString/ReverseString.java:8: error: cannot find symbol
+        //@ maintaining (\forall int k; right < k && k < n; s[k] == \old(s[n - 1 - k]));
+                                                                           ^
+  symbol:   variable n
+  location: class ReverseString
+2 errors
+1 warning

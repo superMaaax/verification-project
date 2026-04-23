@@ -1,0 +1,7 @@
+warning: [options] system modules path not set in conjunction with -source 11
+/Users/xiangxinzhong/Code/verification-project/benchmark/SpecGenBench/common_few_shot_jml/PowerOfFourBranch/PowerOfFourBranch.java:2: error: A catastrophic JML internal error occurred.  Please report the bug with as much information as you can.
+    //@ ensures \result == (n > 0 && (n & (n - 1)) == 0 && (n & 0xaaaaaaaa) == 0);
+                                        ^
+  Reason: Unexpected operation tag in JmlAssertionAdder.makeBin: BITAND n & (n - 1)
+1 error
+1 warning
